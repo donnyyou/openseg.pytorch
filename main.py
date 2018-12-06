@@ -12,7 +12,6 @@ import os
 import time
 import argparse
 
-from methods.method_selector import MethodSelector
 from utils.tools.configer import Configer
 from utils.tools.logger import Logger as Log
 
@@ -131,7 +130,6 @@ if __name__ == "__main__":
              log_format=configer.get('logging', 'log_format'),
              rewrite=configer.get('logging', 'rewrite'))
 
-    method_selector = MethodSelector(configer)
     model = None
     if configer.get('method') == 'fcn_segmentor':
         if configer.get('phase') == 'train':

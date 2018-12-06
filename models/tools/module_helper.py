@@ -8,7 +8,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-
+import functools
 import torch
 import torch.nn as nn
 
@@ -30,6 +30,16 @@ class ModuleHelper(object):
         elif bn_type == 'syncbn':
             from extensions.syncbn.module import BatchNorm2d
             return BatchNorm2d
+
+        elif bn_type == 'inplace_abn':
+            torch_ver = torch.__version__[:3]
+            if torch_ver == '0.4':
+                from extensions.inplace_abn.bn import InPlaceABNSync
+                return functools.partial(InPlaceABNSync, activation='none')
+
+            elif torch_ver == '0.3':
+                from extensions.inplace_abn_03.modules import InPlaceABNSync
+                return functools.partial(InPlaceABNSync, activation='none')
 
         else:
             Log.error('Not support BN type: {}.'.format(bn_type))
