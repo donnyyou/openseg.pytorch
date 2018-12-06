@@ -9,6 +9,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+
 import cv2
 import numpy as np
 import torch
@@ -21,8 +22,8 @@ from models.seg_model_manager import SegModelManager
 from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
-from vis.parser.seg_parser import SegParser
-from vis.visualizer.seg_visualizer import SegVisualizer
+from vis.seg_parser import SegParser
+from vis.seg_visualizer import SegVisualizer
 
 
 class FCNSegmentorTest(object):
@@ -238,8 +239,7 @@ class FCNSegmentorTest(object):
         return label_dst
 
     def test(self):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'val/results/seg', self.configer.get('dataset'))
+        base_dir = os.path.join(self.configer.get('project_dir'), 'val/results', self.configer.get('dataset'))
 
         test_img = self.configer.get('test_img')
         test_dir = self.configer.get('test_dir')
@@ -280,7 +280,7 @@ class FCNSegmentorTest(object):
 
     def debug(self):
         base_dir = os.path.join(self.configer.get('project_dir'),
-                                'vis/results/seg', self.configer.get('dataset'), 'debug')
+                                'vis/results', self.configer.get('dataset'), 'debug')
 
         if not os.path.exists(base_dir):
             os.makedirs(base_dir)

@@ -21,7 +21,7 @@ from models.seg_model_manager import SegModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from val.scripts.seg_running_score import SegRunningScore
-from vis.visualizer.seg_visualizer import SegVisualizer
+from vis.seg_visualizer import SegVisualizer
 
 
 class FCNSegmentor(object):
