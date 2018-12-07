@@ -11,21 +11,19 @@
 import torch.nn as nn
 import torch
 
-from models.modules.oc_modules.base_oc_block import BaseOC_Module
 from models.backbones.backbone_selector import BackboneSelector
 
-affine_par = True
+
 torch_ver = torch.__version__[:3]
-
-if torch_ver == '0.4':
-    from extensions.inplace_abn.bn import InPlaceABNSync
-
-elif torch_ver == '0.3':
-    from extensions.inplace_abn_03.modules import InPlaceABNSync
 
 
 class BaseOCNet(nn.Module):
     def __init__(self, configer):
+        if torch_ver == '0.4':
+            from extensions.inplace_abn.bn import InPlaceABNSync
+        elif torch_ver == '0.3':
+            from extensions.inplace_abn_03.modules import InPlaceABNSync
+
         self.inplanes = 128
         super(BaseOCNet, self).__init__()
         self.configer = configer
@@ -33,12 +31,12 @@ class BaseOCNet(nn.Module):
         self.backbone = BackboneSelector(configer).get_backbone()
 
         # extra added layers
-
         self.oc_module_pre = nn.Sequential(
             nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
             InPlaceABNSync(512),
             )
-        self.oc_module = BaseOC_Module(in_channels=512, out_channels=512, key_channels=256, value_channels=256, 
+        from models.modules.oc_modules.base_oc_block import BaseOC_Module
+        self.oc_module = BaseOC_Module(in_channels=512, out_channels=512, key_channels=256, value_channels=256,
             dropout=0.05, sizes=([1]))
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(

@@ -11,21 +11,19 @@
 import torch.nn as nn
 import torch
 
-from models.modules.oc_modules.asp_oc_block import ASP_OC_Module
 from models.backbones.backbone_selector import BackboneSelector
 
-affine_par = True
+
 torch_ver = torch.__version__[:3]
-
-if torch_ver == '0.4':
-    from extensions.inplace_abn.bn import InPlaceABNSync
-
-elif torch_ver == '0.3':
-    from extensions.inplace_abn_03.modules import InPlaceABNSync
 
 
 class AspOCNet(nn.Module):
     def __init__(self, configer):
+        if torch_ver == '0.4':
+            from extensions.inplace_abn.bn import InPlaceABNSync
+        elif torch_ver == '0.3':
+            from extensions.inplace_abn_03.modules import InPlaceABNSync
+
         self.inplanes = 128
         super(AspOCNet, self).__init__()
         self.configer = configer
@@ -33,6 +31,7 @@ class AspOCNet(nn.Module):
         self.backbone = BackboneSelector(configer).get_backbone()
 
         # extra added layers
+        from models.modules.oc_modules.asp_oc_block import ASP_OC_Module
         self.context = nn.Sequential(
                 ASP_OC_Module(2048, 512),
                 )
