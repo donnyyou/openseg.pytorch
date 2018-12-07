@@ -18,21 +18,21 @@ class FSCELoss(nn.Module):
         super(FSCELoss, self).__init__()
         self.configer = configer
         weight = None
-        if self.configer.exists('loss', 'params')['ce_weight']:
+        if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
             weight = self.configer.get('loss', 'params')['ce_weight']
             weight = torch.FloatTensor(weight).cuda()
 
         reduction = 'elementwise_mean'
-        if self.configer.exists('loss', 'params')['ce_reduction']:
+        if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
             reduction = self.configer.get('loss', 'params')['ce_reduction']
 
         ignore_index = -100
-        if self.configer.exists('loss', 'params')['ce_ignore_index']:
+        if self.configer.exists('loss', 'params') and 'ce_ignore_index' in self.configer.get('loss', 'params'):
             ignore_index = self.configer.get('loss', 'params')['ce_ignore_index']
 
         self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction=reduction)
 
-    def forward(self, inputs, *targets, weights=None):
+    def forward(self, inputs, *targets, weights=None, **kwargs):
         loss = 0.0
         if isinstance(inputs, list):
             if weights is None:
@@ -65,7 +65,7 @@ class FSAuxCELoss(nn.Module):
         self.configer = configer
         self.ce_loss = FSCELoss(self.configer)
 
-    def forward(self, inputs, targets, weights=None):
+    def forward(self, inputs, targets, **kwargs):
         aux_out, seg_out = inputs
         seg_loss = self.ce_loss(seg_out, targets)
         aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
@@ -88,7 +88,7 @@ class FSAuxEncCELoss(nn.Module):
         self.ce_loss = FSCELoss(self.configer)
         self.se_loss = FSEncLoss(self.configer)
 
-    def forward(self, outputs, targets, weights=None):
+    def forward(self, outputs, targets, **kwargs):
         aux_out, enc_out, seg_out = outputs
         seg_loss = self.ce_loss(seg_out, targets)
         aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
@@ -111,7 +111,7 @@ class FSFocalLoss(nn.Module):
         super(FSFocalLoss, self).__init__()
         self.configer = configer
 
-    def forward(self, output, target):
+    def forward(self, output, target, **kwargs):
         self.y = self.configer.get('focal_loss', 'y')
         P = F.softmax(output)
         f_out = F.log_softmax(output)
@@ -129,17 +129,17 @@ class FSEncLoss(nn.Module):
         super(FSEncLoss, self).__init__()
         self.configer = configer
         weight = None
-        if self.configer.exists('loss', 'params')['enc_weight']:
+        if self.configer.exists('loss', 'params') and 'enc_weight' in self.configer.get('loss', 'params'):
             weight = self.configer.get('loss', 'params')['enc_weight']
             weight = torch.FloatTensor(weight).cuda()
 
         reduction = 'elementwise_mean'
-        if self.configer.exists('loss', 'params')['enc_reduction']:
+        if self.configer.exists('loss', 'params') and 'enc_reduction' in self.configer.get('loss', 'params'):
             reduction = self.configer.get('loss', 'params')['enc_reduction']
 
         self.bce_loss = nn.BCELoss(weight, reduction=reduction)
 
-    def forward(self, preds, targets, grid_size=None):
+    def forward(self, preds, targets, grid_size=None, **kwargs):
         if len(targets.size()) == 2:
             return self.bce_loss(F.sigmoid(preds), targets)
 
@@ -180,7 +180,7 @@ class FSEmbedLoss(nn.Module):
         self.num_classes = configer.get('data', 'num_classes')
         self.cosine_loss = nn.CosineEmbeddingLoss()
 
-    def forward(self, inputs, targets):
+    def forward(self, inputs, targets, **kwargs):
         inputs = inputs.transpose(0, 1)
         center_array = torch.zeros((self.num_classes, inputs.size()[0]), requires_grad=True).cuda()
         sim_loss = torch.Tensor([0.0]).cuda()

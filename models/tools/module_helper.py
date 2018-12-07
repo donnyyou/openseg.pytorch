@@ -23,7 +23,7 @@ from utils.tools.logger import Logger as Log
 class ModuleHelper(object):
 
     @staticmethod
-    def BatchNorm2d(bn_type='torch'):
+    def BatchNorm2d(bn_type='torch', ret_cls=False):
         if bn_type == 'torchbn':
             return nn.BatchNorm2d
 
@@ -35,10 +35,16 @@ class ModuleHelper(object):
             torch_ver = torch.__version__[:3]
             if torch_ver == '0.4':
                 from extensions.inplace_abn.bn import InPlaceABNSync
+                if ret_cls:
+                    return InPlaceABNSync
+
                 return functools.partial(InPlaceABNSync, activation='none')
 
             elif torch_ver == '0.3':
                 from extensions.inplace_abn_03.modules import InPlaceABNSync
+                if ret_cls:
+                    return InPlaceABNSync
+
                 return functools.partial(InPlaceABNSync, activation='none')
 
         else:

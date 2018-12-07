@@ -56,8 +56,8 @@ class _SelfAttentionBlock(nn.Module):
             kernel_size=1, stride=1, padding=0)
         self.W = nn.Conv2d(in_channels=self.value_channels, out_channels=self.out_channels,
             kernel_size=1, stride=1, padding=0)
-        nn.init.constant(self.W.weight, 0)
-        nn.init.constant(self.W.bias, 0)
+        nn.init.constant_(self.W.weight, 0)
+        nn.init.constant_(self.W.bias, 0)
 
 
     def forward(self, x):

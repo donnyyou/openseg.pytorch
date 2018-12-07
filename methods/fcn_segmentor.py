@@ -148,7 +148,7 @@ class FCNSegmentor(object):
                 # Compute the loss of the val batch.
                 loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
                 outputs = self.module_runner.gather(outputs)
-                pred = outputs[0]
+                pred = outputs[-1]
 
             self.val_losses.update(loss.item(), inputs.size(0))
             self.seg_running_score.update(pred.max(1)[1].cpu().numpy(), targets.cpu().numpy())
