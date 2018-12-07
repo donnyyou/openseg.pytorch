@@ -10,7 +10,6 @@
 
 import torch.nn as nn
 import torch
-import functools
 
 from models.modules.oc_modules.asp_oc_block import ASP_OC_Module
 from models.backbones.backbone_selector import BackboneSelector
@@ -25,19 +24,17 @@ elif torch_ver == '0.3':
     from extensions.inplace_abn_03.modules import InPlaceABNSync
 
 
-class ResNet101AspOCDsnV2(nn.Module):
+class AspOCNet(nn.Module):
     def __init__(self, configer):
         self.inplanes = 128
-        super(ResNet101AspOCDsnV2, self).__init__()
+        super(AspOCNet, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
 
         # extra added layers
         self.context = nn.Sequential(
-                nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
-                InPlaceABNSync(512),            
-                ASP_OC_Module(512, 512),
+                ASP_OC_Module(2048, 512),
                 )
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(
@@ -49,7 +46,8 @@ class ResNet101AspOCDsnV2(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-        x_dsn = self.dsn(x[-2])
-        x = self.context(x[-1])
+        aux_x = self.dsn(x[-1])
+        x = self.layer4(x)
+        x = self.context(x)
         x = self.cls(x)
-        return [x_dsn, x]
+        return aux_x, x

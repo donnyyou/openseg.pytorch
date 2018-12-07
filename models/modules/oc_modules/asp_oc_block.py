@@ -10,35 +10,21 @@
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import torch.nn as nn
-from torch.nn import functional as F
-import math
-import torch.utils.model_zoo as model_zoo
 import torch
-import os
-import sys
-import pdb
-import numpy as np
 from torch.autograd import Variable
-import functools
 
 torch_ver = torch.__version__[:3]
 
 if torch_ver == '0.4':
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(BASE_DIR, '../inplace_abn'))
-    from bn import InPlaceABNSync
-    BatchNorm2d = functools.partial(InPlaceABNSync, activation='none')
-    
-elif torch_ver == '0.3':
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(BASE_DIR, '../inplace_abn_03'))
-    from modules import InPlaceABNSync
-    BatchNorm2d = functools.partial(InPlaceABNSync, activation='none')  
+    from extensions.inplace_abn.bn import InPlaceABNSync
 
-from base_oc_block import BaseOC_Context_Module
-from fix_base_oc_block import Fix_BaseOC_Context_Module
-from proxy_oc_block import ProxyOC_Context_Module
-from oc_conv_block import OC_Conv_Module
+elif torch_ver == '0.3':
+    from extensions.inplace_abn_03.modules import InPlaceABNSync
+
+from models.modules.oc_modules.base_oc_block import BaseOC_Context_Module
+from models.modules.oc_modules.fix_base_oc_block import Fix_BaseOC_Context_Module
+from models.modules.oc_modules.proxy_oc_block import ProxyOC_Context_Module
+from models.modules.oc_modules.oc_conv_block import OC_Conv_Module
 
 
 class ASP_OC_Module(nn.Module):

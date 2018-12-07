@@ -2,30 +2,18 @@
 # Donny You
 import os
 import torch
-import pdb
-import sys
-import functools
 import torch.nn as nn
 import torch.nn.functional as F
 from itertools import repeat
 
+from models.tools.module_helper import ModuleHelper
+
 torch_ver = torch.__version__[:3]
 
-if torch_ver == '0.4':
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(BASE_DIR, '../inplace_abn'))
-    from bn import InPlaceABNSync
-    BatchNorm2d = functools.partial(InPlaceABNSync, activation='none')
-    
-elif torch_ver == '0.3':
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(BASE_DIR, '../inplace_abn_03'))
-    from modules import InPlaceABNSync
-    BatchNorm2d = functools.partial(InPlaceABNSync, activation='none') 
 
 class OC_Conv_Module(nn.Module):
     def __init__(self, in_channels, key_channels, value_channels,
-                 out_channels=None, kernel_size=1, dilation=1, padding=0, stride=1, scale=1):
+                 out_channels=None, kernel_size=1, dilation=1, padding=0, stride=1, scale=1, bn_type='inplace_abn'):
         super(OC_Conv_Module, self).__init__()
         self.scale = scale
         self.in_channels = in_channels
@@ -42,12 +30,12 @@ class OC_Conv_Module(nn.Module):
         self.f_key = nn.Sequential(
             nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
                       kernel_size=1, stride=1, padding=0),
-            BatchNorm2d(self.key_channels),
+            ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.key_channels),
         )
         # self.f_query = nn.Sequential(
         #     nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
         #               kernel_size=1, stride=1, padding=0),
-        #     nn.BatchNorm2d(self.key_channels),
+        #     ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.key_channels),
         # )
         self.f_query = self.f_key
         self.f_value = nn.Conv2d(in_channels=self.in_channels, out_channels=self.value_channels,

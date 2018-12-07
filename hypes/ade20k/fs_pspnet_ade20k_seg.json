@@ -133,8 +133,11 @@
         "nesterov": false
       }
     },
-    "cross_entropy_loss": {
-      "reduction": "elementwise_mean",
-      "ignore_index": -1
+    "loss": {
+      "loss_type": "fs_auxce_loss",
+      "params": {
+        "ce_reduction": "elementwise_mean",
+        "ce_ignore_index": -1
+      }
     }
 }

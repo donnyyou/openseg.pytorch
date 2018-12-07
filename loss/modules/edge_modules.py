@@ -10,75 +10,206 @@ import scipy.ndimage as nd
 from torch.nn import functional as F
 from torch.autograd import Variable
 
-from .loss import OhemCrossEntropy2d, CrossEntropy2d, CenterLoss, BinaryOhemCrossEntropy2d, OhemMse2d
-from .extend_utils import down_sample_target
-from .edge_criterion import Edge_mIOU_Criterion, Edge_F1_Criterion
+from .loss import OhemCrossEntropy2d, CenterLoss, BinaryOhemCrossEntropy2d, OhemMse2d
 
-torch_ver = torch.__version__[:3]
 
-class Ce(nn.Module):
+
+class Edge_mIOU_Criterion(nn.Module):
     '''
-    Compute cross-entropy loss on the last output.
+    Edge-Mean-IOU-Loss: We compute the mean-IOU loss over the edge regions.
     '''
+
     def __init__(self, ignore_index=255):
-        super(Ce, self).__init__()
-        self.ignore_index = ignore_index
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
-        self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
+        super(Edge_mIOU_Criterion, self).__init__()
+        self.ignore = ignore_index
 
-    def forward(self, preds, target):
-        h, w = target.size(1), target.size(2)
-        if torch_ver == '0.4':
-            scale_pred = F.upsample(input=preds, size=(h, w), mode='bilinear', align_corners=True)
+        disk = np.array([[0, 0, 0, 1, 0, 0, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [1, 1, 1, 1, 1, 1, 1],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 0, 0, 1, 0, 0, 0]])
+        disk = disk.reshape([1, 1, 7, 7])
+        disk = torch.from_numpy(disk.copy()).float()
+        self.disk = disk
+
+        Gx = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        Gx = Gx.reshape([1, 1, 3, 3])
+        Gx = torch.from_numpy(Gx.copy()).float()
+
+        Gy = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
+        Gy = Gy.reshape([1, 1, 3, 3])
+        Gy = torch.from_numpy(Gy.copy()).float()
+
+        self.Gx = Gx
+        self.Gy = Gy
+        print("use IoU for Segmentation and IoU for Boundary\n")
+
+    def forward(self, pred_seg, target):
+        n, h, w = target.size(0), target.size(1), target.size(2)
+
+        # compute the miou loss
+        mask = np.array(target)
+        mask = mask.reshape([target.size(0), 1, h, w])
+        mask = torch.from_numpy(mask.copy()).float()
+        Ed_x = F.conv2d(mask, self.Gx, padding=1).abs()
+        Ed_y = F.conv2d(mask, self.Gy, padding=1).abs()
+        Ed_target = F.conv2d(Ed_x + Ed_y, self.disk, padding=1).abs()
+
+        scale_pred = F.upsample(input=pred_seg, size=(h, w), mode='bilinear', align_corners=True)
+        mask = scale_pred.argmax(dim=1, keepdim=True)
+        mask = mask.type('torch.FloatTensor')
+        Ed_x = F.conv2d(mask, self.Gx, padding=1).abs()
+        Ed_y = F.conv2d(mask, self.Gy, padding=1).abs()
+        Ed_pred = F.conv2d(Ed_x + Ed_y, self.disk, padding=1).abs()
+
+        intersection = ((Ed_pred > 0) & (Ed_target > 0)).sum()
+        union = ((Ed_pred > 0) | ((Ed_target > 0) & (Ed_target != self.ignore))).sum()
+
+        if union > 0:
+            loss_bnd = 1 - intersection.type('torch.cuda.FloatTensor') / union.type('torch.cuda.FloatTensor')
         else:
-            scale_pred = F.upsample(input=preds, size=(h, w), mode='bilinear')
-        loss = self.criterion(scale_pred, target)
-        return loss
-    
+            loss_bnd = torch.tensor(0).type('torch.cuda.FloatTensor')
 
-class Ce_Dsn(nn.Module):
+        return loss_bnd.type('torch.cuda.FloatTensor')
+
+
+class Edge_F1_Criterion(nn.Module):
     '''
-    Compute cross-entropy loss on the last output and the intermediate output.
+    Edge-F1-Loss: We compute the F1 score based loss over the edge regions.
     '''
-    def __init__(self, ignore_index=255, use_weight=True, dsn_weight=0.4):
-        super(Ce_Dsn, self).__init__()
-        self.ignore_index = ignore_index
-        self.dsn_weight = dsn_weight
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
-        if use_weight:
-            print("w/ class balance")
-            self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
-        else:
-            print("w/o class balance")
-            self.criterion = torch.nn.CrossEntropyLoss(ignore_index=ignore_index)
 
-    def forward(self, preds, target):
-        h, w = target.size(1), target.size(2)
+    def __init__(self, ignore_index=255, d_disk=7):
+        super(Edge_F1_Criterion, self).__init__()
+        self.ignore = ignore_index
 
-        if torch_ver == '0.4':
-            scale_pred = F.upsample(input=preds[0], size=(h, w), mode='bilinear', align_corners=True)
-        else:
-            scale_pred = F.upsample(input=preds[0], size=(h, w), mode='bilinear')
-        loss1 = self.criterion(scale_pred, target)
+        if d_disk == 1:
+            disk = np.array([[1]])
+            disk = disk.reshape([1, 1, 1, 1])
+        elif d_disk == 3:
+            disk = np.array([[0, 1, 0],
+                             [1, 1, 1],
+                             [0, 1, 0]])
+            disk = disk.reshape([1, 1, 3, 3])
+        elif d_disk == 7:
+            disk = np.array([[0, 0, 0, 1, 0, 0, 0],
+                             [0, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 0],
+                             [1, 1, 1, 1, 1, 1, 1],
+                             [0, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 0],
+                             [0, 0, 0, 1, 0, 0, 0]])
+            disk = disk.reshape([1, 1, 7, 7])
+        elif d_disk == 5:
+            disk = np.array([[0, 0, 1, 0, 0],
+                             [0, 1, 1, 1, 0],
+                             [1, 1, 1, 1, 1],
+                             [0, 1, 1, 1, 0],
+                             [0, 0, 1, 0, 0]])
+            disk = disk.reshape([1, 1, 5, 5])
+        elif d_disk == 9:
+            disk = np.array([[0, 0, 0, 0, 1, 0, 0, 0, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 0, 0, 0, 1, 0, 0, 0, 0]])
+            disk = disk.reshape([1, 1, 9, 9])
+        elif d_disk == 11:
+            disk = np.array([[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]])
+            disk = disk.reshape([1, 1, 11, 11])
+        elif d_disk == 13:
+            disk = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]])
+            disk = disk.reshape([1, 1, 13, 13])
 
-        if torch_ver == '0.4':
-            scale_pred = F.upsample(input=preds[1], size=(h, w), mode='bilinear', align_corners=True)
+        disk = torch.from_numpy(disk.copy()).float()
+        self.disk = disk
+        self.padding = np.int((d_disk - 1) / 2)
+
+        Gx = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        Gx = Gx.reshape([1, 1, 3, 3])
+        Gx = torch.from_numpy(Gx.copy()).float()
+
+        Gy = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
+        Gy = Gy.reshape([1, 1, 3, 3])
+        Gy = torch.from_numpy(Gy.copy()).float()
+
+        self.Gx = Gx
+        self.Gy = Gy
+        print("use IoU for Segmentation and Fscore for Boundary\n")
+
+    def forward(self, pred_seg, target):
+        n, h, w = target.size(0), target.size(1), target.size(2)
+
+        # compute the miou-based loss
+        mask = np.array(target)
+        mask = mask.reshape([target.size(0), 1, h, w])
+        mask = torch.from_numpy(mask.copy()).float()
+        Ed_x = F.conv2d(mask, self.Gx, padding=1).abs()
+        Ed_y = F.conv2d(mask, self.Gy, padding=1).abs()
+        Ed_lbl = Ed_x + Ed_y
+        Ed_target = F.conv2d(Ed_x + Ed_y, self.disk, padding=self.padding).abs()
+
+        scale_pred = F.upsample(input=pred_seg, size=(h, w), mode='bilinear', align_corners=True)
+        mask = scale_pred.argmax(dim=1, keepdim=True)
+        mask = mask.type('torch.FloatTensor')
+        Ed_x = F.conv2d(mask, self.Gx, padding=1).abs()
+        Ed_y = F.conv2d(mask, self.Gy, padding=1).abs()
+        Ed_res = Ed_x + Ed_y
+        Ed_pred = F.conv2d(Ed_x + Ed_y, self.disk, padding=self.padding).abs()
+
+        precision = ((Ed_res > 0) & (Ed_target > 0)).sum().type('torch.cuda.FloatTensor') / (Ed_res > 0).sum().type(
+            'torch.cuda.FloatTensor')
+        recall = ((Ed_lbl > 0) & (Ed_pred > 0)).sum().type('torch.cuda.FloatTensor') / (Ed_lbl > 0).sum().type(
+            'torch.cuda.FloatTensor')
+
+        if precision + recall > 0:
+            loss_bnd = 1 - 2 * precision * recall / (precision + recall)
         else:
-            scale_pred = F.upsample(input=preds[1], size=(h, w), mode='bilinear')
-        loss2 = self.criterion(scale_pred, target)
-        return self.dsn_weight*loss1 + loss2
+            loss_bnd = torch.tensor(0).type('torch.cuda.FloatTensor')
+
+        return loss_bnd.type('torch.cuda.FloatTensor')
 
 
 class Edge_mIOU_Ce_Dsn(nn.Module):
     '''
     Compute cross-entropy loss on the last output and the intermediate output.
     '''
+
     def __init__(self, ignore_index=255, use_weight=True, dsn_weight=0.4, edge_weight=0.1):
         super(Edge_mIOU_Ce_Dsn, self).__init__()
         self.ignore_index = ignore_index
         self.dsn_weight = dsn_weight
         self.edge_weight = edge_weight
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         if use_weight:
             print("w/ class balance")
             self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
@@ -103,19 +234,22 @@ class Edge_mIOU_Ce_Dsn(nn.Module):
         loss2 = self.criterion(scale_pred, target)
         loss3 = self.edge_criterion(scale_pred, target)
         # print('seg loss = {:.3f}, edge loss = {:.3f}'.format(loss2, loss3))
-        return self.dsn_weight*loss1 + loss2 + self.edge_weight*loss3
+        return self.dsn_weight * loss1 + loss2 + self.edge_weight * loss3
 
 
 class Edge_F1_Ce_Dsn(nn.Module):
     '''
     Compute cross-entropy loss on the last output and the intermediate output.
     '''
+
     def __init__(self, ignore_index=255, use_weight=True, dsn_weight=0.4, edge_weight=0.1):
         super(Edge_F1_Ce_Dsn, self).__init__()
         self.ignore_index = ignore_index
         self.dsn_weight = dsn_weight
         self.edge_weight = edge_weight
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         if use_weight:
             print("w/ class balance")
             self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
@@ -140,17 +274,20 @@ class Edge_F1_Ce_Dsn(nn.Module):
         loss2 = self.criterion(scale_pred, target)
         loss3 = self.edge_criterion(scale_pred, target)
         # print('seg loss = {:.3f}, edge loss = {:.3f}'.format(loss2, loss3))
-        return self.dsn_weight*loss1 + loss2 + self.edge_weight*loss3
+        return self.dsn_weight * loss1 + loss2 + self.edge_weight * loss3
 
 
 class Ce_Quad(nn.Module):
     '''
     Compute cross-entropy loss on the last output and the intermediate output.
     '''
+
     def __init__(self, ignore_index=255, use_weight=True):
         super(Ce_Quad, self).__init__()
         self.ignore_index = ignore_index
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         if use_weight:
             print("w/ class balance")
             self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
@@ -179,14 +316,18 @@ class Ce_Quad(nn.Module):
 
         return loss0 + loss1 + loss2 + loss3
 
+
 class Ce_Triple(nn.Module):
     '''
     Compute cross-entropy loss on the last output and the intermediate output.
     '''
+
     def __init__(self, ignore_index=255, use_weight=True):
         super(Ce_Triple, self).__init__()
         self.ignore_index = ignore_index
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         if use_weight:
             print("w/ class balance")
             self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
@@ -210,17 +351,21 @@ class Ce_Triple(nn.Module):
         loss1 = self.criterion(scale_pred_1, target)
         loss2 = self.criterion(scale_pred_2, target)
 
-        return 0.4*loss0 + loss1 + loss2
+        return 0.4 * loss0 + loss1 + loss2
+
 
 class Ce_Sphere_Dsn(nn.Module):
     '''
     Compute cross-entropy loss on the last output and the intermediate output.
     '''
+
     def __init__(self, ignore_index=255, use_weight=True, dsn_weight=0.4):
         super(Ce_Sphere_Dsn, self).__init__()
         self.ignore_index = ignore_index
         self.dsn_weight = dsn_weight
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         if use_weight:
             print("w/ class balance")
             self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
@@ -249,12 +394,14 @@ class Ce_Sphere_Dsn(nn.Module):
             scale_pred = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
         loss3 = self.criterion(scale_pred, target)
 
-        return self.dsn_weight*loss1 + loss2 + loss3
+        return self.dsn_weight * loss1 + loss2 + loss3
+
 
 class Ce_Dsn_Ohem(nn.Module):
     '''
     Compute cross-entropy loss with hard-sampling mining on both two branches.
     '''
+
     def __init__(self, ignore_index=255, thres=0.7, min_kept=100000, dsn_weight=0.4, use_weight=True):
         super(Ce_Dsn_Ohem, self).__init__()
         self.ignore_index = ignore_index
@@ -273,17 +420,21 @@ class Ce_Dsn_Ohem(nn.Module):
         else:
             scale_pred = F.upsample(input=preds[1], size=(h, w), mode='bilinear')
         loss2 = self.criterion(scale_pred, target)
-        return self.dsn_weight*loss1 + loss2
+        return self.dsn_weight * loss1 + loss2
+
 
 class Ce_Dsn_Ohem_Single(nn.Module):
     '''
     Compute cross-entropy loss with hard-sampling mining on the main branch.
     '''
+
     def __init__(self, ignore_index=255, thres=0.7, min_kept=100000, dsn_weight=0.4):
         super(Ce_Dsn_Ohem_Single, self).__init__()
         self.ignore_index = ignore_index
         self.dsn_weight = dsn_weight
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
         self.criterion_ohem = OhemCrossEntropy2d(ignore_index, thres, min_kept, use_weight=True)
 
@@ -301,19 +452,22 @@ class Ce_Dsn_Ohem_Single(nn.Module):
         else:
             scale_pred = F.upsample(input=preds[1], size=(h, w), mode='bilinear')
         loss2 = self.criterion_ohem(scale_pred, target)
-        return self.dsn_weight*loss1 + loss2
+        return self.dsn_weight * loss1 + loss2
 
 
 class Ce_Proxy(nn.Module):
     '''
     DSN : We need to consider two supervision for the model.
     '''
+
     def __init__(self, ignore_index=255, use_weight=True, dsn_weight=0.4, center_weight=0.1):
         super(Ce_Proxy, self).__init__()
         self.ignore_index = ignore_index
         self.dsn_weight = dsn_weight
         self.center_weight = center_weight
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         if use_weight:
             print("w/ class balance")
             self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
@@ -322,7 +476,6 @@ class Ce_Proxy(nn.Module):
             self.criterion = torch.nn.CrossEntropyLoss(ignore_index=ignore_index)
 
         self.criterion_center = CenterLoss(ignore_label=ignore_index)
-
 
     def forward(self, preds, target):
         h, w = target.size(1), target.size(2)
@@ -341,14 +494,15 @@ class Ce_Proxy(nn.Module):
 
         scale_target = down_sample_target(target, 8)
         center_loss = self.criterion_center(preds[0], preds[1], scale_target)
-        print('center loss: {}'.format(self.center_weight*center_loss.data.cpu().numpy()))
-        return self.dsn_weight*loss1 + loss2 + self.center_weight*center_loss 
+        print('center loss: {}'.format(self.center_weight * center_loss.data.cpu().numpy()))
+        return self.dsn_weight * loss1 + loss2 + self.center_weight * center_loss
 
 
 class Mse_Aff(nn.Module):
     '''
     Compute cross-entropy loss + mse based affinity loss.
     '''
+
     def __init__(self, ignore_index=255, dsn_weight=0.4, pair_weight=1):
         super(Mse_Aff, self).__init__()
         self.ignore_index = ignore_index
@@ -356,14 +510,17 @@ class Mse_Aff(nn.Module):
         self.affinity_weight = pair_weight
         self.affinity_criterion = torch.nn.MSELoss()
 
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
 
     def forward(self, preds, target):
         batch_size, h, w = target.size(0), target.size(1), target.size(2)
         # affinity loss
         preds_h, preds_w = preds[1].size(2), preds[1].size(3)
-        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w), mode='nearest')
+        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w),
+                           mode='nearest')
         label_row_vec = label.view(batch_size, 1, -1).expand(batch_size, preds_h * preds_w, preds_h * preds_w)
         label_col_vec = label_row_vec.permute(0, 2, 1)
         pair_label = label_col_vec.eq(label_row_vec)
@@ -384,14 +541,15 @@ class Mse_Aff(nn.Module):
             scale_pred = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
         loss2 = self.criterion(scale_pred, target)
 
-        print('affinity loss: {}'.format(self.affinity_weight*affinity_loss.data.cpu().numpy()))
-        return self.dsn_weight*loss1 + loss2 + self.affinity_weight*affinity_loss
+        print('affinity loss: {}'.format(self.affinity_weight * affinity_loss.data.cpu().numpy()))
+        return self.dsn_weight * loss1 + loss2 + self.affinity_weight * affinity_loss
 
 
 class Mse_Aff_01(nn.Module):
     '''
     Compute cross-entropy loss + mse based affinity loss.
     '''
+
     def __init__(self, ignore_index=255, dsn_weight=0.4, pair_weight=0.1):
         super(Mse_Aff_01, self).__init__()
         self.ignore_index = ignore_index
@@ -399,14 +557,17 @@ class Mse_Aff_01(nn.Module):
         self.affinity_weight = pair_weight
         self.affinity_criterion = torch.nn.MSELoss()
 
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
 
     def forward(self, preds, target):
         batch_size, h, w = target.size(0), target.size(1), target.size(2)
         # affinity loss
         preds_h, preds_w = preds[1].size(2), preds[1].size(3)
-        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w), mode='nearest')
+        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w),
+                           mode='nearest')
         label_row_vec = label.view(batch_size, 1, -1).expand(batch_size, preds_h * preds_w, preds_h * preds_w)
         label_col_vec = label_row_vec.permute(0, 2, 1)
         pair_label = label_col_vec.eq(label_row_vec)
@@ -427,19 +588,22 @@ class Mse_Aff_01(nn.Module):
             scale_pred = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
         loss2 = self.criterion(scale_pred, target)
 
-        print('affinity loss: {}'.format(self.affinity_weight*affinity_loss.data.cpu().numpy()))
-        return self.dsn_weight*loss1 + loss2 + self.affinity_weight*affinity_loss
+        print('affinity loss: {}'.format(self.affinity_weight * affinity_loss.data.cpu().numpy()))
+        return self.dsn_weight * loss1 + loss2 + self.affinity_weight * affinity_loss
 
 
 class Mse_Aff_0(nn.Module):
     '''
     Compute cross-entropy loss + mse based affinity loss.
     '''
+
     def __init__(self, ignore_index=255, dsn_weight=0.4):
         super(Mse_Aff_0, self).__init__()
         self.ignore_index = ignore_index
         self.dsn_weight = dsn_weight
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
 
     def forward(self, preds, target):
@@ -456,13 +620,14 @@ class Mse_Aff_0(nn.Module):
         else:
             scale_pred = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
         loss2 = self.criterion(scale_pred, target)
-        return self.dsn_weight*loss1 + loss2 
+        return self.dsn_weight * loss1 + loss2
 
 
 class Mse_Aff_Ohem(nn.Module):
     '''
     Compute cross-entropy loss + mse based affinity loss.
     '''
+
     def __init__(self, ignore_index=255, dsn_weight=0.4, pair_weight=1):
         super(Mse_Aff_Ohem, self).__init__()
         self.ignore_index = ignore_index
@@ -470,7 +635,9 @@ class Mse_Aff_Ohem(nn.Module):
         self.affinity_weight = pair_weight
         self.affinity_criterion = OhemMse2d()
 
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
 
     def forward(self, preds, target):
@@ -478,7 +645,8 @@ class Mse_Aff_Ohem(nn.Module):
         # affinity loss
         pdb.set_trace()
         preds_h, preds_w = preds[1].size(2), preds[1].size(3)
-        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w), mode='nearest')
+        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w),
+                           mode='nearest')
         label_row_vec = label.view(batch_size, 1, -1).expand(batch_size, preds_h * preds_w, preds_h * preds_w)
         label_col_vec = label_row_vec.permute(0, 2, 1)
         pair_label = label_col_vec.eq(label_row_vec)
@@ -499,14 +667,15 @@ class Mse_Aff_Ohem(nn.Module):
             scale_pred = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
         loss2 = self.criterion(scale_pred, target)
 
-        print('affinity loss: {}'.format(self.affinity_weight*affinity_loss.data.cpu().numpy()))
-        return self.dsn_weight*loss1 + loss2 + self.affinity_weight*affinity_loss
+        print('affinity loss: {}'.format(self.affinity_weight * affinity_loss.data.cpu().numpy()))
+        return self.dsn_weight * loss1 + loss2 + self.affinity_weight * affinity_loss
 
 
 class Ce_Aff(nn.Module):
     '''
     Compute cross-entropy loss + cross-entropy based transposed affinity loss.
     '''
+
     def __init__(self, ignore_index=255, dsn_weight=0.4, pair_weight=1):
         super(Ce_Aff, self).__init__()
         self.ignore_index = ignore_index
@@ -514,14 +683,17 @@ class Ce_Aff(nn.Module):
         self.affinity_weight = pair_weight
         self.affinity_criterion = torch.nn.CrossEntropyLoss()
 
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
 
     def forward(self, preds, target):
         batch_size, h, w = target.size(0), target.size(1), target.size(2)
         # affinity loss
         preds_h, preds_w = 48, 48
-        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w), mode='nearest')
+        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w),
+                           mode='nearest')
         label_row_vec = label.view(batch_size, 1, -1).expand(batch_size, preds_h * preds_w, preds_h * preds_w)
         label_col_vec = label_row_vec.permute(0, 2, 1)
         pair_label = label_col_vec.eq(label_row_vec)
@@ -529,9 +701,9 @@ class Ce_Aff(nn.Module):
         affinity_gt = pair_label.type(torch.cuda.LongTensor)
         affinity_pred = preds[0].type(torch.cuda.FloatTensor)
         affinity_pred = affinity_pred.unsqueeze(1)
-        # 
-        ext_affinity_pred = torch.cat([affinity_pred, 1-affinity_pred], 1)
-        affinity_loss = self.affinity_criterion(ext_affinity_pred, 1-affinity_gt)
+        #
+        ext_affinity_pred = torch.cat([affinity_pred, 1 - affinity_pred], 1)
+        affinity_loss = self.affinity_criterion(ext_affinity_pred, 1 - affinity_gt)
 
         # segmentation loss
         if torch_ver == '0.4':
@@ -545,28 +717,32 @@ class Ce_Aff(nn.Module):
             scale_pred = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
         loss2 = self.criterion(scale_pred, target)
 
-        print('affinity loss: {}'.format(self.affinity_weight*affinity_loss.data.cpu().numpy()))
-        return self.dsn_weight*loss1 + loss2 + self.affinity_weight*affinity_loss
+        print('affinity loss: {}'.format(self.affinity_weight * affinity_loss.data.cpu().numpy()))
+        return self.dsn_weight * loss1 + loss2 + self.affinity_weight * affinity_loss
 
 
 class Mse_Aff_T(nn.Module):
     '''
     Train the model to predict the pair-wise affinity.
     '''
+
     def __init__(self, ignore_index=255, dsn_weight=0.4, pair_weight=1):
         super(Mse_Aff_T, self).__init__()
         self.ignore_index = ignore_index
         self.dsn_weight = dsn_weight
         self.affinity_weight = pair_weight
-        self.affinity_criterion = torch.nn.MSELoss() 
-        weight = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
+        self.affinity_criterion = torch.nn.MSELoss()
+        weight = torch.FloatTensor(
+            [0.8373, 0.918, 0.866, 1.0345, 1.0166, 0.9969, 0.9754, 1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116,
+             0.9037, 1.0865, 1.0955, 1.0865, 1.1529, 1.0507])
         self.criterion = torch.nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index)
 
     def forward(self, preds, target):
         batch_size, h, w = target.size(0), target.size(1), target.size(2)
         # affinity loss
         preds_h, preds_w = 48, 48
-        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w), mode='nearest')
+        label = F.upsample(input=target.unsqueeze(1).type(torch.cuda.FloatTensor), size=(preds_h, preds_w),
+                           mode='nearest')
         label_row_vec = label.view(batch_size, 1, -1).expand(batch_size, preds_h * preds_w, preds_h * preds_w)
         label_col_vec = label_row_vec.permute(0, 2, 1)
         pair_label = label_col_vec.eq(label_row_vec)
@@ -586,8 +762,8 @@ class Mse_Aff_T(nn.Module):
         else:
             scale_pred = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
         loss2 = self.criterion(scale_pred, target)
-        print('affinity loss: {}'.format(self.affinity_weight*affinity_loss.data.cpu().numpy()))
-        return self.dsn_weight*loss1 + loss2 + self.affinity_weight*affinity_loss
+        print('affinity loss: {}'.format(self.affinity_weight * affinity_loss.data.cpu().numpy()))
+        return self.dsn_weight * loss1 + loss2 + self.affinity_weight * affinity_loss
 
 
 # class CriterionAffinityOhem(nn.Module):
@@ -641,34 +817,35 @@ class Ce_Edge(nn.Module):
         Reference:  CE2P
                     https://github.com/liutinglt/CE2P/blob/master/train.py
     '''
+
     def __init__(self, ignore_index=255):
         super(Ce_Edge, self).__init__()
         self.ignore_index = ignore_index
-          
+
     def forward(self, preds, target):
         h, w = target.size(1), target.size(2)
-        
+
         input_labels = target.data.cpu().numpy().astype(np.int64)
-        pos_num = np.sum(input_labels==1).astype(np.float)
-        neg_num = np.sum(input_labels==0).astype(np.float)
-        
-        weight_pos = neg_num/(pos_num+neg_num)
-        weight_neg = pos_num/(pos_num+neg_num)
-        weights = (weight_neg, weight_pos)  
+        pos_num = np.sum(input_labels == 1).astype(np.float)
+        neg_num = np.sum(input_labels == 0).astype(np.float)
+
+        weight_pos = neg_num / (pos_num + neg_num)
+        weight_neg = pos_num / (pos_num + neg_num)
+        weights = (weight_neg, weight_pos)
         weights = Variable(torch.from_numpy(np.array(weights)).float().cuda())
-        
+
         scale_pred1 = F.upsample(input=preds[0], size=(h, w), mode='bilinear')
-        loss1 = F.cross_entropy(scale_pred1, target, weights )
+        loss1 = F.cross_entropy(scale_pred1, target, weights)
         scale_pred2 = F.upsample(input=preds[1], size=(h, w), mode='bilinear')
-        loss2 = F.cross_entropy(scale_pred2, target, weights )
+        loss2 = F.cross_entropy(scale_pred2, target, weights)
         scale_pred3 = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
-        loss3 = F.cross_entropy(scale_pred3, target, weights )
+        loss3 = F.cross_entropy(scale_pred3, target, weights)
         scale_pred4 = F.upsample(input=preds[3], size=(h, w), mode='bilinear')
-        loss4 = F.cross_entropy(scale_pred4, target, weights )
+        loss4 = F.cross_entropy(scale_pred4, target, weights)
         scale_pred5 = F.upsample(input=preds[4], size=(h, w), mode='bilinear')
-        loss5 = F.cross_entropy(scale_pred5, target, weights ) 
+        loss5 = F.cross_entropy(scale_pred5, target, weights)
         scale_pred6 = F.upsample(input=preds[5], size=(h, w), mode='bilinear')
-        loss6 = F.cross_entropy(scale_pred6, target, weights ) 
+        loss6 = F.cross_entropy(scale_pred6, target, weights)
 
         return loss1 + loss2 + loss3 + loss4 + loss5 + loss6
 
@@ -678,29 +855,30 @@ class Ce_Edge_Parse(nn.Module):
         Reference:  CE2P
                     https://github.com/liutinglt/CE2P/blob/master/train.py
     '''
+
     def __init__(self, ignore_index=255):
         super(Ce_Edge_Parse, self).__init__()
         self.ignore_index = ignore_index
-        self.criterion = torch.nn.CrossEntropyLoss(ignore_index=ignore_index) 
-          
+        self.criterion = torch.nn.CrossEntropyLoss(ignore_index=ignore_index)
+
     def forward(self, preds, target):
         h, w = target[0].size(1), target[0].size(2)
-        
+
         input_labels = target[1].data.cpu().numpy().astype(np.int64)
-        pos_num = np.sum(input_labels==1).astype(np.float)
-        neg_num = np.sum(input_labels==0).astype(np.float)
-        
-        weight_pos = neg_num/(pos_num+neg_num)
-        weight_neg = pos_num/(pos_num+neg_num)
-        weights = (weight_neg, weight_pos)  
+        pos_num = np.sum(input_labels == 1).astype(np.float)
+        neg_num = np.sum(input_labels == 0).astype(np.float)
+
+        weight_pos = neg_num / (pos_num + neg_num)
+        weight_neg = pos_num / (pos_num + neg_num)
+        weights = (weight_neg, weight_pos)
         weights = Variable(torch.from_numpy(np.array(weights)).float().cuda())
-        
+
         scale_pred = F.upsample(input=preds[0], size=(h, w), mode='bilinear')
         loss = self.criterion(scale_pred, target[0])
-        
+
         scale_pred1 = F.upsample(input=preds[1], size=(h, w), mode='bilinear')
         loss1 = self.criterion(scale_pred1, target[0])
-     
+
         scale_pred2 = F.upsample(input=preds[2], size=(h, w), mode='bilinear')
-        loss2 = F.cross_entropy(scale_pred2, target[1], weights )
-        return loss+loss1+loss2
+        loss2 = F.cross_entropy(scale_pred2, target[1], weights)
+        return loss + loss1 + loss2

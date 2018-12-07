@@ -24,10 +24,10 @@ elif torch_ver == '0.3':
     from extensions.inplace_abn_03.modules import InPlaceABNSync
 
 
-class ResNet101BaseOCDsn(nn.Module):
+class BaseOCNet(nn.Module):
     def __init__(self, configer):
         self.inplanes = 128
-        super(ResNet101BaseOCDsn, self).__init__()
+        super(BaseOCNet, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
@@ -50,9 +50,9 @@ class ResNet101BaseOCDsn(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-        x_dsn = self.dsn(x[-2])
+        aux_x = self.dsn(x[-2])
         x = self.oc_module_pre(x[-1])
         x = self.oc_module(x)
         x = self.cls(x)
-        return [x_dsn, x]
+        return aux_x, x
 

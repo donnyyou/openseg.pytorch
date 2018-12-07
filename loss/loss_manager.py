@@ -8,18 +8,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from loss.modules.cls_modules import FCClsLoss
-from loss.modules.det_modules import FRDetLoss
-from loss.modules.det_modules import SSDMultiBoxLoss
-from loss.modules.det_modules import YOLOv3DetLoss
-from loss.modules.pose_modules import OPPoseLoss
-from loss.modules.seg_modules import FCNSegLoss
+from loss.modules.seg_modules import FSCELoss, FSAuxCELoss, FSAuxEncCELoss
 from utils.tools.logger import Logger as Log
 
 
 
 SEG_LOSS_DICT = {
-    'fcn_seg_loss': FCNSegLoss
+    'fs_ce_loss': FSCELoss,
+    'fs_auxce_loss':FSAuxCELoss,
+    'fs_auxencce_loss': FSAuxEncCELoss
 }
 
 
@@ -34,7 +31,8 @@ class LossManager(object):
 
         return loss
 
-    def get_seg_loss(self, key):
+    def get_seg_loss(self):
+        key = self.configer.get('loss', 'loss_type')
         if key not in SEG_LOSS_DICT:
             Log.error('Loss: {} not valid!'.format(key))
             exit(1)
