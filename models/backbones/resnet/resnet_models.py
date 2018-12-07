@@ -38,7 +38,7 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU(inplace=False)
         self.conv2 = conv3x3(planes, planes)
         self.bn2 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
         self.downsample = downsample
@@ -57,7 +57,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out += residual
+        out = out + residual
         out = self.relu(out)
 
         return out
@@ -75,7 +75,7 @@ class Bottleneck(nn.Module):
         self.bn2 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes * 4)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU(inplace=False)
         self.downsample = downsample
         self.stride = stride
 
@@ -96,7 +96,7 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out += residual
+        out = out + residual
         out = self.relu(out)
 
         return out
@@ -111,17 +111,17 @@ class ResNet(nn.Module):
             self.conv1 = nn.Sequential(
                 nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
                 ModuleHelper.BatchNorm2d(bn_type=bn_type)(64),
-                nn.ReLU(inplace=True),
+                nn.ReLU(inplace=False),
                 nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False),
                 ModuleHelper.BatchNorm2d(bn_type=bn_type)(64),
-                nn.ReLU(inplace=True),
+                nn.ReLU(inplace=False),
                 nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False),
             )
         else:
             self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
 
         self.bn1 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.inplanes)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU(inplace=False)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.layer1 = self._make_layer(block, 64, layers[0], bn_type=bn_type)
