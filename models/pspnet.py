@@ -91,7 +91,7 @@ class PSPNet(nn.Sequential):
         num_features = self.backbone.get_num_features()
 
         self.low_features = nn.Sequential(
-            self.backbone.conv1, self.backbone.bn1, self.backbone.relu,
+            self.backbone.resinit,
             self.backbone.maxpool,
             self.backbone.layer1,
         )

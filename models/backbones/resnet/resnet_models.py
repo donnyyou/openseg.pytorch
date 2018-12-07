@@ -9,8 +9,8 @@ from __future__ import print_function
 
 import os
 import math
-import torch
 import torch.nn as nn
+from collections import OrderedDict
 
 from models.tools.module_helper import ModuleHelper
 from utils.tools.logger import Logger as Log
@@ -108,20 +108,24 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.inplanes = 128 if deep_base else 64
         if deep_base:
-            self.conv1 = nn.Sequential(
-                nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
-                ModuleHelper.BatchNorm2d(bn_type=bn_type)(64),
-                nn.ReLU(inplace=False),
-                nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False),
-                ModuleHelper.BatchNorm2d(bn_type=bn_type)(64),
-                nn.ReLU(inplace=False),
-                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False),
-            )
+            self.resinit = nn.Sequential(OrderedDict([
+                ('conv1', nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)),
+                ('bn1', ModuleHelper.BatchNorm2d(bn_type=bn_type)(64)),
+                ('relu1', nn.ReLU(inplace=False)),
+                ('conv2', nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False)),
+                ('bn2', ModuleHelper.BatchNorm2d(bn_type=bn_type)(64)),
+                ('relu2', nn.ReLU(inplace=False)),
+                ('conv3', nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False)),
+                ('bn3', ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.inplanes)),
+                ('relu3', nn.ReLU(inplace=False))]
+            ))
         else:
-            self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+            self.resinit = nn.Sequential(OrderedDict([
+                ('conv1', nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)),
+                ('bn1', ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.inplanes)),
+                ('relu1', nn.ReLU(inplace=False))]
+            ))
 
-        self.bn1 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.inplanes)
-        self.relu = nn.ReLU(inplace=False)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.layer1 = self._make_layer(block, 64, layers[0], bn_type=bn_type)
@@ -157,9 +161,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
+        x = self.resinit(x)
         x = self.maxpool(x)
 
         x = self.layer1(x)

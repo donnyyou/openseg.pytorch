@@ -1,6 +1,9 @@
 .reviewboardrc
 *.pyc
 *.pth
+*.zip
+*.tar*
+*.pth.tar
 *.so
 *.o
 /log
@@ -20,5 +23,5 @@
 /build
 /dist
 /*.egg-info
-
+/pretrained_model
 /docs/build

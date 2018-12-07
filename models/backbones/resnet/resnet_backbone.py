@@ -18,9 +18,7 @@ class NormalResnetBackbone(nn.Module):
 
         self.num_features = 2048
         # take pretrained resnet, except AvgPool and FC
-        self.conv1 = orig_resnet.conv1
-        self.bn1 = orig_resnet.bn1
-        self.relu = orig_resnet.relu
+        self.resinit = orig_resnet.resinit
         self.maxpool = orig_resnet.maxpool
         self.layer1 = orig_resnet.layer1
         self.layer2 = orig_resnet.layer2
@@ -32,9 +30,7 @@ class NormalResnetBackbone(nn.Module):
 
     def forward(self, x):
         tuple_features = list()
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
+        x = self.resinit(x)
         x = self.maxpool(x)
 
         x = self.layer1(x)
@@ -72,9 +68,7 @@ class DilatedResnetBackbone(nn.Module):
                     orig_resnet.layer4[i].apply(partial(self._nostride_dilate, dilate=2 * r))
 
         # Take pretrained resnet, except AvgPool and FC
-        self.conv1 = orig_resnet.conv1
-        self.bn1 = orig_resnet.bn1
-        self.relu = orig_resnet.relu
+        self.resinit = orig_resnet.resinit
         self.maxpool = orig_resnet.maxpool
         self.layer1 = orig_resnet.layer1
         self.layer2 = orig_resnet.layer2
@@ -101,9 +95,7 @@ class DilatedResnetBackbone(nn.Module):
 
     def forward(self, x):
         tuple_features = list()
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
+        x = self.resinit(x)
         x = self.maxpool(x)
 
         x = self.layer1(x)
