@@ -3,11 +3,13 @@
 
 cd ../../
 
+STD_LOG_FILE="./log/std_log.log"+"`date +%Y-%m-%d,%H:%m:%s`"
+
 
 if [ "$1"x == "train"x ]; then
   python main.py --hypes hypes/cityscape/fs_ocnet_cityscape_seg.json \
                  --phase train --gathered n --loss_balance y \
-                 --pretrained ./pretrained_model/resnet101-imagenet.pth
+                 --pretrained ./pretrained_model/resnet101-imagenet.pth  > $STD_LOG_FILE 2>&1
 
 elif [ "$1"x == "debug"x ]; then
   python main.py --hypes hypes/cityscape/fs_ocnet_cityscape_seg.json --phase debug --gpu 0
