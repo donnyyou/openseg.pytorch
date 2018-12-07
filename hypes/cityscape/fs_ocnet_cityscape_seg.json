@@ -48,7 +48,7 @@
       },
       "random_crop":{
         "ratio": 1.0,
-        "crop_size": [864, 864],
+        "crop_size": [769, 769],
         "method": "random",
         "allow_outside_center": false
       }

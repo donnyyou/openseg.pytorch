@@ -10,6 +10,7 @@
 
 import torch.nn as nn
 import torch
+import torch.nn.functional as F
 
 from models.backbones.backbone_selector import BackboneSelector
 
@@ -45,9 +46,10 @@ class AspOCNetV2(nn.Module):
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
             )
 
-    def forward(self, x):
+    def forward(self, x_):
         x = self.backbone(x)
         aux_x = self.dsn(x[-2])
         x = self.context(x[-1])
         x = self.cls(x)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
         return aux_x, x
