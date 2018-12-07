@@ -53,18 +53,18 @@ class ModuleHelper(object):
 
     @staticmethod
     def load_model(model, pretrained=None, all_match=True):
-        print(model.state_dict().keys())
         if pretrained is None:
             return model
 
         if all_match:
             Log.info('Loading pretrained model:{}'.format(pretrained))
             pretrained_dict = torch.load(pretrained)
+            model_dict = model.state_dict()
             for k, v in pretrained_dict.items():
-                if 'resinit' in k:
-                    pretrained_dict[k[8:]] = v
+                if 'resinit.{}'.format(k) in model_dict:
+                    pretrained_dict['resinit.{}'.format(k)] = v
 
-            load_dict = {k: v for k, v in pretrained_dict.items() if 'resinit' not in k}
+            load_dict = {k: v for k, v in pretrained_dict.items() if 'resinit.{}'.format(k) not in model_dict}
             model.load_state_dict(load_dict)
 
         else:
