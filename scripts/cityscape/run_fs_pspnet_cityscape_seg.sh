@@ -5,9 +5,9 @@ cd ../../
 
 
 if [ "$1"x == "train"x ]; then
-  python main.py --hypes hypes/cityscape/fs_pspnet_cityscape_seg.json
-                 --phase train --gpu 0 1 2 3
-                 --pretrained ../imagenet_101.pth
+  python main.py --hypes hypes/cityscape/fs_pspnet_cityscape_seg.json \
+                 --phase train --gpu 0 1 2 3 --gathered n --loss_balance y \
+                 --pretrained ./pretrained_model/resnet101-imagenet.pth
 
 elif [ "$1"x == "debug"x ]; then
   python main.py --hypes hypes/cityscape/fs_pspnet_cityscape_seg.json --phase debug --gpu 0

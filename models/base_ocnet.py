@@ -45,7 +45,7 @@ class BaseOCNet(nn.Module):
             InPlaceABNSync(512),
             nn.Dropout2d(0.05),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
-            )
+        )
 
     def forward(self, x_):
         x = self.backbone(x_)

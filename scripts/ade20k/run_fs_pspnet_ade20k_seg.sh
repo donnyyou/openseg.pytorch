@@ -7,7 +7,7 @@ cd ../../
 if [ "$1"x == "train"x ]; then
   python main.py --hypes hypes/ade20k/fs_pspnet_ade20k_seg.json
                  --phase train --gpu 0 1 2 3
-                 --pretrained ../imagenet_101.pth
+                 --pretrained ./pretrained_model/resnet101-imagenet.pth
 
 elif [ "$1"x == "debug"x ]; then
   python main.py --hypes hypes/ade20k/fs_pspnet_ade20k_seg.json --phase debug --gpu 0
