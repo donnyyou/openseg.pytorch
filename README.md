@@ -17,8 +17,6 @@ This repository provides source code for some deep learning based cv problems. W
     - PSPNet: Pyramid Scene Parsing Network
     - DenseASPP: DenseASPP for Semantic Segmentation in Street Scenes
     
-- [Video Segmentation](https://github.com/youansheng/PyTorchCV-SemSeg/tree/master/methods)
-
 
 
 ## Performances with PyTorchCV-SemSeg
