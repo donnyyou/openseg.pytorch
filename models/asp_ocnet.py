@@ -46,9 +46,8 @@ class AspOCNet(nn.Module):
 
     def forward(self, x_):
         x = self.backbone(x_)
-        aux_x = self.dsn(x[-1])
-        x = self.layer4(x)
-        x = self.context(x)
+        aux_x = self.dsn(x[-2])
+        x = self.context(x[-1])
         x = self.cls(x)
         x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
         return aux_x, x

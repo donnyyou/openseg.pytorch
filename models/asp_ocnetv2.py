@@ -47,7 +47,7 @@ class AspOCNetV2(nn.Module):
             )
 
     def forward(self, x_):
-        x = self.backbone(x)
+        x = self.backbone(x_)
         aux_x = self.dsn(x[-2])
         x = self.context(x[-1])
         x = self.cls(x)
