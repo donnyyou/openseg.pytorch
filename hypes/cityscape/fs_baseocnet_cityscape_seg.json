@@ -112,7 +112,7 @@
         "weight_decay": 0.0001
       },
       "sgd": {
-        "weight_decay": 0.00004,
+        "weight_decay": 0.0005,
         "momentum": 0.9,
         "nesterov": false
       }
