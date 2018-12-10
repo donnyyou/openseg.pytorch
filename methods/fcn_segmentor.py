@@ -86,6 +86,10 @@ class FCNSegmentor(object):
         self.scheduler.step(self.configer.get('epoch'))
 
         for i, data_dict in enumerate(self.train_loader):
+            if self.configer.get('lr', 'lr_policy') == 'lambda_poly':
+                self.module_runner.lamda_poly_iter(self.configer.get('iters'),
+                                                   len(self.train_loader), self.optimizer)
+
             inputs = data_dict['img']
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)
@@ -182,6 +186,7 @@ class FCNSegmentor(object):
         while self.configer.get('epoch') < self.configer.get('solver', 'max_epoch'):
             self.__train()
             if self.configer.get('epoch') == self.configer.get('solver', 'max_epoch'):
+                self.__val()
                 break
 
 

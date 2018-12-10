@@ -7,7 +7,7 @@
       "num_classes": 19,
       "label_list": [7, 8, 11, 12, 14, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33],
       "data_dir": "~/DataSet/CityScape",
-      "workers": 8
+      "workers": 16
     },
    "train": {
       "batch_size": 8,
@@ -31,7 +31,7 @@
       "mode": "ss_test"
     },
     "train_trans": {
-      "trans_seq": ["random_hflip", "random_resize", "random_crop", "random_brightness"],
+      "trans_seq": ["random_hflip", "random_resize", "random_crop"],
       "random_brightness": {
         "ratio": 1.0,
         "shift_value": 10
@@ -44,7 +44,7 @@
         "ratio": 1.0,
         "method": "random",
         "scale_range": [0.5, 2.0],
-        "aspect_range": [0.9, 1.1]
+        "aspect_range": [1.0, 1.0]
       },
       "random_crop":{
         "ratio": 1.0,
@@ -69,9 +69,9 @@
                      [0, 80, 100], [0, 0, 230], [119, 11, 32]]
     },
     "checkpoints": {
-      "checkpoints_name": "fs_baseocnet_cityscape",
+      "checkpoints_name": "fs_baseocnet_cityscape_sgd",
       "checkpoints_dir": "./checkpoints/cityscape",
-      "save_iters": 300
+      "save_iters": 1000
     },
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
@@ -92,7 +92,7 @@
       "rewrite": true
     },
     "lr": {
-      "base_lr": 0.00003,
+      "base_lr": 0.01,
       "lr_policy": "lambda_poly",
       "step": {
         "gamma": 0.5,
@@ -101,11 +101,11 @@
     },
     "solver": {
       "display_iter": 20,
-      "test_interval": 300,
+      "test_interval": 1000,
       "max_epoch": 120
     },
     "optim": {
-      "optim_method": "adam",
+      "optim_method": "sgd",
       "adam": {
         "betas": [0.9, 0.999],
         "eps": 1e-08,
@@ -123,9 +123,9 @@
         "weight_": [0.8194, 0.8946, 0.9416, 1.0091, 0.9925, 0.9740, 1.0804,
                     1.0192, 0.8528, 0.9771, 0.9139, 0.9744, 1.1098, 0.8883,
                     1.0639, 1.2476, 1.0729, 1.1323, 1.0365],
-        "ce_weight":  [0.8373, 0.9180, 0.8660, 1.0345, 1.0166, 0.9969, 0.9754,
-                    1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037,
-                    1.0865, 1.0955, 1.0865, 1.1529, 1.0507],
+        "ce_weight": [0.8373, 0.9180, 0.8660, 1.0345, 1.0166, 0.9969, 0.9754,
+                      1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037,
+                      1.0865, 1.0955, 1.0865, 1.1529, 1.0507],
         "ce_reduction": "elementwise_mean",
         "ce_ignore_index": -1
       }
