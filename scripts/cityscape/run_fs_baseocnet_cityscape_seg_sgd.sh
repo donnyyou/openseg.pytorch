@@ -26,4 +26,4 @@ elif [ "$1"x == "test"x ]; then
                                  --pred_dir path-to-pred
 else
   echo "$1"x" is invalid..."
-fih
+fi
