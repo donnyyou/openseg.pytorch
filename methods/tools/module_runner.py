@@ -233,7 +233,7 @@ class ModuleRunner(object):
     def lamda_poly_iter(self, iters, batch_len, optimizer):
         new_lr = pow((1.0 - iters / (self.configer.get('solver', 'max_epoch') * batch_len)), 0.9)
         for param_group in optimizer.param_groups:
-            param_group['lr'] = new_lr
+            param_group['lr'] = new_lr * self.configer.get('lr', 'base_lr')
 
     def warm_lr(self, iters, batch_len, scheduler, optimizer, backbone_list=(0, ), backbone_scale=1.0):
         """Sets the learning rate
