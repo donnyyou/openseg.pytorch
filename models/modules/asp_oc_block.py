@@ -9,8 +9,8 @@
 ## LICENSE file in the root directory of this source tree 
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import torch.nn as nn
 import torch
+import torch.nn as nn
 from torch.autograd import Variable
 
 torch_ver = torch.__version__[:3]
@@ -21,10 +21,10 @@ if torch_ver == '0.4':
 elif torch_ver == '0.3':
     from extensions.inplace_abn_03.modules import InPlaceABNSync
 
-from models.modules.oc_modules.base_oc_block import BaseOC_Context_Module
-from models.modules.oc_modules.fix_base_oc_block import Fix_BaseOC_Context_Module
-from models.modules.oc_modules.proxy_oc_block import ProxyOC_Context_Module
-from models.modules.oc_modules.oc_conv_block import OC_Conv_Module
+from models.modules.base_oc_block import BaseOC_Context_Module
+from models.modules.fix_base_oc_block import Fix_BaseOC_Context_Module
+from models.modules.proxy_oc_block import ProxyOC_Context_Module
+from models.modules.oc_conv_block import OC_Conv_Module
 
 
 class ASP_OC_Module(nn.Module):

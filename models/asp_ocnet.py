@@ -8,12 +8,11 @@
 ## LICENSE file in the root directory of this source tree 
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import torch.nn as nn
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 from models.backbones.backbone_selector import BackboneSelector
-
 
 torch_ver = torch.__version__[:3]
 
@@ -32,7 +31,7 @@ class AspOCNet(nn.Module):
         self.backbone = BackboneSelector(configer).get_backbone()
 
         # extra added layers
-        from models.modules.oc_modules.asp_oc_block import ASP_OC_Module
+        from models.modules.asp_oc_block import ASP_OC_Module
         self.context = nn.Sequential(
                 ASP_OC_Module(2048, 512),
                 )
