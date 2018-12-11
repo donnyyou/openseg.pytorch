@@ -75,7 +75,7 @@
     "checkpoints": {
       "checkpoints_name": "fs_denseaspp_cityscape_seg",
       "checkpoints_dir": "./checkpoints/seg/cityscape",
-      "save_iters": 2000
+      "save_iters": 1000
     },
     "network":{
       "backbone": "densenet121_dilated8",
@@ -104,8 +104,8 @@
       }
     },
     "solver": {
-      "display_iter": 20,
-      "test_interval": 300,
+      "display_iter": 50,
+      "test_interval": 1000,
       "max_epoch": 200
     },
     "optim": {

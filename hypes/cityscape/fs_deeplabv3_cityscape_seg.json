@@ -75,7 +75,7 @@
     "checkpoints": {
       "checkpoints_name": "syncbn_deeplabv3",
       "checkpoints_dir": "./checkpoints/seg/cityscape",
-      "save_iters": 2000
+      "save_iters": 1000
     },
 
     "network":{
@@ -101,8 +101,8 @@
       }
     },
     "solver": {
-      "display_iter": 20,
-      "test_interval": 300,
+      "display_iter": 50,
+      "test_interval": 1000,
       "max_epoch": 200
     },
     "optim": {

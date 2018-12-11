@@ -100,7 +100,7 @@
       }
     },
     "solver": {
-      "display_iter": 20,
+      "display_iter": 50,
       "test_interval": 1000,
       "max_epoch": 120
     },
