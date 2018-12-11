@@ -41,6 +41,8 @@ if __name__ == "__main__":
     # ***********  Params for data.  **********
     parser.add_argument('--data_dir', default=None, type=str,
                         dest='data:data_dir', help='The Directory of the data.')
+    parser.add_argument('--drop_last', type=str2bool, nargs='?', default=False,
+                        dest='data:drop_last', help='Fix bug for syncbn.')
     parser.add_argument('--workers', default=None, type=int,
                         dest='data:workers', help='The number of workers to load data.')
     parser.add_argument('--train_batch_size', default=None, type=int,
