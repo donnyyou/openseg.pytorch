@@ -31,7 +31,7 @@
       "mode": "ss_test"
     },
     "train_trans": {
-      "trans_seq": ["random_hflip", "random_resize", "random_crop", "random_brightness"],
+      "trans_seq": ["random_resize", "random_crop", "random_brightness", "random_hflip"],
       "random_brightness": {
         "ratio": 1.0,
         "shift_value": 10
