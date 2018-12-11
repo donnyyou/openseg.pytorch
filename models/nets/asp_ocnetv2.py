@@ -13,6 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from models.backbones.backbone_selector import BackboneSelector
+from models.tools.module_helper import ModuleHelper
 
 torch_ver = torch.__version__[:3]
 
@@ -34,13 +35,13 @@ class AspOCNetV2(nn.Module):
         from models.modules.asp_oc_block import ASP_OC_Module
         self.context = nn.Sequential(
                 nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
-                InPlaceABNSync(512),            
-                ASP_OC_Module(512, 512),
+                ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+                ASP_OC_Module(512, 512, bn_type=self.configer.get('network', 'bn_type')),
                 )
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
-            InPlaceABNSync(512),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
             nn.Dropout2d(0.10),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
             )

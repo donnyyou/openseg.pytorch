@@ -23,6 +23,26 @@ from utils.tools.logger import Logger as Log
 class ModuleHelper(object):
 
     @staticmethod
+    def BNReLU(num_features, bn_type=None, **kwargs):
+        if bn_type == 'torchbn':
+            return nn.Sequential(
+                nn.BatchNorm2d(num_features, **kwargs),
+                nn.ReLU()
+            )
+        elif bn_type == 'syncbn':
+            from extensions.syncbn.module import BatchNorm2d
+            return nn.Sequential(
+                BatchNorm2d(num_features, **kwargs),
+                nn.ReLU()
+            )
+        elif bn_type == 'inplace_abn':
+            from extensions.inplace_abn.bn import InPlaceABNSync
+            return InPlaceABNSync(num_features, **kwargs)
+        else:
+            Log.error('Not support BN type: {}.'.format(bn_type))
+            exit(1)
+
+    @staticmethod
     def BatchNorm2d(bn_type='torch', ret_cls=False):
         if bn_type == 'torchbn':
             return nn.BatchNorm2d
