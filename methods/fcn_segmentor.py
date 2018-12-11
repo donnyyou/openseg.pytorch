@@ -17,7 +17,7 @@ from datasets.seg_data_loader import SegDataLoader
 from loss.loss_manager import LossManager
 from methods.tools.module_runner import ModuleRunner
 from methods.tools.optim_scheduler import OptimScheduler
-from models.seg_model_manager import SegModelManager
+from models.tools.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from val.scripts.seg_running_score import SegRunningScore
@@ -38,7 +38,7 @@ class FCNSegmentor(object):
         self.seg_visualizer = SegVisualizer(configer)
         self.seg_loss_manager = LossManager(configer)
         self.module_runner = ModuleRunner(configer)
-        self.seg_model_manager = SegModelManager(configer)
+        self.seg_model_manager = ModelManager(configer)
         self.seg_data_loader = SegDataLoader(configer)
         self.optim_scheduler = OptimScheduler(configer)
 
