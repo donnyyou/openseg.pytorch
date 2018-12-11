@@ -31,7 +31,7 @@
       "mode": "ss_test"
     },
     "train_trans": {
-      "trans_seq": ["random_resize", "random_crop", "random_brightness", "random_hflip"],
+      "trans_seq": ["random_resize", "random_crop", "random_hflip"],
       "random_brightness": {
         "ratio": 1.0,
         "shift_value": 10
@@ -44,7 +44,7 @@
         "ratio": 1.0,
         "method": "random",
         "scale_range": [0.5, 2.0],
-        "aspect_range": [0.9, 1.1]
+        "aspect_range": [1.0, 1.0]
       },
       "random_crop":{
         "ratio": 1.0,
@@ -71,7 +71,7 @@
     "checkpoints": {
       "checkpoints_name": "fs_aspocnet_cityscape",
       "checkpoints_dir": "./checkpoints/cityscape",
-      "save_iters": 1000
+      "save_iters": 10000
     },
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
@@ -101,8 +101,8 @@
     },
     "solver": {
       "display_iter": 50,
-      "test_interval": 1000,
-      "max_epoch": 240
+      "test_interval": 10000,
+      "max_epoch": 220
     },
     "optim": {
       "optim_method": "sgd",
