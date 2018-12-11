@@ -33,7 +33,7 @@ class _ConvBatchNormReluBlock(nn.Module):
 # PSP decoder Part
 # pyramid pooling, bilinear upsample
 class PPMBilinearDeepsup(nn.Module):
-    def __init__(self, num_class=150, fc_dim=4096, bn_type=None):
+    def __init__(self, fc_dim=4096, bn_type=None):
         super(PPMBilinearDeepsup, self).__init__()
         self.bn_type = bn_type
         pool_scales = (1, 2, 3, 6)
@@ -49,36 +49,18 @@ class PPMBilinearDeepsup(nn.Module):
             ))
 
         self.ppm = nn.ModuleList(self.ppm)
-        self.cbr_deepsup = _ConvBatchNormReluBlock(fc_dim // 2, fc_dim // 4, 3, 1, bn_type=bn_type)
-        self.conv_last = nn.Sequential(
-            nn.Conv2d(fc_dim+len(pool_scales)*512, 512,
-                      kernel_size=3, padding=1, bias=False),
-            ModuleHelper.BatchNorm2d(bn_type=bn_type)(512),
-            nn.ReLU(inplace=True),
-            nn.Dropout2d(0.1),
-            nn.Conv2d(512, num_class, kernel_size=1)
-        )
-        self.conv_last_deepsup = nn.Conv2d(fc_dim // 4, num_class, 1, 1, 0)
-        self.dropout_deepsup = nn.Dropout2d(0.1)
 
-    def forward(self, conv_out):
-        conv5, conv4 = conv_out
-        input_size = conv5.size()
-        ppm_out = [conv5]
-        assert self.bn_type == 'syncbn' or not self.training or conv5.size(0) > 1
+    def forward(self, x):
+        input_size = x.size()
+        ppm_out = [x]
+        assert self.bn_type == 'syncbn' or not self.training or x.size(0) > 1
         for pool_scale in self.ppm:
-            ppm_out.append(F.interpolate(pool_scale(conv5),
-                                         (input_size[2], input_size[3]),
+            ppm_out.append(F.interpolate(pool_scale(x), (input_size[2], input_size[3]),
                                          mode='bilinear', align_corners=False))
 
         ppm_out = torch.cat(ppm_out, 1)
 
-        x = self.conv_last(ppm_out)
-        aux = self.cbr_deepsup(conv4)
-        aux = self.dropout_deepsup(aux)
-        aux = self.conv_last_deepsup(aux)
-
-        return x, aux
+        return ppm_out
 
 
 class PSPNet(nn.Sequential):
@@ -88,12 +70,27 @@ class PSPNet(nn.Sequential):
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
         num_features = self.backbone.get_num_features()
-        self.decoder = PPMBilinearDeepsup(num_class=self.num_classes, fc_dim=num_features,
-                                          bn_type=self.configer.get('network', 'bn_type'))
+        self.dsn = nn.Sequential(
+            _ConvBatchNormReluBlock(num_features // 2, num_features // 4, 3, 1,
+                                    bn_type=self.configer.get('network', 'bn_type')),
+            nn.Dropout2d(0.1),
+            nn.Conv2d(num_features // 4, self.num_classes, 1, 1, 0)
+        )
+        self.ppm = PPMBilinearDeepsup(fc_dim=num_features, bn_type=self.configer.get('network', 'bn_type'))
+
+        self.cls = nn.Sequential(
+            nn.Conv2d(num_features + 4 * 512, 512, kernel_size=3, padding=1, bias=False),
+            ModuleHelper.BatchNorm2d(bn_type=self.configer.get('network', 'bn_type'))(512),
+            nn.ReLU(inplace=True),
+            nn.Dropout2d(0.1),
+            nn.Conv2d(512, self.num_classes, kernel_size=1)
+        )
 
     def forward(self, x_):
         x = self.backbone(x_)
-        x, aux = self.decoder([x[-1], x[-2]])
+        aux = self.dsn(x[-2])
+        x = self.ppm(x[-1])
+        x = self.cls(x)
         x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
         return aux, x
 
