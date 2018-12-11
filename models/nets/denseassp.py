@@ -88,7 +88,7 @@ class DenseASPP(nn.Module):
 
         cls = self.classification(feature)
 
-        out = F.interpolate(cls, scale_factor=8, mode='bilinear', align_corners=False)
+        out = F.interpolate(cls, scale_factor=8, mode='bilinear', align_corners=True)
 
         return out
 

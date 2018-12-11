@@ -91,7 +91,7 @@ class PSPNet(nn.Sequential):
         aux = self.dsn(x[-2])
         x = self.ppm(x[-1])
         x = self.cls(x)
-        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         return aux, x
 
 

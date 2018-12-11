@@ -63,6 +63,8 @@ if __name__ == "__main__":
                         dest='network:model_name', help='The name of model.')
     parser.add_argument('--backbone', default=None, type=str,
                         dest='network:backbone', help='The base network of model.')
+    parser.add_argument('--bn_type', default=None, type=str,
+                        dest='network:bn_type', help='The BN type of the network.')
     parser.add_argument('--multi_grid', default=None, nargs='+', type=int,
                         dest='network:multi_grid', help='The multi_grid for resnet backbone.')
     parser.add_argument('--pretrained', type=str, default=None,

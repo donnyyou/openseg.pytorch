@@ -55,6 +55,7 @@ class BaseOCNet(nn.Module):
         x = self.oc_module_pre(x[-1])
         x = self.oc_module(x)
         x = self.cls(x)
-        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
+        aux_x = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         return aux_x, x
 
