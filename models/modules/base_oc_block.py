@@ -80,12 +80,12 @@ class _SelfAttentionBlock(nn.Module):
 
 
 class SelfAttentionBlock2D(_SelfAttentionBlock):
-    def __init__(self, in_channels, key_channels, value_channels, out_channels=None, scale=1):
+    def __init__(self, in_channels, key_channels, value_channels, out_channels=None, scale=1, bn_type=None):
         super(SelfAttentionBlock2D, self).__init__(in_channels,
                                                     key_channels,
                                                     value_channels,
                                                     out_channels,
-                                                    scale)
+                                                    scale, bn_type)
 
 
 class BaseOC_Module(nn.Module):
@@ -101,19 +101,20 @@ class BaseOC_Module(nn.Module):
     def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout, sizes=([1]), bn_type=None):
         super(BaseOC_Module, self).__init__()
         self.stages = []
-        self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels, key_channels, value_channels, size) for size in sizes])        
+        self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
+                                                      key_channels, value_channels, size, bn_type) for size in sizes])
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(2*in_channels, out_channels, kernel_size=1, padding=0),
             ModuleHelper.BNReLU(out_channels, bn_type=bn_type),
             nn.Dropout2d(dropout)
             )
 
-    def _make_stage(self, in_channels, output_channels, key_channels, value_channels, size):
+    def _make_stage(self, in_channels, output_channels, key_channels, value_channels, size, bn_type):
         return SelfAttentionBlock2D(in_channels,
                                     key_channels,
                                     value_channels,
                                     output_channels, 
-                                    size)
+                                    size, bn_type=bn_type)
         
     def forward(self, feats):
         priors = [stage(feats) for stage in self.stages]
@@ -138,19 +139,20 @@ class BaseOC_Context_Module(nn.Module):
     def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout=0, sizes=([1]), bn_type=None):
         super(BaseOC_Context_Module, self).__init__()
         self.stages = []
-        self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels, key_channels, value_channels, size) for size in sizes])
+        self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
+                                                      key_channels, value_channels, size, bn_type) for size in sizes])
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=1, padding=0),
             ModuleHelper.BNReLU(out_channels, bn_type=bn_type),
             nn.Dropout2d(dropout),
             )
 
-    def _make_stage(self, in_channels, output_channels, key_channels, value_channels, size):
+    def _make_stage(self, in_channels, output_channels, key_channels, value_channels, size, bn_type):
         return SelfAttentionBlock2D(in_channels,
                                     key_channels,
                                     value_channels,
                                     output_channels, 
-                                    size)
+                                    size, bn_type=bn_type)
         
     def forward(self, feats):
         priors = [stage(feats) for stage in self.stages]
