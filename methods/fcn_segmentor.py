@@ -17,7 +17,7 @@ from datasets.seg_data_loader import SegDataLoader
 from loss.loss_manager import LossManager
 from methods.tools.module_runner import ModuleRunner
 from methods.tools.optim_scheduler import OptimScheduler
-from models.tools.model_manager import ModelManager
+from models.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from val.scripts.seg_running_score import SegRunningScore

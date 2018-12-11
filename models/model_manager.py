@@ -8,12 +8,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from models.deeplabv3 import DeepLabV3
-from models.denseassp import DenseASPP
-from models.asp_ocnet import AspOCNet
-from models.asp_ocnetv2 import AspOCNetV2
-from models.base_ocnet import BaseOCNet
-from models.pspnet import PSPNet
+from models.nets.asp_ocnet import AspOCNet
+from models.nets.asp_ocnetv2 import AspOCNetV2
+from models.nets.deeplabv3 import DeepLabV3
+from models.nets.denseassp import DenseASPP
+from models.nets.pspnet import PSPNet
+
+from models.nets.base_ocnet import BaseOCNet
 from utils.tools.logger import Logger as Log
 
 SEG_MODEL_DICT = {

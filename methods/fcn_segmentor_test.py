@@ -18,7 +18,7 @@ from PIL import Image
 from datasets.seg_data_loader import SegDataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.module_runner import ModuleRunner
-from models.tools.model_manager import ModelManager
+from models.model_manager import ModelManager
 from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
