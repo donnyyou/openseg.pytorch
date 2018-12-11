@@ -87,27 +87,15 @@ class PSPNet(nn.Sequential):
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
-
         num_features = self.backbone.get_num_features()
-
-        self.low_features = nn.Sequential(
-            self.backbone.resinit,
-            self.backbone.maxpool,
-            self.backbone.layer1,
-        )
-
-        self.high_features1 = nn.Sequential(self.backbone.layer2, self.backbone.layer3)
-        self.high_features2 = nn.Sequential(self.backbone.layer4)
         self.decoder = PPMBilinearDeepsup(num_class=self.num_classes, fc_dim=num_features,
                                           bn_type=self.configer.get('network', 'bn_type'))
 
     def forward(self, x_):
-        low = self.low_features(x_)
-        aux = self.high_features1(low)
-        x = self.high_features2(aux)
-        x, aux = self.decoder([x, aux])
-        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
-        return aux, x
+        x = self.backbone(x_)
+        out, aux = self.decoder([x[-1], x[-2]])
+        out = F.interpolate(out, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
+        return aux, out
 
 
 if __name__ == '__main__':
