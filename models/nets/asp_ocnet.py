@@ -8,14 +8,11 @@
 ## LICENSE file in the root directory of this source tree 
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from models.backbones.backbone_selector import BackboneSelector
 from models.tools.module_helper import ModuleHelper
-
-torch_ver = torch.__version__[:3]
 
 
 class AspOCNet(nn.Module):

@@ -8,23 +8,15 @@
 ## LICENSE file in the root directory of this source tree 
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from models.backbones.backbone_selector import BackboneSelector
 from models.tools.module_helper import ModuleHelper
 
-torch_ver = torch.__version__[:3]
-
 
 class BaseOCNet(nn.Module):
     def __init__(self, configer):
-        if torch_ver == '0.4':
-            from extensions.inplace_abn.bn import InPlaceABNSync
-        elif torch_ver == '0.3':
-            from extensions.inplace_abn_03.modules import InPlaceABNSync
-
         self.inplanes = 128
         super(BaseOCNet, self).__init__()
         self.configer = configer
