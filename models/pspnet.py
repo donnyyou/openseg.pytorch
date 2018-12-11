@@ -93,9 +93,9 @@ class PSPNet(nn.Sequential):
 
     def forward(self, x_):
         x = self.backbone(x_)
-        out, aux = self.decoder([x[-1], x[-2]])
-        out = F.interpolate(out, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
-        return aux, out
+        x, aux = self.decoder([x[-1], x[-2]])
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=False)
+        return aux, x
 
 
 if __name__ == '__main__':
