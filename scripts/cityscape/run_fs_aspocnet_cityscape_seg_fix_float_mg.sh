@@ -6,7 +6,7 @@ PYTHON="/root/miniconda3/bin/python"
 
 cd ../../
 
-LOG_FILE="./log/cityscape/fs_aspocnet_cityscape_seg_fix.log"
+LOG_FILE="./log/cityscape/fs_aspocnet_cityscape_seg_fix_float_mg.log"
 
 
 if [ "$1"x == "train"x ]; then
