@@ -61,6 +61,7 @@ class ModuleRunner(object):
             net = self._make_parallel(net)
 
         net = net.to(torch.device('cpu' if self.configer.get('gpu') is None else 'cuda'))
+        net.float()
         if self.configer.get('network', 'resume') is not None:
             resume_dict = torch.load(self.configer.get('network', 'resume'))
             if 'state_dict' in resume_dict:

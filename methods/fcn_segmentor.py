@@ -24,6 +24,9 @@ from val.scripts.seg_running_score import SegRunningScore
 from vis.seg_visualizer import SegVisualizer
 
 
+cudnn.enabled = True
+
+
 class FCNSegmentor(object):
     """
       The class for Pose Estimation. Include train, val, val & predict.

@@ -58,7 +58,7 @@ class SegDataLoader(object):
                              img_transform=self.img_transform,
                              label_transform=self.label_transform,
                              configer=self.configer),
-                batch_size=self.configer.get('train', 'batch_size'),
+                batch_size=self.configer.get('train', 'batch_size'), pin_memory=True,
                 shuffle=True, drop_last=self.configer.get('data', 'drop_last'),
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('train', 'data_transformer')
@@ -79,7 +79,7 @@ class SegDataLoader(object):
                              img_transform=self.img_transform,
                              label_transform=self.label_transform,
                              configer=self.configer),
-                batch_size=self.configer.get('val', 'batch_size'),
+                batch_size=self.configer.get('val', 'batch_size'), pin_memory=True,
                 shuffle=True, drop_last=self.configer.get('data', 'drop_last'),
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('val', 'data_transformer')
