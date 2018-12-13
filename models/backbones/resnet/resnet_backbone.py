@@ -79,10 +79,12 @@ class DilatedResnetBackbone(nn.Module):
         classname = m.__class__.__name__
         if classname.find('Conv') != -1:
             # the convolution with stride
-            if m.kernel_size == (3, 3):
-                # m.dilation = (dilate//2, dilate//2)
-                # m.padding = (dilate//2, dilate//2)
+            if m.stride == (2, 2):
                 m.stride = (1, 1)
+
+            if m.kernel_size == (3, 3):
+                # m.dilation = (dilate // 2, dilate // 2)
+                # m.padding = (dilate // 2, dilate // 2)
                 m.dilation = (dilate, dilate)
                 m.padding = (dilate, dilate)
 
