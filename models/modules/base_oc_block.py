@@ -64,9 +64,6 @@ class _SelfAttentionBlock(nn.Module):
         query = query.permute(0, 2, 1)
         key = self.f_key(x).view(batch_size, self.key_channels, -1)
 
-        query = F.normalize(query, p=2, dim=2) # batch x hw x c w/o torch.exp
-        key = F.normalize(key, p=2, dim=1) # batch x c x hw w/o torch.exp
-
         sim_map = torch.matmul(query, key)
         sim_map = (self.key_channels**-.5) * sim_map
         sim_map = F.softmax(sim_map, dim=-1)
