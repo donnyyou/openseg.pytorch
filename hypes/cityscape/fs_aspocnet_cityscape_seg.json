@@ -75,7 +75,7 @@
     },
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
-      "multi_grid": [2, 1, 1],
+      "multi_grid": [1, 1, 1],
       "model_name": "asp_ocnet",
       "bn_type": "inplace_abn",
       "stride": 8,

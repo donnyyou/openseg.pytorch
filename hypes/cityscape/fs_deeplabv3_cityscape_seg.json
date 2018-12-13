@@ -80,6 +80,7 @@
 
     "network":{
       "backbone": "resnet101_dilated8",
+      "multi_grid": [1, 1, 1],
       "model_name": "deeplabv3",
       "bn_type": "syncbn",
       "stride": 8,
