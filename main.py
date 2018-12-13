@@ -9,6 +9,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import json
 import time
 import argparse
 
@@ -107,6 +108,8 @@ if __name__ == "__main__":
                         dest='logging:stdout_level', help='To set the level to print to screen.')
     parser.add_argument('--log_file', default=None, type=str,
                         dest='logging:log_file', help='The path of log files.')
+    parser.add_argument('--log_to_file', type=str2bool, nargs='?', default=True,
+                        dest='logging:log_to_file', help='Whether to write logging into files.')
 
     # ***********  Params for test or submission.  **********
     parser.add_argument('--test_img', default=None, type=str,
@@ -117,6 +120,7 @@ if __name__ == "__main__":
     args_parser = parser.parse_args()
 
     configer = Configer(args_parser=args_parser)
+    Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
     configer.update(['data', 'data_dir'], abs_data_dir)
 
@@ -126,9 +130,12 @@ if __name__ == "__main__":
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
 
-    log_file = configer.get('logging', 'log_file')
-    new_log_file = '{}_{}'.format(log_file, time.strftime("%Y-%m-%d_%X", time.localtime()))
-    configer.update(['logging', 'log_file'], new_log_file)
+    if configer.get('logging', 'log_to_file'):
+        log_file = configer.get('logging', 'log_file')
+        new_log_file = '{}_{}'.format(log_file, time.strftime("%Y-%m-%d_%X", time.localtime()))
+        configer.update(['logging', 'log_file'], new_log_file)
+    else:
+        configer.update(['logging', 'log_file'], None)
 
     Log.init(logfile_level=configer.get('logging', 'logfile_level'),
              stdout_level=configer.get('logging', 'stdout_level'),
