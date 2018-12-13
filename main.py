@@ -120,7 +120,6 @@ if __name__ == "__main__":
     args_parser = parser.parse_args()
 
     configer = Configer(args_parser=args_parser)
-    Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
     configer.update(['data', 'data_dir'], abs_data_dir)
 
@@ -135,7 +134,7 @@ if __name__ == "__main__":
         new_log_file = '{}_{}'.format(log_file, time.strftime("%Y-%m-%d_%X", time.localtime()))
         configer.update(['logging', 'log_file'], new_log_file)
     else:
-        configer.update(['logging', 'log_file'], None)
+        configer.update(['logging', 'logfile_level'], None)
 
     Log.init(logfile_level=configer.get('logging', 'logfile_level'),
              stdout_level=configer.get('logging', 'stdout_level'),
@@ -143,6 +142,7 @@ if __name__ == "__main__":
              log_format=configer.get('logging', 'log_format'),
              rewrite=configer.get('logging', 'rewrite'))
 
+    Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     model = None
     if configer.get('method') == 'fcn_segmentor':
         if configer.get('phase') == 'train':
