@@ -9,7 +9,7 @@ from __future__ import division
 from __future__ import print_function
 
 from loss.modules.seg_modules import FSCELoss, FSAuxCELoss, FSAuxEncCELoss
-from loss.modules.seg_modules import FSAuxOhemCELoss
+from loss.modules.seg_modules import FSAuxOhemCELoss, FSEdgeAuxCELoss
 from utils.tools.logger import Logger as Log
 
 
@@ -18,7 +18,8 @@ SEG_LOSS_DICT = {
     'fs_ce_loss': FSCELoss,
     'fs_auxce_loss':FSAuxCELoss,
     'fs_auxencce_loss': FSAuxEncCELoss,
-    'fs_auxohemce_loss': FSAuxOhemCELoss
+    'fs_auxohemce_loss': FSAuxOhemCELoss,
+    'fs_edgeauxce_loss': FSEdgeAuxCELoss
 }
 
 
