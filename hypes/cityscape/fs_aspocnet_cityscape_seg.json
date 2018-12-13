@@ -14,7 +14,8 @@
       "data_transformer": {
         "size_mode": "fix_size",
         "input_size": [769, 769],
-        "align_method": "only_pad"
+        "align_method": "only_pad",
+        "pad_mode": "pad_right_down"
       }
     },
     "val": {
