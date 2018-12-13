@@ -88,12 +88,14 @@ class FSDataLoader(data.Dataset):
 
         for file_name in os.listdir(label_dir):
             image_name = '.'.join(file_name.split('.')[:-1])
-            img_list.append(os.path.join(image_dir, '{}.{}'.format(image_name, img_extension)))
+            img_path = os.path.join(image_dir, '{}.{}'.format(image_name, img_extension))
             label_path = os.path.join(label_dir, file_name)
-            label_list.append(label_path)
-            if not os.path.exists(label_path):
+            if not os.path.exists(label_path) or not os.path.exists(img_path):
                 Log.error('Label Path: {} not exists.'.format(label_path))
-                exit(1)
+                continue
+
+            img_list.append(img_path)
+            label_list.append(label_path)
 
         return img_list, label_list
 
