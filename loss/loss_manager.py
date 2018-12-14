@@ -12,7 +12,6 @@ from loss.modules.seg_modules import FSCELoss, FSEdgeAuxCELoss
 from utils.tools.logger import Logger as Log
 
 
-
 SEG_LOSS_DICT = {
     'fs_ce_loss': FSCELoss,
     'fs_edgeauxce_loss': FSEdgeAuxCELoss
