@@ -10,7 +10,7 @@
       "workers": 8
     },
    "train": {
-      "batch_size": 1,
+      "batch_size": 12,
       "data_transformer": {
         "size_mode": "fix_size",
         "input_size": [480, 480],
@@ -18,7 +18,7 @@
       }
     },
     "val": {
-      "batch_size": 1,
+      "batch_size": 12,
       "data_transformer": {
         "size_mode": "random_size",
         "fit_stride": 8,
@@ -63,7 +63,7 @@
       }
     },
     "val_trans": {
-      "trans_seq": ["resize"],
+      "trans_seq": ["resize", "random_crop"],
       "resize": {
         "min_side_length": 520
       },
@@ -89,7 +89,7 @@
     "checkpoints": {
       "checkpoints_name": "fs_edgeawarenet_ade20k_seg",
       "checkpoints_dir": "./checkpoints/ade20k_6",
-      "save_iters": 10000
+      "save_iters": 1000
     },
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
@@ -97,7 +97,7 @@
       "bn_type": "torchbn",
       "stride": 8,
       "loss_weights": {
-        "edge_loss": 0.5,
+        "edge_loss": 0.0,
         "aux_loss": 0.4,
         "seg_loss": 1.0
       }
@@ -119,7 +119,7 @@
     },
     "solver": {
       "display_iter": 100,
-      "test_interval": 10000,
+      "test_interval": 1000,
       "max_epoch": 120
     },
     "optim": {
