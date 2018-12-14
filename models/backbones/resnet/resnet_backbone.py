@@ -81,14 +81,12 @@ class DilatedResnetBackbone(nn.Module):
             # the convolution with stride
             if m.stride == (2, 2):
                 m.stride = (1, 1)
-                if m.kernel_size == (3, 3):
-                    m.dilation = (dilate // 2, dilate // 2)
-                    m.padding = (dilate // 2, dilate // 2)
-            # other convoluions
-            else:
-                if m.kernel_size == (3, 3):
-                    m.dilation = (dilate, dilate)
-                    m.padding = (dilate, dilate)
+
+            if m.kernel_size == (3, 3):
+                # m.dilation = (dilate // 2, dilate // 2)
+                # m.padding = (dilate // 2, dilate // 2)
+                m.dilation = (dilate, dilate)
+                m.padding = (dilate, dilate)
 
     def get_num_features(self):
         return self.num_features
