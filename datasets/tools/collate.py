@@ -129,6 +129,13 @@ def collate(batch, trans_dict):
                 left_pad = pad_width // 2
                 up_pad = pad_height // 2
 
+            elif trans_dict['pad_mode'] == 'pad_border':
+                if random.randint(0, 1) == 0:
+                    left_pad = pad_width
+                    up_pad = pad_height
+                else:
+                    left_pad = 0
+                    up_pad = 0
             else:
                 Log.error('Invalid pad mode: {}'.format(trans_dict['pad_mode']))
                 exit(1)
