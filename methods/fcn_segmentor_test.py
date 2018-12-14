@@ -198,7 +198,7 @@ class FCNSegmentorTest(object):
         inputs = torch.from_numpy(split_crops).permute(0, 3, 1, 2).to(self.device)
         with torch.no_grad():
             results = self.seg_net.forward(inputs)
-            results = results[0].permute(0, 2, 3, 1).cpu().numpy()
+            results = results[-1].permute(0, 2, 3, 1).cpu().numpy()
 
         reassemble = np.zeros((np_image.shape[0], np_image.shape[1], results.shape[-1]), np.float32)
         index = 0
@@ -224,7 +224,7 @@ class FCNSegmentorTest(object):
     def _predict(self, inputs):
         with torch.no_grad():
             results = self.seg_net.forward(inputs)
-            results = results[0].squeeze().permute(1, 2, 0).cpu().numpy()
+            results = results[-1].squeeze().permute(1, 2, 0).cpu().numpy()
 
         return results
 

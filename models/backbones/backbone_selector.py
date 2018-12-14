@@ -8,9 +8,6 @@ from __future__ import division
 from __future__ import print_function
 
 from models.backbones.resnet.resnet_backbone import ResNetBackbone
-from models.backbones.mobilenet.mobilenet_backbone import MobileNetBackbone
-from models.backbones.densenet.densenet_backbone import DenseNetBackbone
-from models.backbones.squeezenet.squeezenet_backbone import SqueezeNetBackbone
 from utils.tools.logger import Logger as Log
 
 
@@ -25,15 +22,6 @@ class BackboneSelector(object):
         model = None
         if 'resnet' in backbone:
             model = ResNetBackbone(self.configer)(**params)
-
-        elif 'mobilenet' in backbone:
-            model = MobileNetBackbone(self.configer)(*params)
-
-        elif 'densenet' in backbone:
-            model = DenseNetBackbone(self.configer)(**params)
-
-        elif 'squeezenet' in backbone:
-            model = SqueezeNetBackbone(self.configer)(**params)
 
         else:
             Log.error('Backbone {} is invalid.'.format(backbone))
