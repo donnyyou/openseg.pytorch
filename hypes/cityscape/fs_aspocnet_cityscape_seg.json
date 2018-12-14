@@ -15,7 +15,7 @@
         "size_mode": "fix_size",
         "input_size": [769, 769],
         "align_method": "only_pad",
-        "pad_mode": "pad_right_down"
+        "pad_mode": "random"
       }
     },
     "val": {
@@ -32,7 +32,7 @@
       "mode": "ss_test"
     },
     "train_trans": {
-      "trans_seq": ["random_resize", "random_crop", "random_hflip"],
+      "trans_seq": ["random_resize", "random_crop", "random_hflip", "random_brightness"],
       "random_brightness": {
         "ratio": 1.0,
         "shift_value": 10
