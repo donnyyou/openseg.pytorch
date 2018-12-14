@@ -12,7 +12,7 @@ LOG_FILE="./log/cityscape/fs_aspocnet_cityscape_seg.log"
 if [ "$1"x == "train"x ]; then
   ${PYTHON} -u main.py --hypes hypes/cityscape/fs_aspocnet_cityscape_seg.json \
                        --phase train --gathered n --loss_balance y --log_to_file n \
-                       --data_dir /teamscratch/msravcshare/v-ansheng/DataSet/CityScape \
+                       --data_dir /msravcshare/v-ansheng/DataSet/CityScape \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  > $LOG_FILE 2>&1
 
 elif [ "$1"x == "debug"x ]; then
