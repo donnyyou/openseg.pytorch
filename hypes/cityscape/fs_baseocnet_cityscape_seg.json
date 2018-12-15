@@ -15,7 +15,7 @@
         "size_mode": "fix_size",
         "input_size": [769, 769],
         "align_method": "only_pad",
-        "pad_mode": "pad_border"
+        "pad_mode": "random"
       }
     },
     "val": {
