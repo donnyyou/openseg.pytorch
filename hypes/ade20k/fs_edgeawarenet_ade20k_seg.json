@@ -97,7 +97,7 @@
       "bn_type": "torchbn",
       "stride": 8,
       "loss_weights": {
-        "edge_loss": 0.0,
+        "edge_loss": 0.2,
         "aux_loss": 0.4,
         "seg_loss": 1.0
       }
@@ -139,6 +139,7 @@
       "loss_type": "fs_edgeauxce_loss",
       "params": {
         "ce_reduction": "elementwise_mean",
+        "ce_weight": [1.0, 1.0, 1.0, 1.0, 1.0, 1.5],
         "ce_ignore_index": -1
       }
     }
