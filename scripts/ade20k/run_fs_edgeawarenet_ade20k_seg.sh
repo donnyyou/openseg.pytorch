@@ -2,6 +2,7 @@
 
 # check the enviroment info
 nvidia-smi
+export PYTHONPATH=/home/yishendiman/Projects/donny/PyTorchCV-SemSeg:$PYTHONPATH
 PYTHON=python
 
 cd ../../
@@ -26,6 +27,13 @@ elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u ade20k_evaluator.py --hypes_file hypes/ade20k/fs_edgeawarenet_ade20k_seg.json \
                                    --gt_dir /mnt/hdd/yizhaoguangyu/data/ade20k/val/label  \
                                    --pred_dir ./val/results/ade20k_6/test_dir/image/label
+
+elif [ "$1"x == "val"x ]; then
+  cd val/scripts
+  ${PYTHON} -u ade20k_evaluator.py --hypes_file ../../hypes/ade20k/fs_edgeawarenet_ade20k_seg.json \
+                                   --gt_dir /mnt/hdd/yizhaoguangyu/data/ade20k/val/label  \
+                                   --pred_dir ../results/ade20k_6/test_dir/image/label
+
 else
   echo "$1"x" is invalid..."
 fi
