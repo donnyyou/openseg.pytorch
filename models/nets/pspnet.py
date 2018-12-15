@@ -56,7 +56,7 @@ class PPMBilinearDeepsup(nn.Module):
         assert self.bn_type == 'syncbn' or not self.training or x.size(0) > 1
         for pool_scale in self.ppm:
             ppm_out.append(F.interpolate(pool_scale(x), (input_size[2], input_size[3]),
-                                         mode='bilinear', align_corners=False))
+                                         mode='bilinear', align_corners=True))
 
         ppm_out = torch.cat(ppm_out, 1)
 
