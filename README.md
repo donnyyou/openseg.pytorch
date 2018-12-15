@@ -21,13 +21,10 @@ This repository provides source code for some deep learning based cv problems. W
 
 ## Performances with PyTorchCV-SemSeg
 
-#### Semantic Segmentation
-- PSPNet: Pyramid Scene Parsing Network
+#### CityScapes
 
-| Model | Backbone | Training data  | Testing data | mIOU | Pixel Acc | Setting |
-|--------|:---------:|:------:|:------:|:------:|:------:|:------:|
-| [PSPNet Origin](https://github.com/hszhao/PSPNet) | 3x3-ResNet101 | ADE20K train | ADE20K val | 41.96 | 80.64 | - |
-| [PSPNet Ours](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [7x7-ResNet101](https://drive.google.com/open?id=1ROewKyaGPynox_-a50wHkSv1-0jYWyvc) | ADE20K train | ADE20K val | 44.18 | 80.91 | [PSPNet](https://github.com/youansheng/PyTorchCV/blob/master/hypes/seg/ade20k/fs_pspnet_ade20k_seg.json) |
-
+| Model | Backbone | Training data  | Testing data | mIOU | Setting |
+|--------|:---------:|:------:|:------:|:------:|:------:|
+| [Base OCNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-ResNet101](https://drive.google.com/open?id=1ROewKyaGPynox_-a50wHkSv1-0jYWyvc) | CityScapes train | CityScapes val | 79.13 | [PSPNet](https://github.com/youansheng/PyTorchCV/blob/master/hypes/seg/ade20k/fs_pspnet_ade20k_seg.json) |
 
 
