@@ -48,7 +48,7 @@ class PPMBilinearDeepsup(nn.Module):
     def forward(self, x):
         input_size = x.size()
         ppm_out = [x]
-        assert self.bn_type == 'syncbn' or not self.training or x.size(0) > 1
+        assert not (self.bn_type == 'torchbn' and self.training and x.size(0) == 1)
         for pool_scale in self.ppm:
             ppm_out.append(F.interpolate(pool_scale(x), (input_size[2], input_size[3]),
                                          mode='bilinear', align_corners=True))
