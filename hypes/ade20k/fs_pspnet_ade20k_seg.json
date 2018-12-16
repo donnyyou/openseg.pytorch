@@ -94,7 +94,7 @@
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
       "model_name": "pspnet",
-      "bn_type": "syncbn",
+      "bn_type": "inplace_abn",
       "stride": 8,
       "loss_weights": {
         "aux_loss": 0.4,
