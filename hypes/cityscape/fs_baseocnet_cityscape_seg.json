@@ -72,7 +72,7 @@
     "checkpoints": {
       "checkpoints_name": "fs_baseocnet_cityscape_seg",
       "checkpoints_dir": "./checkpoints/cityscape",
-      "save_iters": 10000
+      "save_iters": 1000
     },
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
@@ -102,7 +102,7 @@
     },
     "solver": {
       "display_iter": 50,
-      "test_interval": 10000,
+      "test_interval": 1000,
       "max_epoch": 110
     },
     "optim": {
