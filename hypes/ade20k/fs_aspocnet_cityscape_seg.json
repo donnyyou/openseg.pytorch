@@ -23,7 +23,7 @@
         "size_mode": "random_size",
         "fit_stride": 8,
         "align_method": "only_pad",
-        "pad_mode": "random"
+        "pad_mode": "pad_right_down"
       }
     },
     "test": {
@@ -119,7 +119,7 @@
     "solver": {
       "display_iter": 100,
       "test_interval": 10000,
-      "max_epoch": 300
+      "max_epoch": 180
     },
     "optim": {
       "optim_method": "sgd",
@@ -135,7 +135,7 @@
       }
     },
     "loss": {
-      "loss_type": "fs_auxohemce_loss",
+      "loss_type": "fs_auxce_loss",
       "params": {
         "ce_reduction": "elementwise_mean",
         "ce_ignore_index": -1,
