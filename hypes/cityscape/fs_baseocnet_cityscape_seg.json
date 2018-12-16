@@ -32,7 +32,7 @@
       "mode": "ss_test"
     },
     "train_trans": {
-      "trans_seq": ["random_resize", "random_crop", "random_hflip"],
+      "trans_seq": ["random_resize", "random_crop", "random_hflip", "random_brightness"],
       "random_brightness": {
         "ratio": 1.0,
         "shift_value": 10
@@ -45,7 +45,7 @@
         "ratio": 1.0,
         "method": "random",
         "scale_range": [0.5, 2.0],
-        "aspect_range": [1.0, 1.0]
+        "aspect_range": [0.9, 1.1]
       },
       "random_crop":{
         "ratio": 1.0,

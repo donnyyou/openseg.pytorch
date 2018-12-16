@@ -14,19 +14,15 @@ from models.tools.module_helper import ModuleHelper
 
 
 class _ConvBatchNormReluBlock(nn.Module):
-    def __init__(self, inplanes, outplanes, kernel_size, stride, padding=1, dilation=1, relu=True, bn_type=None):
+    def __init__(self, inplanes, outplanes, kernel_size, stride, padding=1, dilation=1, bn_type=None):
         super(_ConvBatchNormReluBlock, self).__init__()
-        self.relu = relu
         self.conv = nn.Conv2d(in_channels=inplanes,out_channels=outplanes,
                               kernel_size=kernel_size, stride=stride, padding=padding,
                               dilation = dilation, bias=False)
-        self.bn = ModuleHelper.BatchNorm2d(bn_type=bn_type)(num_features=outplanes)
-        self.relu_f = nn.ReLU()
+        self.bn_relu = ModuleHelper.BNReLU(outplanes, bn_type=bn_type)
 
     def forward(self, x):
-        x = self.bn(self.conv(x))
-        if self.relu:
-            x = self.relu_f(x)
+        x = self.bn_relu(self.conv(x))
         return x
 
 
@@ -44,8 +40,7 @@ class PPMBilinearDeepsup(nn.Module):
             self.ppm.append(nn.Sequential(
                 nn.AdaptiveAvgPool2d(scale),
                 nn.Conv2d(fc_dim, 512, kernel_size=1, bias=False),
-                ModuleHelper.BatchNorm2d(bn_type=bn_type)(512),
-                nn.ReLU(inplace=True)
+                ModuleHelper.BNReLU(512, bn_type=bn_type)
             ))
 
         self.ppm = nn.ModuleList(self.ppm)
@@ -80,8 +75,7 @@ class PSPNet(nn.Sequential):
 
         self.cls = nn.Sequential(
             nn.Conv2d(num_features + 4 * 512, 512, kernel_size=3, padding=1, bias=False),
-            ModuleHelper.BatchNorm2d(bn_type=self.configer.get('network', 'bn_type'))(512),
-            nn.ReLU(inplace=True),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
             nn.Dropout2d(0.1),
             nn.Conv2d(512, self.num_classes, kernel_size=1)
         )
