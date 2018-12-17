@@ -121,7 +121,6 @@ class BaseOC_Module(nn.Module):
         output = self.conv_bn_dropout(torch.cat([context, feats], 1))
         return output
 
-
 class BaseOC_Context_Module(nn.Module):
     """
     Output only the context features.
@@ -159,7 +158,7 @@ class BaseOC_Context_Module(nn.Module):
         output = self.conv_bn_dropout(context)
         return output
 
-    class BaseOC_Context_Module_v2(nn.Module):
+class BaseOC_Context_Module_v2(nn.Module):
     """
     Output only the context features.
     Parameters:
