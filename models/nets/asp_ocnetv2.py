@@ -24,11 +24,11 @@ class AspOCNetV2(nn.Module):
         self.backbone = BackboneSelector(configer).get_backbone()
 
         # extra added layers
-        from models.modules.asp_oc_block import ASP_OC_Module
+        from models.modules.asp_oc_block import ASP_OC_Module_v2
         self.context = nn.Sequential(
             nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
             ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
-            ASP_OC_Module(512, 512, bn_type=self.configer.get('network', 'bn_type')),
+            ASP_OC_Module_v2(512, 512, bn_type=self.configer.get('network', 'bn_type')),
         )
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(
