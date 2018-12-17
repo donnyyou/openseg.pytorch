@@ -19,9 +19,8 @@ from utils.tools.logger import Logger as Log
 class FSDataLoader(data.Dataset):
     def __init__(self, root_dir, aug_transform=None, dataset=None,
                  img_transform=None, label_transform=None, configer=None):
-        self.img_list, self.label_list = self.__list_dirs(root_dir)
+        self.img_list, self.label_list = self.__list_dirs(root_dir, dataset)
         self.configer = configer
-        self.dataset=dataset
         self.aug_transform = aug_transform
         self.img_transform = img_transform
         self.label_transform = label_transform
@@ -80,11 +79,11 @@ class FSDataLoader(data.Dataset):
 
         return encoded_labelmap
 
-    def __list_dirs(self, root_dir):
+    def __list_dirs(self, root_dir, dataset):
         img_list = list()
         label_list = list()
-        image_dir = os.path.join(root_dir, self.dataset, 'image')
-        label_dir = os.path.join(root_dir, self.dataset, 'label')
+        image_dir = os.path.join(root_dir, dataset, 'image')
+        label_dir = os.path.join(root_dir, dataset, 'label')
         img_extension = os.listdir(image_dir)[0].split('.')[-1]
 
         for file_name in os.listdir(label_dir):
@@ -98,7 +97,7 @@ class FSDataLoader(data.Dataset):
             img_list.append(img_path)
             label_list.append(label_path)
 
-        if self.dataset == 'train' and self.configer.get('data', 'include_val'):
+        if dataset == 'train' and self.configer.get('data', 'include_val'):
             image_dir = os.path.join(root_dir, 'val/image')
             label_dir = os.path.join(root_dir, 'val/label')
             for file_name in os.listdir(label_dir):
