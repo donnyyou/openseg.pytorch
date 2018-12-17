@@ -66,22 +66,22 @@ class FSOhemCELoss(nn.Module):
         super(FSOhemCELoss, self).__init__()
         self.configer = configer
         self.thresh = self.configer.get('loss', 'params')['ohem_thresh']
-        self.min_kept = self.configer.get('loss', 'params')['ohem_minkeep']
+        self.min_kept = max(1, self.configer.get('loss', 'params')['ohem_minkeep'])
         weight = None
         if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
             weight = self.configer.get('loss', 'params')['ce_weight']
             weight = torch.FloatTensor(weight).cuda()
 
-        reduction = 'elementwise_mean'
+        self.reduction = 'elementwise_mean'
         if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
-            reduction = self.configer.get('loss', 'params')['ce_reduction']
+            self.reduction = self.configer.get('loss', 'params')['ce_reduction']
 
         ignore_index = -100
         if self.configer.exists('loss', 'params') and 'ce_ignore_index' in self.configer.get('loss', 'params'):
             ignore_index = self.configer.get('loss', 'params')['ce_ignore_index']
 
         self.ignore_label = ignore_index
-        self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction=reduction)
+        self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction='none')
 
     def forward(self, predict, target, **kwargs):
         """
@@ -91,37 +91,21 @@ class FSOhemCELoss(nn.Module):
                 weight (Tensor, optional): a manual rescaling weight given to each class.
                                            If given, has to be a Tensor of size "nclasses"
         """
-        n, c, h, w = predict.size()
-        input_label = target.data.cpu().numpy().ravel().astype(np.int32)
-        x = np.rollaxis(predict.data.cpu().numpy(), 1).reshape((c, -1))
-        input_prob = np.exp(x - x.max(axis=0).reshape((1, -1)))
-        input_prob /= input_prob.sum(axis=0).reshape((1, -1))
-
-        valid_flag = input_label != self.ignore_label
-        valid_inds = np.where(valid_flag)[0]
-        label = input_label[valid_flag]
-        num_valid = valid_flag.sum()
-        if self.min_kept >= num_valid:
-            print('Labels: {}'.format(num_valid))
-
-        elif num_valid > 0:
-            prob = input_prob[:, valid_flag]
-            pred = prob[label, np.arange(len(label), dtype=np.int32)]
-            threshold = self.thresh
-            if self.min_kept > 0:
-                index = pred.argsort()
-                threshold_index = index[min(len(index), self.min_kept) - 1]
-                if pred[threshold_index] > self.thresh:
-                    threshold = pred[threshold_index]
-            kept_flag = pred <= threshold
-            valid_inds = valid_inds[kept_flag]
-            # print('hard ratio: {} = {} / {} '.format(round(len(valid_inds)/num_valid, 4), len(valid_inds), num_valid))
-
-        label = input_label[valid_inds].copy()
-        input_label.fill(self.ignore_label)
-        input_label[valid_inds] = label
-        target = Variable(torch.from_numpy(input_label.reshape(target.size())).long().cuda())
-        return self.ce_loss(predict, target)
+        prob_out = F.softmax(predict, dim=1)
+        prob = prob_out.gather(1, target.unsqueeze(1))
+        mask = (target.contiguous().view(-1) >= 0)
+        sort_prob, sort_indices = prob[mask].contiguous().view(-1,).sort()
+        min_threshold = sort_prob[self.min_kept]
+        threshold = max(min_threshold, self.thresh)
+        loss_matirx = self.ce_loss(predict, target).contiguous().view(-1,)
+        sort_loss_matirx = loss_matirx[mask][sort_indices]
+        select_loss_matrix = sort_loss_matirx[sort_prob < threshold]
+        if self.reduction == 'sum':
+            return select_loss_matrix.sum()
+        elif self.reduction == 'elementwise_mean':
+            return select_loss_matrix.mean()
+        else:
+            raise NotImplementedError('Reduction Error!')
 
 
 class FSAuxOhemCELoss(nn.Module):
