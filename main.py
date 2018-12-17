@@ -92,6 +92,8 @@ if __name__ == "__main__":
                         dest='lr:base_lr', help='The learning rate.')
     parser.add_argument('--lr_policy', default=None, type=str,
                         dest='lr:lr_policy', help='The policy of lr during training.')
+    parser.add_argument('--loss_type', default=None, type=str,
+                        dest='loss:loss_type', help='The loss type of the network.')
 
     # ***********  Params for display.  **********
     parser.add_argument('--max_epoch', default=None, type=int,
