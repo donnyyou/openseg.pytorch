@@ -19,11 +19,11 @@ from utils.tools.logger import Logger as Log
 class FSDataLoader(data.Dataset):
     def __init__(self, root_dir, aug_transform=None, dataset=None,
                  img_transform=None, label_transform=None, configer=None):
-        self.img_list, self.label_list = self.__list_dirs(root_dir, dataset)
         self.configer = configer
         self.aug_transform = aug_transform
         self.img_transform = img_transform
         self.label_transform = label_transform
+        self.img_list, self.label_list = self.__list_dirs(root_dir, dataset)
 
     def __len__(self):
         return len(self.img_list)
