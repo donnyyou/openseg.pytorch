@@ -158,3 +158,39 @@ class BaseOC_Context_Module(nn.Module):
             context += priors[i]
         output = self.conv_bn_dropout(context)
         return output
+
+    class BaseOC_Context_Module_v2(nn.Module):
+    """
+    Output only the context features.
+    Parameters:
+        in_features / out_features: the channels of the input / output feature maps.
+        dropout: specify the dropout ratio
+        fusion: We provide two different fusion method, "concat" or "add"
+        size: we find that directly learn the attention weights on even 1/8 feature maps is hard.
+    Return:
+        features after "concat" or "add"
+    """
+    def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout=0, sizes=([1]), bn_type=None):
+        super(BaseOC_Context_Module_v2, self).__init__()
+        self.stages = []
+        self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
+                                                      key_channels, value_channels, size, bn_type) for size in sizes])
+        self.conv_bn_dropout = nn.Sequential(
+            ModuleHelper.BNReLU(out_channels, bn_type=bn_type),
+            nn.Dropout2d(dropout),
+            )
+
+    def _make_stage(self, in_channels, output_channels, key_channels, value_channels, size, bn_type):
+        return SelfAttentionBlock2D(in_channels,
+                                    key_channels,
+                                    value_channels,
+                                    output_channels, 
+                                    size, bn_type=bn_type)
+        
+    def forward(self, feats):
+        priors = [stage(feats) for stage in self.stages]
+        context = priors[0]
+        for i in range(1, len(priors)):
+            context += priors[i]
+        output = self.conv_bn_dropout(context)
+        return output
