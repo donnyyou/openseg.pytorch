@@ -78,8 +78,8 @@ class ASP_OC_Module_v2(nn.Module):
         self.context = nn.Sequential(nn.Conv2d(features, out_features, kernel_size=3, padding=1, dilation=1, bias=True),
                                      ModuleHelper.BNReLU(out_features, bn_type=bn_type),
                                      BaseOC_Context_Module_v2(in_channels=out_features, out_channels=out_features,
-                                                           key_channels=out_features//2, value_channels=out_features//2,
-                                                           dropout=0, sizes=([2]), bn_type=bn_type))
+                                                              key_channels=out_features//2, value_channels=out_features//2,
+                                                              dropout=0, sizes=([2]), bn_type=bn_type))
         self.conv2 = nn.Sequential(nn.Conv2d(features, out_features, kernel_size=1, padding=0, dilation=1, bias=False),
                                    ModuleHelper.BNReLU(out_features, bn_type=bn_type))
         self.conv3 = nn.Sequential(nn.Conv2d(features, out_features, kernel_size=3, padding=dilations[0], dilation=dilations[0], bias=False),
