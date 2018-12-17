@@ -26,7 +26,9 @@ class AspOCNet(nn.Module):
         # extra added layers
         from models.modules.asp_oc_block import ASP_OC_Module
         self.context = nn.Sequential(
-            ASP_OC_Module(2048, 512, bn_type=self.configer.get('network', 'bn_type')),
+            nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            ASP_OC_Module(512, 512, bn_type=self.configer.get('network', 'bn_type')),
         )
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(
