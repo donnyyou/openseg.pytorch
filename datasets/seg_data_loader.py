@@ -53,7 +53,7 @@ class SegDataLoader(object):
     def get_trainloader(self):
         if self.configer.get('method') == 'fcn_segmentor':
             trainloader = data.DataLoader(
-                FSDataLoader(root_dir=os.path.join(self.configer.get('data', 'data_dir'), 'train'),
+                FSDataLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                              aug_transform=self.aug_train_transform,
                              img_transform=self.img_transform,
                              label_transform=self.label_transform,
@@ -75,7 +75,7 @@ class SegDataLoader(object):
     def get_valloader(self):
         if self.configer.get('method') == 'fcn_segmentor':
             valloader = data.DataLoader(
-                FSDataLoader(root_dir=os.path.join(self.configer.get('data', 'data_dir'), 'val'),
+                FSDataLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
                              aug_transform=self.aug_val_transform,
                              img_transform=self.img_transform,
                              label_transform=self.label_transform,
