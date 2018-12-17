@@ -10,7 +10,7 @@ LOG_FILE="./log/ade20k/fs_baseocnet_ade20k_seg.log"
 
 
 if [ "$1"x == "train"x ]; then
-  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_baseocnet_ade20k_seg.json \
+  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_baseocnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --data_dir /msravcshare/v-ansheng/DataSet/ADE20K \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  > $LOG_FILE 2>&1
