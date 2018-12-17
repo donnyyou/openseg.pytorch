@@ -49,6 +49,9 @@ class SegRunningScore(object):
 
         return acc, acc_cls, fwavacc, mean_iu, cls_iu
 
+    def get_cls_iu(self):
+        return self._get_scores()[-1]
+
     def get_mean_iou(self):
         return self._get_scores()[3]
 
