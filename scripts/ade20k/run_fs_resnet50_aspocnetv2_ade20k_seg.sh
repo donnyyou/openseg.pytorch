@@ -11,7 +11,7 @@ LOG_FILE="./log/ade20k/fs_resnet50_aspocnetv2_ade20k_seg.log"
 
 if [ "$1"x == "train"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json --drop_last y \
-                       --phase train --gathered n --loss_balance y --log_to_file n \
+                       --phase train --gathered n --loss_balance y --log_to_file n --max_iters 75000 \
                        --data_dir /msravcshare/v-ansheng/DataSet/ADE20K --model_name asp_ocnetv2 \
                        --backbone deepbase_resnet50_dilated8 --checkpoints_name fs_resnet50_aspocnetv2_ade20k_seg \
                        --pretrained ./pretrained_model/resnet50-imagenet.pth  > $LOG_FILE 2>&1
