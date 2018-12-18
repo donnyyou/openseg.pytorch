@@ -67,7 +67,7 @@ class DeepLabV3(nn.Module):
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
 
-        self.head = nn.Sequential(ASPPModule(2048),
+        self.head = nn.Sequential(ASPPModule(2048, bn_type=self.configer.get('network', 'bn_type')),
                                   nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True))
         self.dsn = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
