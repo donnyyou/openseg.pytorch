@@ -10,7 +10,7 @@ LOG_FILE="./log/cityscape/fs_aspocnetv2_cityscape_ohem_seg.log"
 
 
 if [ "$1"x == "train"x ]; then
-  ${PYTHON} -u main.py --hypes hypes/cityscape/fs_aspocnet_cityscape_seg.json \
+  ${PYTHON} -u main.py --hypes hypes/cityscape/fs_aspocnet_cityscape_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --data_dir /msravcshare/v-ansheng/DataSet/CityScape \
                        --model_name asp_ocnetv2 --checkpoints_name fs_aspocnetv2_cityscape_ohem_seg \
