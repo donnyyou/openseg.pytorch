@@ -112,6 +112,8 @@ if __name__ == "__main__":
                         dest='logging:stdout_level', help='To set the level to print to screen.')
     parser.add_argument('--log_file', default=None, type=str,
                         dest='logging:log_file', help='The path of log files.')
+    parser.add_argument('--rewrite', type=str2bool, nargs='?', default=True,
+                        dest='logging:rewrite', help='Whether to rewrite files.')
     parser.add_argument('--log_to_file', type=str2bool, nargs='?', default=True,
                         dest='logging:log_to_file', help='Whether to write logging into files.')
 

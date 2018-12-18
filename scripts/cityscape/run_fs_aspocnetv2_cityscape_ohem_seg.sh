@@ -17,6 +17,15 @@ if [ "$1"x == "train"x ]; then
                        --max_epoch 220 --loss_type fs_auxohemce_loss \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  > $LOG_FILE 2>&1
 
+elif [ "$1"x == "resume"x ]; then
+  ${PYTHON} -u main.py --hypes hypes/cityscape/fs_aspocnet_cityscape_seg.json \
+                       --phase train --gathered n --loss_balance y --log_to_file n \
+                       --data_dir /msravcshare/v-ansheng/DataSet/CityScape --rewrite n \
+                       --model_name asp_ocnetv2 --checkpoints_name fs_aspocnetv2_cityscape_ohem_seg \
+                       --max_epoch 220 --loss_type fs_auxohemce_loss \
+                       --resume_continue y --resume ./checkpoints/cityscape/fs_aspocnetv2_cityscape_ohem_seg_max_performance.pth \
+                       --pretrained ./pretrained_model/resnet101-imagenet.pth  > $LOG_FILE 2>&1
+
 elif [ "$1"x == "debug"x ]; then
   ${PYTHON} -u main.py --hypes hypes/cityscape/fs_aspocnet_cityscape_seg.json --phase debug --gpu 0 > $LOG_FILE 2>&1
 

@@ -156,6 +156,8 @@ class ModuleRunner(object):
         if not os.path.exists(checkpoints_dir):
             os.makedirs(checkpoints_dir)
 
+        latest_name = '{}_latest.pth'.format(self.configer.get('checkpoints', 'checkpoints_name'))
+        torch.save(state, os.path.join(checkpoints_dir, latest_name))
         if save_mode == 'performance':
             if self.configer.get('performance') > self.configer.get('max_performance'):
                 latest_name = '{}_max_performance.pth'.format(self.configer.get('checkpoints', 'checkpoints_name'))
