@@ -9,6 +9,7 @@
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import torch.nn as nn
+import torch.nn.functional as F
 
 from models.modules.pyramid_oc_block import Pyramid_OC_Module
 from models.backbones.backbone_selector import BackboneSelector
@@ -38,10 +39,12 @@ class PyramidOCNet(nn.Module):
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )
 
-    def forward(self, x):
-        x = self.backbone(x)
+    def forward(self, x_):
+        x = self.backbone(x_)
         x_dsn = self.dsn(x[-2])
         x = self.layer5(x[-1])
         x = self.context(x)
         x = self.cls(x)
+        x_dsn = F.interpolate(x_dsn, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         return x_dsn, x
