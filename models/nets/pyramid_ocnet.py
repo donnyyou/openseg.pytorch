@@ -24,15 +24,16 @@ class PyramidOCNet(nn.Module):
         self.backbone = BackboneSelector(configer).get_backbone()
         self.layer5 = nn.Sequential(
             nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
-            ModuleHelper.BatchNorm2d(bn_type=self.configer.get('network', 'bn_type'))(512)
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type'))
         )
 
         # extra added layers
-        self.context = Pyramid_OC_Module(in_channels=512, out_channels=512, dropout=0.05, sizes=([1, 2, 3, 6]))
+        self.context = Pyramid_OC_Module(in_channels=512, out_channels=512, dropout=0.05,
+                                         sizes=([1, 2, 3, 6]), bn_type=self.configer.get('network', 'bn_type'))
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
-            ModuleHelper.BatchNorm2d(bn_type=self.configer.get('network', 'bn_type'))(512),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
             nn.Dropout2d(0.05),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )
