@@ -21,7 +21,7 @@ elif [ "$1"x == "resume"x ]; then
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --data_dir /msravcshare/v-ansheng/DataSet/CityScape \
                        --model_name asp_ocnetv2 --checkpoints_name fs_aspocnetv2_cityscape_seg \
-                       --resume_continue y --resume ./checkpoints/cityscape/fs_aspocnetv2_cityscape_seg_max_performance.pth \
+                       --resume_continue y --resume ./checkpoints/cityscape/fs_aspocnetv2_cityscape_seg_latest.pth \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  >> $LOG_FILE 2>&1
 
 elif [ "$1"x == "debug"x ]; then

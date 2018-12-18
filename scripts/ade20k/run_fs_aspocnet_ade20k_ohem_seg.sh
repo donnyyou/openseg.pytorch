@@ -20,7 +20,7 @@ elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --data_dir /msravcshare/v-ansheng/DataSet/ADE20K \
-                       --resume_continue y --resume ./checkpoints/ade20k/fs_aspocnet_ade20k_ohem_seg_max_performance.pth \
+                       --resume_continue y --resume ./checkpoints/ade20k/fs_aspocnet_ade20k_ohem_seg_latest.pth \
                        --max_epoch 240 --loss_type fs_auxohemce_loss --checkpoints_name fs_aspocnet_ade20k_ohem_seg \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  >> $LOG_FILE 2>&1
 

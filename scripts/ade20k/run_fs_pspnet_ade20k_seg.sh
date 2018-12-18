@@ -19,7 +19,7 @@ elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pspnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --data_dir /msravcshare/v-ansheng/DataSet/ADE20K \
-                       --resume_continue y --resume ./checkpoints/ade20k/fs_pspnet_ade20k_seg_max_performance.pth \
+                       --resume_continue y --resume ./checkpoints/ade20k/fs_pspnet_ade20k_seg_latest.pth \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  >> $LOG_FILE 2>&1
 
 elif [ "$1"x == "debug"x ]; then

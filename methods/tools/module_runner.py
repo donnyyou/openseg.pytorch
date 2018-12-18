@@ -63,6 +63,7 @@ class ModuleRunner(object):
         net = net.to(torch.device('cpu' if self.configer.get('gpu') is None else 'cuda'))
         net.float()
         if self.configer.get('network', 'resume') is not None:
+            Log.info('Loading checkpoint from {}...'.format(self.configer.get('network', 'resume')))
             resume_dict = torch.load(self.configer.get('network', 'resume'))
             if 'state_dict' in resume_dict:
                 checkpoint_dict = resume_dict['state_dict']
