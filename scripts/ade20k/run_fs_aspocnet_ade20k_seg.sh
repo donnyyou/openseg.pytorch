@@ -18,9 +18,9 @@ if [ "$1"x == "train"x ]; then
 elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
-                       --data_dir /msravcshare/v-ansheng/DataSet/ADE20K --rewrite n \
+                       --data_dir /msravcshare/v-ansheng/DataSet/ADE20K \
                        --resume_continue y --resume ./checkpoints/ade20k/fs_aspocnet_ade20k_seg_max_performance.pth \
-                       --pretrained ./pretrained_model/resnet101-imagenet.pth  > $LOG_FILE 2>&1
+                       --pretrained ./pretrained_model/resnet101-imagenet.pth  >> $LOG_FILE 2>&1
 
 elif [ "$1"x == "debug"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json --phase debug --gpu 0 > $LOG_FILE 2>&1

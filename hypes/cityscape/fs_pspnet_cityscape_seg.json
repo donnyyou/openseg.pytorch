@@ -70,7 +70,7 @@
                      [0, 80, 100], [0, 0, 230], [119, 11, 32]]
     },
     "checkpoints": {
-      "checkpoints_name": "fs_pspnet_cityscape",
+      "checkpoints_name": "fs_pspnet_cityscape_seg",
       "checkpoints_dir": "./checkpoints/cityscape",
       "save_iters": 1000
     },
