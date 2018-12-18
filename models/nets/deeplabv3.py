@@ -47,7 +47,7 @@ class ASPPModule(nn.Module):
     def forward(self, x):
         _, _, h, w = x.size()
 
-        feat1 = F.upsample(self.conv1(x), size=(h, w), mode='bilinear', align_corners=True)
+        feat1 = F.interpolate(self.conv1(x), size=(h, w), mode='bilinear', align_corners=True)
 
         feat2 = self.conv2(x)
         feat3 = self.conv3(x)
