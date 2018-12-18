@@ -128,9 +128,13 @@ class FCNSegmentor(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
+            if self.configer.get('iters') == self.configer.get('solver', 'max_iters'):
+                self.__val()
+                break
+
             # Check to val the current model.
-            if self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0 or \
-               self.configer.get('iters') == self.configer.get('solver', 'max_iters'):
+            if self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0:
+
                 self.__val()
 
         self.configer.plus_one('epoch')
