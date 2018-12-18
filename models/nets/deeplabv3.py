@@ -59,10 +59,10 @@ class ASPPModule(nn.Module):
         return bottle
 
 
-class DeepLabv3(nn.Module):
+class DeepLabV3(nn.Module):
     def __init__(self, configer):
         self.inplanes = 128
-        super(DeepLabv3, self).__init__()
+        super(DeepLabV3, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
