@@ -234,8 +234,8 @@ class ModuleRunner(object):
 
         return [param_group['lr'] for param_group in optimizer.param_groups]
 
-    def lamda_poly_iter(self, iters, batch_len, optimizer):
-        new_lr = pow((1.0 - iters / (self.configer.get('solver', 'max_epoch') * batch_len)), 0.9)
+    def lamda_poly_iter(self, iters, optimizer):
+        new_lr = pow((1.0 - iters / self.configer.get('solver', 'max_iters')), 0.9)
         for param_group in optimizer.param_groups:
             param_group['lr'] = new_lr * self.configer.get('lr', 'base_lr')
 
@@ -247,7 +247,7 @@ class ModuleRunner(object):
         if not self.configer.exists('lr', 'is_warm') or not self.configer.get('lr', 'is_warm'):
             return
 
-        warm_iters = self.configer.get('lr', 'warm')['warm_epoch'] * batch_len
+        warm_iters = self.configer.get('lr', 'warm')['warm_iters']
         if iters < warm_iters:
             if self.configer.get('lr', 'warm')['freeze_backbone']:
                 for backbone_index in backbone_list:

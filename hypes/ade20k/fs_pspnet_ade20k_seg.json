@@ -119,7 +119,7 @@
     "solver": {
       "display_iter": 100,
       "test_interval": 10000,
-      "max_epoch": 120
+      "max_iters": 150000
     },
     "optim": {
       "optim_method": "sgd",

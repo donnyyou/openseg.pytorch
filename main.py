@@ -100,6 +100,8 @@ if __name__ == "__main__":
     # ***********  Params for display.  **********
     parser.add_argument('--max_epoch', default=None, type=int,
                         dest='solver:max_epoch', help='The max epoch of training.')
+    parser.add_argument('--max_iters', default=None, type=int,
+                        dest='solver:max_iters', help='The max iters of training.')
     parser.add_argument('--display_iter', default=None, type=int,
                         dest='solver:display_iter', help='The display iteration of train logs.')
     parser.add_argument('--test_interval', default=None, type=int,

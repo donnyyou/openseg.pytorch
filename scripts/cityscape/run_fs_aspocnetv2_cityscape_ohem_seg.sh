@@ -14,7 +14,7 @@ if [ "$1"x == "train"x ]; then
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --data_dir /msravcshare/v-ansheng/DataSet/CityScape \
                        --model_name asp_ocnetv2 --checkpoints_name fs_aspocnetv2_cityscape_ohem_seg \
-                       --max_epoch 220 --loss_type fs_auxohemce_loss \
+                       --max_iters 80000 --loss_type fs_auxohemce_loss \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  > $LOG_FILE 2>&1
 
 elif [ "$1"x == "resume"x ]; then
@@ -22,7 +22,7 @@ elif [ "$1"x == "resume"x ]; then
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --data_dir /msravcshare/v-ansheng/DataSet/CityScape \
                        --model_name asp_ocnetv2 --checkpoints_name fs_aspocnetv2_cityscape_ohem_seg \
-                       --max_epoch 220 --loss_type fs_auxohemce_loss \
+                       --max_iters 80000 --loss_type fs_auxohemce_loss \
                        --resume_continue y --resume ./checkpoints/cityscape/fs_aspocnetv2_cityscape_ohem_seg_latest.pth \
                        --pretrained ./pretrained_model/resnet101-imagenet.pth  >> $LOG_FILE 2>&1
 

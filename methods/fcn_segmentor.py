@@ -90,8 +90,7 @@ class FCNSegmentor(object):
 
         for i, data_dict in enumerate(self.train_loader):
             if self.configer.get('lr', 'lr_policy') == 'lambda_poly':
-                self.module_runner.lamda_poly_iter(self.configer.get('iters'),
-                                                   len(self.train_loader), self.optimizer)
+                self.module_runner.lamda_poly_iter(self.configer.get('iters'), self.optimizer)
 
             inputs = data_dict['img']
             targets = data_dict['labelmap']
@@ -130,8 +129,8 @@ class FCNSegmentor(object):
                 self.train_losses.reset()
 
             # Check to val the current model.
-            if self.val_loader is not None and \
-               self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0:
+            if self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0 or \
+               self.configer.get('iters') == self.configer.get('solver', 'max_iters'):
                 self.__val()
 
         self.configer.plus_one('epoch')
@@ -186,11 +185,8 @@ class FCNSegmentor(object):
         if self.configer.get('network', 'resume') is not None and self.configer.get('network', 'resume_val'):
             self.__val()
 
-        while self.configer.get('epoch') < self.configer.get('solver', 'max_epoch'):
+        while self.configer.get('iters') < self.configer.get('solver', 'max_iters'):
             self.__train()
-            if self.configer.get('epoch') == self.configer.get('solver', 'max_epoch'):
-                self.__val()
-                break
 
 
 if __name__ == "__main__":
