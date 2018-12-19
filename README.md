@@ -34,7 +34,7 @@ This repository provides source code for some deep learning based cv problems. W
 
 
 #### ADE20K (Single Scale Whole Image Test)
-| Model | Backbone | Training data  | Testing data | mIOU | PixelACC | Batch Size | Iterations | Scripts |
+| Model | Backbone | TrainData  | TestData | mIOU | PixelACC | BatchSize | Iters | Scripts |
 |--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------:|:------|
 | [PSPNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 40.54 | 78.62 | 16 | 75000 | [PSPNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_pspnet_ade20k_seg.sh) |
 | [DeepLabv3](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 41.52 | 78.95 | 16 | 75000 | [DeepLabV3](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_deeplabv3_ade20k_seg.sh) |
