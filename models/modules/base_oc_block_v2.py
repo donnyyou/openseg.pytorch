@@ -44,8 +44,19 @@ class _SelfAttentionBlock(nn.Module):
             nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
                 kernel_size=1, stride=1, padding=0),
             ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            nn.Conv2d(in_channels=self.key_channels, out_channels=self.key_channels,
+                kernel_size=1, stride=1, padding=0),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
         )
-        self.f_query = self.f_key
+        self.f_query = nn.Sequential(
+            nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
+                kernel_size=1, stride=1, padding=0),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            nn.Conv2d(in_channels=self.key_channels, out_channels=self.key_channels,
+                kernel_size=1, stride=1, padding=0),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+        )
+
         self.f_value = nn.Conv2d(in_channels=self.in_channels, out_channels=self.value_channels,
             kernel_size=1, stride=1, padding=0)
         self.W = nn.Conv2d(in_channels=self.value_channels, out_channels=self.out_channels,
@@ -85,7 +96,7 @@ class SelfAttentionBlock2D(_SelfAttentionBlock):
                                                     scale, bn_type)
 
 
-class BaseOC_Module(nn.Module):
+class BaseOC_Module_v2(nn.Module):
     """
     Implementation of the BaseOC module
     Parameters:
@@ -96,7 +107,7 @@ class BaseOC_Module(nn.Module):
         features fused with Object context information.
     """
     def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout, sizes=([1]), bn_type=None):
-        super(BaseOC_Module, self).__init__()
+        super(BaseOC_Context_Module_v2, self).__init__()
         self.stages = []
         self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
                                                       key_channels, value_channels, size, bn_type) for size in sizes])
@@ -122,7 +133,7 @@ class BaseOC_Module(nn.Module):
         return output
 
 
-class BaseOC_Context_Module(nn.Module):
+class BaseOC_Context_Module_v2(nn.Module):
     """
     Output only the context features.
     Parameters:
@@ -134,7 +145,7 @@ class BaseOC_Context_Module(nn.Module):
         features after "concat" or "add"
     """
     def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout=0, sizes=([1]), bn_type=None):
-        super(BaseOC_Context_Module, self).__init__()
+        super(BaseOC_Context_Module_v2, self).__init__()
         self.stages = []
         self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
                                                       key_channels, value_channels, size, bn_type) for size in sizes])
