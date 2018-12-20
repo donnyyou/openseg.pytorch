@@ -90,8 +90,8 @@ def collate(batch, trans_dict):
                         batch[i]['polygons'].data[object_id][polygon_id][1::2] *= h_scale_ratio
 
             scaled_size = (int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio)))
-            if 'meta' in data_keys and 'aug_img_size' in batch[i]['meta'].data:
-                batch[i]['meta'].data['aug_img_size'] = scaled_size
+            if 'meta' in data_keys and 'border_size' in batch[i]['meta'].data:
+                batch[i]['meta'].data['border_size'] = scaled_size
 
             scaled_size_hw = (scaled_size[1], scaled_size[0])
             batch[i]['img'] = DataContainer(F.interpolate(batch[i]['img'].data.unsqueeze(0),

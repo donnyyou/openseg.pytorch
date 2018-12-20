@@ -224,7 +224,7 @@ class FCNSegmentorTest(object):
     def _predict(self, inputs):
         with torch.no_grad():
             results = self.seg_net.forward(inputs)
-            results = results[-1].squeeze().permute(1, 2, 0).cpu().numpy()
+            results = results[-1].squeeze(0).permute(1, 2, 0).cpu().numpy()
 
         return results
 

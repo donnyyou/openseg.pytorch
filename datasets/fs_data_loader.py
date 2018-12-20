@@ -32,8 +32,10 @@ class FSDataLoader(data.Dataset):
         img = ImageHelper.read_image(self.img_list[index],
                                      tool=self.configer.get('data', 'image_tool'),
                                      mode=self.configer.get('data', 'input_mode'))
+        img_size = ImageHelper.get_size(img)
         labelmap = ImageHelper.read_image(self.label_list[index],
                                           tool=self.configer.get('data', 'image_tool'), mode='P')
+        ori_target = ImageHelper.tonp(labelmap)
         if self.configer.exists('data', 'label_list'):
             labelmap = self._encode_label(labelmap)
 
@@ -42,6 +44,15 @@ class FSDataLoader(data.Dataset):
 
         if self.aug_transform is not None:
             img, labelmap = self.aug_transform(img, labelmap=labelmap)
+
+        img_scale = ImageHelper.get_size(img)[0] / img_size[0]
+
+        meta = dict(
+            ori_img_size=img_size,
+            border_size=ImageHelper.get_size(img),
+            img_scale=img_scale,
+            ori_target=ori_target
+        )
 
         if self.img_transform is not None:
             img = self.img_transform(img)
@@ -52,6 +63,7 @@ class FSDataLoader(data.Dataset):
         return dict(
             img=DataContainer(img, stack=True),
             labelmap=DataContainer(labelmap, stack=True),
+            meta=DataContainer(meta, stack=False, cpu_only=True),
         )
 
     def _reduce_zero_label(self, labelmap):
