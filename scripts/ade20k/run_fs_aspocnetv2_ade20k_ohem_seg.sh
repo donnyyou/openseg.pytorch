@@ -6,7 +6,13 @@ PYTHON="/root/miniconda3/bin/python"
 
 cd ../../
 
+DATA_DIR="/msravcshare/v-ansheng/DataSet/ADE20K"
+BACKBONE="deepbase_resnet101_dilated8"
+MODEL_NAME="asp_ocnetv2"
+LOSS_TYPE="fs_auxohemce_loss"
 CHECKPOINTS_NAME="fs_aspocnetv2_ade20k_ohem_seg"
+PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
+MAX_ITERS=150000
 
 LOG_FILE="./log/ade20k/${CHECKPOINTS_NAME}.log"
 
@@ -14,31 +20,30 @@ LOG_FILE="./log/ade20k/${CHECKPOINTS_NAME}.log"
 if [ "$1"x == "train"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
-                       --data_dir /msravcshare/v-ansheng/DataSet/ADE20K \
-                       --model_name asp_ocnetv2 --checkpoints_name ${CHECKPOINTS_NAME} \
-                       --max_iters 300000 --loss_type fs_auxohemce_loss \
-                       --pretrained ./pretrained_model/resnet101-imagenet.pth  > $LOG_FILE 2>&1
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
+                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
+                       --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL} > ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
-                       --data_dir /msravcshare/v-ansheng/DataSet/ADE20K \
-                       --model_name asp_ocnetv2 --checkpoints_name ${CHECKPOINTS_NAME} \
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --max_iters ${MAX_ITERS} \
+                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} \
                        --resume_continue y --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
-                       --max_iters 300000 --loss_type fs_auxohemce_loss \
-                       --pretrained ./pretrained_model/resnet101-imagenet.pth  >> $LOG_FILE 2>&1
+                       --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  >> ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "debug"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json --phase debug --gpu 0 > $LOG_FILE 2>&1
 
 elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json \
-                       --phase test --gpu 0 \
-                       --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth > $LOG_FILE 2>&1
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
+                       --phase test --gpu 0 --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
+                       --test_dir ${DATA_DIR}/val/image  >> ${LOG_FILE} 2>&1
   cd val/scripts
   ${PYTHON} -u ade20k_evaluator.py --hypes_file ../../hypes/ade20k/fs_aspocnet_ade20k_seg.json \
-                                   --gt_dir path-to-gt \
-                                   --pred_dir path-to-pred >> $LOG_FILE 2>&1
+                                   --gt_dir ${DATA_DIR}/val/image \
+                                   --pred_dir ../results/ade20k/test_dir/image/label >> ${LOG_FILE} 2>&1
 else
   echo "$1"x" is invalid..."
 fi
