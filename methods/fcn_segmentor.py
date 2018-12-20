@@ -192,7 +192,7 @@ class FCNSegmentor(object):
             border_size = metas[i]['border_size']
             ori_target = metas[i]['ori_target']
             total_logits = cv2.resize(pred[i, :border_size[1], :border_size[0]].cpu().numpy(),
-                                      tuple(ori_img_size[::-1]), interpolation=cv2.INTER_CUBIC)
+                                      tuple(ori_img_size), interpolation=cv2.INTER_CUBIC)
             labelmap = np.argmax(total_logits, axis=-1)
             self.seg_running_score.update(labelmap[None], ori_target[None])
 
