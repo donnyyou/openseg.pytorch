@@ -4,6 +4,8 @@
 nvidia-smi
 PYTHON="/root/miniconda3/bin/python"
 
+export PYTHONPATH="/msravcshare/v-ansheng/PyTorchCV-SemSeg":$PYTHONPATH
+
 cd ../../
 
 DATA_DIR="/msravcshare/v-ansheng/DataSet/ADE20K"
