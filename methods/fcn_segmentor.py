@@ -11,6 +11,7 @@ from __future__ import print_function
 import time
 import cv2
 import torch
+import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 
 from datasets.seg_data_loader import SegDataLoader
@@ -158,10 +159,9 @@ class FCNSegmentor(object):
                 # Compute the loss of the val batch.
                 loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
                 outputs = self.module_runner.gather(outputs)
-                pred = outputs[-1].max(1)[1]
 
             self.val_losses.update(loss.item(), inputs.size(0))
-            self._update_running_score(pred, data_dict['meta'])
+            self._update_running_score(outputs[-1], data_dict['meta'])
             # self.seg_running_score.update(pred.max(1)[1].cpu().numpy(), targets.cpu().numpy())
 
             # Update the vars of the val phase.
@@ -190,8 +190,9 @@ class FCNSegmentor(object):
             ori_img_size = metas[i]['ori_img_size']
             border_size = metas[i]['border_size']
             ori_target = metas[i]['ori_target']
-            labelmap = cv2.resize(pred[i][:border_size[1], :border_size[0]].cpu().numpy(),
-                                  ori_img_size, interpolation=cv2.INTER_CUBIC)
+            labelmap = F.interpolate(pred[i:i+1, :border_size[1], :border_size[0]],
+                                     tuple(ori_img_size[::-1]), mode='bilinear', align_corners=True)[0]
+            labelmap = labelmap.max(0, keepdim=True)[1].cpu().numpy()
             self.seg_running_score.update(labelmap[None], ori_target[None])
 
     def train(self):
