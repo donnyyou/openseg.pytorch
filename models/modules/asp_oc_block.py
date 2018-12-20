@@ -13,8 +13,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-from models.modules.base_oc_block import BaseOC_Context_Module
-from models.modules.base_oc_block_v2 import BaseOC_Context_Module_v2
+from models.modules.base_oc_block import BaseOC_Context_Module, BaseOC_Context_Module_v2
 from models.tools.module_helper import ModuleHelper
 
 
