@@ -10,8 +10,8 @@ from __future__ import print_function
 
 import time
 import cv2
+import numpy as np
 import torch
-import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 
 from datasets.seg_data_loader import SegDataLoader
@@ -186,13 +186,14 @@ class FCNSegmentor(object):
         self.seg_net.train()
 
     def _update_running_score(self, pred, metas):
+        pred = pred.permute(0, 2, 3, 1)
         for i in range(pred.size(0)):
             ori_img_size = metas[i]['ori_img_size']
             border_size = metas[i]['border_size']
             ori_target = metas[i]['ori_target']
-            labelmap = F.interpolate(pred[i:i+1, :border_size[1], :border_size[0]],
-                                     tuple(ori_img_size[::-1]), mode='bilinear', align_corners=True)[0]
-            labelmap = labelmap.max(0, keepdim=True)[1].cpu().numpy()
+            total_logits = cv2.resize(pred[i, :border_size[1], :border_size[0]].cpu().numpy(),
+                                      tuple(ori_img_size[::-1]), interpolation=cv2.INTER_CUBIC)
+            labelmap = np.argmax(total_logits, axis=-1)
             self.seg_running_score.update(labelmap[None], ori_target[None])
 
     def train(self):
