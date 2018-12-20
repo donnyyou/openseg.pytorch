@@ -45,12 +45,9 @@ class FSDataLoader(data.Dataset):
         if self.aug_transform is not None:
             img, labelmap = self.aug_transform(img, labelmap=labelmap)
 
-        img_scale = ImageHelper.get_size(img)[0] / img_size[0]
-
         meta = dict(
             ori_img_size=img_size,
             border_size=ImageHelper.get_size(img),
-            img_scale=img_scale,
             ori_target=ori_target
         )
 
