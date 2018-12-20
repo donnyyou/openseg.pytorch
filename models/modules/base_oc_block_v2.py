@@ -107,7 +107,7 @@ class BaseOC_Module_v2(nn.Module):
         features fused with Object context information.
     """
     def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout, sizes=([1]), bn_type=None):
-        super(BaseOC_Context_Module_v2, self).__init__()
+        super(BaseOC_Module_v2, self).__init__()
         self.stages = []
         self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
                                                       key_channels, value_channels, size, bn_type) for size in sizes])
@@ -133,7 +133,7 @@ class BaseOC_Module_v2(nn.Module):
         return output
 
 
-class BaseOC_Context_Module_v2(nn.Module):
+class BaseOC_Context_Module_v3(nn.Module):
     """
     Output only the context features.
     Parameters:
@@ -145,7 +145,7 @@ class BaseOC_Context_Module_v2(nn.Module):
         features after "concat" or "add"
     """
     def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout=0, sizes=([1]), bn_type=None):
-        super(BaseOC_Context_Module_v2, self).__init__()
+        super(BaseOC_Context_Module_v3, self).__init__()
         self.stages = []
         self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
                                                       key_channels, value_channels, size, bn_type) for size in sizes])
@@ -171,7 +171,7 @@ class BaseOC_Context_Module_v2(nn.Module):
         return output
 
 
-class BaseOC_Context_Module_v2(nn.Module):
+class BaseOC_Context_Module_v4(nn.Module):
     """
     Output only the context features.
     Parameters:
@@ -183,7 +183,7 @@ class BaseOC_Context_Module_v2(nn.Module):
         features after "concat" or "add"
     """
     def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout=0, sizes=([1]), bn_type=None):
-        super(BaseOC_Context_Module_v2, self).__init__()
+        super(BaseOC_Context_Module_v4, self).__init__()
         self.stages = []
         self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
                                                       key_channels, value_channels, size, bn_type) for size in sizes])
