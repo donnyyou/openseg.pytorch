@@ -162,7 +162,7 @@ class ImageHelper(object):
         if isinstance(img, Image.Image):
             img = ImageHelper.img2np(img)
 
-        return img
+        return img.astype(np.uint8)
 
     @staticmethod
     def get_size(img):
