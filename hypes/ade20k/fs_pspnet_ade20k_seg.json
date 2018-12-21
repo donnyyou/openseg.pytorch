@@ -109,7 +109,7 @@
       "rewrite": true
     },
     "lr": {
-      "base_lr": 0.02,
+      "base_lr": 0.01,
       "lr_policy": "lambda_poly",
       "step": {
         "gamma": 0.5,
