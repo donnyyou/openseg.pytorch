@@ -76,7 +76,7 @@ class FCNSegmentor(object):
                 lr_1.append(value)
 
         params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr') * 1.0}]
+                  {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr') * self.configer.get('lr', 'bb_mult')}]
         return params
 
     def __train(self):
