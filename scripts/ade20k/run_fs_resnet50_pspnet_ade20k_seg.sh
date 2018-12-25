@@ -35,7 +35,7 @@ elif [ "$1"x == "resume"x ]; then
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  >> ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "debug"x ]; then
-  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pspnet_ade20k_seg.json --phase debug --gpu 0 > $LOG_FILE 2>&1
+  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pspnet_ade20k_seg.json --phase debug --gpu 0 > ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pspnet_ade20k_seg.json \
@@ -45,7 +45,7 @@ elif [ "$1"x == "test"x ]; then
   cd val/scripts
   ${PYTHON} -u ade20k_evaluator.py --hypes_file ../../hypes/ade20k/fs_pspnet_ade20k_seg.json \
                                    --gt_dir ${DATA_DIR}/val/image \
-                                   --pred_dir ../results/ade20k/test_dir/image/label >> ${LOG_FILE} 2>&1
+                                   --pred_dir ../results/ade20k/test_dir/${MODEL_NAME}/label >> ${LOG_FILE} 2>&1
 else
   echo "$1"x" is invalid..."
 fi

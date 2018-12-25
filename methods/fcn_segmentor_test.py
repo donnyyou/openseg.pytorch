@@ -264,7 +264,7 @@ class FCNSegmentorTest(object):
             self.__test_img(test_img, label_path, vis_path, raw_path)
 
         else:
-            base_dir = os.path.join(base_dir, 'test_dir', test_dir.rstrip('/').split('/')[-1])
+            base_dir = os.path.join(base_dir, 'test_dir', self.configer.get('network', 'model_name'))
             FileHelper.make_dirs(base_dir)
 
             for filename in FileHelper.list_dir(test_dir):
