@@ -160,8 +160,7 @@ class SelfAttentionModuleV2(nn.Module):
         for dilation, padding in zip(self.dilation_list, self.padding_list):
             unfold_value = F.unfold(value, kernel_size=self.kernel_size,
                                     dilation=dilation, padding=padding, stride=self.stride)
-            unfold_value_h, unfold_value_w = self._out_size([value_h, value_w])
-            unfold_value = unfold_value.view(b, value_c, -1, unfold_value_h, unfold_value_w).contiguous()
+            unfold_value = unfold_value.view(b, value_c, -1, value_h, value_w).contiguous()
             # print('unfold_value: {}'.format(unfold_value.size()))
             unfold_value_list.append(unfold_value)
 
@@ -173,8 +172,7 @@ class SelfAttentionModuleV2(nn.Module):
         for dilation, padding in zip(self.dilation_list, self.padding_list):
             unfold_key = F.unfold(key, kernel_size=self.kernel_size,
                                   dilation=dilation, padding=padding, stride=self.stride)
-            unfold_key_h, unfold_key_w = self._out_size([key_h, key_w])
-            unfold_key = unfold_key.view(b, key_c, -1, unfold_key_h, unfold_key_w).contiguous()
+            unfold_key = unfold_key.view(b, key_c, -1, key_h, key_w).contiguous()
             # print('unfold_key: {}'.format(unfold_key.size()))
             unfold_key_list.append(unfold_key)
 
