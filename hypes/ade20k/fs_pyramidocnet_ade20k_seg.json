@@ -13,7 +13,7 @@
       "batch_size": 16,
       "data_transformer": {
         "size_mode": "fix_size",
-        "input_size": [480, 480],
+        "input_size": [520, 520],
         "align_method": "only_pad"
       }
     },
@@ -57,7 +57,7 @@
       },
       "random_crop":{
         "ratio": 1.0,
-        "crop_size": [480, 480],
+        "crop_size": [520, 520],
         "method": "random",
         "allow_outside_center": false
       }
@@ -69,7 +69,7 @@
       },
       "random_crop": {
         "ratio": 1.0,
-        "crop_size": [480, 480],
+        "crop_size": [520, 520],
         "method": "center",
         "allow_outside_center": false
       }
@@ -109,7 +109,7 @@
       "rewrite": true
     },
     "lr": {
-      "base_lr": 0.01,
+      "base_lr": 0.02,
       "bb_mult": 1.0,
       "lr_policy": "lambda_poly",
       "step": {
