@@ -143,7 +143,7 @@ class ASP_OC_Module_v5(nn.Module):
                                                          value_channels=out_features//2, out_channels=inner_features,
                                                          kernel_size=3, padding_list=dilations, dilation_list=dilations,
                                                          bn_type=bn_type),
-                                   ModuleHelper.BNReLU(out_features, bn_type=bn_type))
+                                   ModuleHelper.BNReLU(inner_features, bn_type=bn_type))
 
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(out_features * 3, out_features, kernel_size=1, padding=0, dilation=1, bias=False),
