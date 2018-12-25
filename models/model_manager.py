@@ -12,6 +12,7 @@ from models.nets.asp_ocnet import AspOCNet
 from models.nets.asp_ocnetv2 import AspOCNetV2
 from models.nets.asp_ocnetv3 import AspOCNetV3
 from models.nets.asp_ocnetv4 import AspOCNetV4
+from models.nets.asp_ocnetv5 import AspOCNetV5
 from models.nets.deeplabv3 import DeepLabV3
 from models.nets.denseassp import DenseASPP
 from models.nets.pspnet import PSPNet
@@ -28,6 +29,7 @@ SEG_MODEL_DICT = {
     'asp_ocnetv2': AspOCNetV2,
     'asp_ocnetv3': AspOCNetV3,
     'asp_ocnetv4': AspOCNetV4,
+    'asp_ocnetv5': AspOCNetV5,
     'base_ocnet': BaseOCNet,
     'base_ocnetv2': BaseOCNetV2,
     'pyramid_ocnet': PyramidOCNet
