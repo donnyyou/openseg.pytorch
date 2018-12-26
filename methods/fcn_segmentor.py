@@ -12,6 +12,7 @@ import time
 import cv2
 import numpy as np
 import torch
+import torch.nn as nn
 import torch.backends.cudnn as cudnn
 
 from datasets.seg_data_loader import SegDataLoader
@@ -64,6 +65,29 @@ class FCNSegmentor(object):
         self.val_loader = self.seg_data_loader.get_valloader()
 
         self.pixel_loss = self.seg_loss_manager.get_seg_loss()
+
+    @staticmethod
+    def group_weight(module):
+        group_decay = []
+        group_no_decay = []
+        for m in module.modules():
+            if isinstance(m, nn.Linear):
+                group_decay.append(m.weight)
+                if m.bias is not None:
+                    group_no_decay.append(m.bias)
+            elif isinstance(m, nn.modules.conv._ConvNd):
+                group_decay.append(m.weight)
+                if m.bias is not None:
+                    group_no_decay.append(m.bias)
+            elif isinstance(m, nn.modules.batchnorm._BatchNorm):
+                if m.weight is not None:
+                    group_no_decay.append(m.weight)
+                if m.bias is not None:
+                    group_no_decay.append(m.bias)
+
+        assert len(list(module.parameters())) == len(group_decay) + len(group_no_decay)
+        groups = [dict(params=group_decay), dict(params=group_no_decay, weight_decay=.0)]
+        return groups
 
     def _get_parameters(self):
         lr_1 = []
