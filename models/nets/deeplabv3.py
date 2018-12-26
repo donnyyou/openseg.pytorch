@@ -18,7 +18,7 @@ class ASPPModule(nn.Module):
         Chen, Liang-Chieh, et al. *"Rethinking Atrous Convolution for Semantic Image Segmentation."*
     """
 
-    def __init__(self, features, inner_features=256, out_features=512, dilations=(12, 24, 36), bn_type=None):
+    def __init__(self, features, inner_features=512, out_features=512, dilations=(12, 24, 36), bn_type=None):
         super(ASPPModule, self).__init__()
 
         self.conv1 = nn.Sequential(nn.AdaptiveAvgPool2d((1, 1)),

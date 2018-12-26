@@ -130,7 +130,7 @@ class ASP_OC_Module_v4(nn.Module):
 
 
 class ASP_OC_Module_v5(nn.Module):
-    def __init__(self, features, inner_features=256, out_features=512, dilations=(12, 24, 36), bn_type=None):
+    def __init__(self, features, inner_features=512, out_features=512, dilations=(12, 24, 36), bn_type=None):
         super(ASP_OC_Module_v5, self).__init__()
         self.conv1 = nn.Sequential(nn.AdaptiveAvgPool2d((1, 1)),
                                    nn.Conv2d(features, inner_features, kernel_size=1, padding=0, dilation=1,
@@ -146,7 +146,7 @@ class ASP_OC_Module_v5(nn.Module):
                                    ModuleHelper.BNReLU(inner_features, bn_type=bn_type))
 
         self.conv_bn_dropout = nn.Sequential(
-            nn.Conv2d(out_features * 3, out_features, kernel_size=1, padding=0, dilation=1, bias=False),
+            nn.Conv2d(inner_features * 3, out_features, kernel_size=1, padding=0, dilation=1, bias=False),
             ModuleHelper.BNReLU(out_features, bn_type=bn_type),
             nn.Dropout2d(0.1)
             )
