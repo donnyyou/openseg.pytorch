@@ -14,7 +14,7 @@ MODEL_NAME="asp_ocnetv4"
 LOSS_TYPE="fs_auxohemce_loss"
 CHECKPOINTS_NAME="fs_aspocnetv4_cityscape_ohem_val_seg"
 PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
-MAX_ITERS=40000
+MAX_ITERS=80000
 
 LOG_FILE="./log/cityscape/${CHECKPOINTS_NAME}.log"
 
