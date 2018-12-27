@@ -10,9 +10,9 @@ cd ../../
 
 DATA_DIR="/msravcshare/v-ansheng/DataSet/CityScape"
 BACKBONE="deepbase_resnet101_dilated8"
-MODEL_NAME="asp_ocnetv2"
+MODEL_NAME="asp_ocnetv4"
 LOSS_TYPE="fs_auxohemce_loss"
-CHECKPOINTS_NAME="fs_aspocnetv2_cityscape_ohem_seg"
+CHECKPOINTS_NAME="fs_aspocnetv4_cityscape_ohem_seg"
 PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
 MAX_ITERS=40000
 
