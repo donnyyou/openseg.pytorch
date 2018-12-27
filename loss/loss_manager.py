@@ -9,13 +9,13 @@ from __future__ import division
 from __future__ import print_function
 
 from loss.modules.seg_modules import FSCELoss, FSAuxCELoss, FSAuxEncCELoss
-from loss.modules.seg_modules import FSAuxOhemCELoss
+from loss.modules.seg_modules import FSAuxOhemCELoss, FSOhemCELoss
 from utils.tools.logger import Logger as Log
-
 
 
 SEG_LOSS_DICT = {
     'fs_ce_loss': FSCELoss,
+    'fs_ohemce_loss': FSOhemCELoss,
     'fs_auxce_loss':FSAuxCELoss,
     'fs_auxencce_loss': FSAuxEncCELoss,
     'fs_auxohemce_loss': FSAuxOhemCELoss
@@ -33,8 +33,8 @@ class LossManager(object):
 
         return loss
 
-    def get_seg_loss(self):
-        key = self.configer.get('loss', 'loss_type')
+    def get_seg_loss(self, loss_type=None):
+        key = self.configer.get('loss', 'loss_type') if loss_type is None else loss_type
         if key not in SEG_LOSS_DICT:
             Log.error('Loss: {} not valid!'.format(key))
             exit(1)
