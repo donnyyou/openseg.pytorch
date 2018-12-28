@@ -90,17 +90,17 @@ class FCNSegmentor(object):
         return groups
 
     def _get_parameters(self):
-        lr_1 = []
-        lr_10 = []
+        bb_lr = []
+        nbb_lr = []
         params_dict = dict(self.seg_net.named_parameters())
         for key, value in params_dict.items():
             if 'backbone' not in key:
-                lr_10.append(value)
+                nbb_lr.append(value)
             else:
-                lr_1.append(value)
+                bb_lr.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr') * self.configer.get('lr', 'bb_mult')}]
+        params = [{'params': bb_lr, 'lr': self.configer.get('lr', 'base_lr')},
+                  {'params': nbb_lr, 'lr': self.configer.get('lr', 'base_lr') * self.configer.get('lr', 'nbb_mult')}]
         return params
 
     def __train(self):
@@ -118,7 +118,7 @@ class FCNSegmentor(object):
 
             if self.configer.get('lr', 'is_warm'):
                 self.module_runner.warm_lr(self.configer.get('iters'),
-                                           self.scheduler, self.optimizer, backbone_list=[1,])
+                                           self.scheduler, self.optimizer, backbone_list=[0,])
             inputs = data_dict['img']
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)

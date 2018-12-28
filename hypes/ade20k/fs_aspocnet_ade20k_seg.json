@@ -110,7 +110,6 @@
     },
     "lr": {
       "base_lr": 0.02,
-      "bb_mult": 1.0,
       "metric": "iters",
       "lr_policy": "lambda_poly",
       "warm": {
