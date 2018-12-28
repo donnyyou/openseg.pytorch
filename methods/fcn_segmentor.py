@@ -109,14 +109,16 @@ class FCNSegmentor(object):
         """
         self.seg_net.train()
         start_time = time.time()
-        # Adjust the learning rate after every epoch.
-
-        self.scheduler.step(self.configer.get('epoch'))
 
         for i, data_dict in enumerate(self.train_loader):
-            if self.configer.get('lr', 'lr_policy') == 'lambda_poly':
-                self.module_runner.lamda_poly_iter(self.configer.get('iters'), self.optimizer)
+            if self.configer.get('lr', 'metric') == 'iters':
+                self.scheduler.step(self.configer.get('iters'))
+            else:
+                self.scheduler.step(self.configer.get('epoch'))
 
+            if self.configer.get('lr', 'is_warm'):
+                self.module_runner.warm_lr(self.configer.get('iters'),
+                                           self.scheduler, self.optimizer, backbone_list=[1,])
             inputs = data_dict['img']
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)

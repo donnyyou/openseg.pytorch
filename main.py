@@ -98,6 +98,8 @@ if __name__ == "__main__":
                         dest='lr:lr_policy', help='The policy of lr during training.')
     parser.add_argument('--loss_type', default=None, type=str,
                         dest='loss:loss_type', help='The loss type of the network.')
+    parser.add_argument('--is_warm', type=str2bool, nargs='?', default=False,
+                        dest='lr:is_warm', help='Whether to warm training.')
 
     # ***********  Params for display.  **********
     parser.add_argument('--max_epoch', default=None, type=int,

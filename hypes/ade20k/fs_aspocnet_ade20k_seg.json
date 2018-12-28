@@ -111,7 +111,12 @@
     "lr": {
       "base_lr": 0.02,
       "bb_mult": 1.0,
+      "metric": "iters",
       "lr_policy": "lambda_poly",
+      "warm": {
+        "warm_iters": 1000,
+        "freeze_backbone": true
+      },
       "step": {
         "gamma": 0.5,
         "step_size": 100

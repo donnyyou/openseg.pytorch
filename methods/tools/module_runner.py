@@ -234,12 +234,7 @@ class ModuleRunner(object):
 
         return [param_group['lr'] for param_group in optimizer.param_groups]
 
-    def lamda_poly_iter(self, iters, optimizer):
-        s = pow((1.0 - iters / self.configer.get('solver', 'max_iters')), 0.9)
-        optimizer.param_groups[0]['lr'] = s * self.configer.get('lr', 'base_lr')
-        optimizer.param_groups[1]['lr'] = s * self.configer.get('lr', 'base_lr') * self.configer.get('lr', 'bb_mult')
-
-    def warm_lr(self, iters, scheduler, optimizer, backbone_list=(0, ), backbone_scale=1.0):
+    def warm_lr(self, iters, scheduler, optimizer, backbone_list=(0, )):
         """Sets the learning rate
         # Adapted from PyTorch Imagenet example:
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py
@@ -259,14 +254,4 @@ class ModuleRunner(object):
                 base_lr_list = scheduler.get_lr()
                 for param_group, base_lr in zip(optimizer.param_groups, base_lr_list):
                     param_group['lr'] = base_lr * (lr_ratio ** 4)
-
-        elif iters == warm_iters:
-            try:
-                base_lr_list = scheduler.get_lr()
-                for param_group, base_lr in zip(optimizer.param_groups, base_lr_list):
-                    param_group['lr'] = base_lr
-
-            except AttributeError:
-                for backbone_index in backbone_list:
-                    optimizer.param_groups[backbone_index]['lr'] = self.configer.get('lr', 'base_lr') * backbone_scale
 
