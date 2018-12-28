@@ -250,8 +250,7 @@ class ModuleRunner(object):
 
             else:
                 lr_ratio = (self.configer.get('iters') + 1) / warm_iters
-
                 base_lr_list = scheduler.get_lr()
-                for param_group, base_lr in zip(optimizer.param_groups, base_lr_list):
-                    param_group['lr'] = base_lr * (lr_ratio ** 4)
+                for backbone_index in backbone_list:
+                    optimizer.param_groups[backbone_index]['lr'] = base_lr_list[backbone_index] * (lr_ratio ** 4)
 
