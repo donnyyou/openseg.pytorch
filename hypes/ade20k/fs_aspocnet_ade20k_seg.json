@@ -113,7 +113,7 @@
       "metric": "iters",
       "lr_policy": "lambda_poly",
       "warm": {
-        "warm_iters": 10000,
+        "warm_iters": 1000,
         "freeze_backbone": false
       },
       "step": {
