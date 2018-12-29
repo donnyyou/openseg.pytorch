@@ -94,7 +94,7 @@ class FCNSegmentorTest(object):
             total_logits = self.sscrop_test(ori_image)
 
         elif self.configer.get('test', 'mode') == 'ms_test':
-            total_logits = self.ss_test(ori_image)
+            total_logits = self.ms_test(ori_image)
 
         elif self.configer.get('test', 'mode') == 'mscrop_test':
             total_logits = self.mscrop_test(ori_image)
@@ -167,7 +167,7 @@ class FCNSegmentorTest(object):
         for scale in self.configer.get('test', 'scale_search'):
             image, border_hw = self._get_blob(ori_image, scale=scale)
             results = self._predict(image)
-            results = cv2.resize(results[:-border_hw[0], :-border_hw[1]],
+            results = cv2.resize(results[:border_hw[0], :border_hw[1]],
                                  (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
             total_logits += results
 
@@ -178,7 +178,7 @@ class FCNSegmentorTest(object):
 
         image, border_hw = self._get_blob(mirror_image, scale=1.0)
         results = self._predict(image)
-        results = results[:-border_hw[0], :-border_hw[1]]
+        results = results[:border_hw[0], :border_hw[1]]
         results = cv2.resize(results[:, ::-1], (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
         total_logits += results
         return total_logits
