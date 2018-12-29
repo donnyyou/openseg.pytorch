@@ -30,7 +30,7 @@ elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pspnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --max_iters ${MAX_ITERS} \
-                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} \
+                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --gpu 0 1 2 3 \
                        --resume_continue y --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  >> ${LOG_FILE} 2>&1
 

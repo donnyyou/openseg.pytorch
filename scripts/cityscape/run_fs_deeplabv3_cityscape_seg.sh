@@ -30,7 +30,7 @@ elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --hypes hypes/cityscape/fs_deeplabv3_cityscape_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --max_iters ${MAX_ITERS} \
-                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} \
+                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --gpu 0 1 2 3 \
                        --resume_continue y --resume ./checkpoints/cityscape/${CHECKPOINTS_NAME}_latest.pth \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  >> ${LOG_FILE} 2>&1
 
@@ -38,7 +38,7 @@ elif [ "$1"x == "debug"x ]; then
   ${PYTHON} -u main.py --hypes hypes/cityscape/fs_deeplabv3_cityscape_seg.json \
                        --phase debug --gpu 0 --log_to_file n  > ${LOG_FILE} 2>&1
 
-elif [ "$1"x == "test"x ]; then
+elif [ "$1"x == "val"x ]; then
   ${PYTHON} -u main.py --hypes hypes/cityscape/fs_deeplabv3_cityscape_seg.json \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/cityscape/${CHECKPOINTS_NAME}_latest.pth \
@@ -47,6 +47,13 @@ elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u cityscape_evaluator.py --hypes_file ../../hypes/cityscape/fs_deeplabv3_cityscape_seg.json \
                                       --gt_dir ${DATA_DIR}/val/image \
                                       --pred_dir ../results/cityscape/test_dir/${MODEL_NAME}/label >> ${LOG_FILE} 2>&1
+
+elif [ "$1"x == "test"x ]; then
+  ${PYTHON} -u main.py --hypes hypes/cityscape/fs_deeplabv3_cityscape_seg.json \
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
+                       --phase test --gpu 0 --resume ./checkpoints/cityscape/${CHECKPOINTS_NAME}_latest.pth \
+                       --test_dir ${DATA_DIR}/test --log_to_file n  >> ${LOG_FILE} 2>&1
+
 else
   echo "$1"x" is invalid..."
 fi
