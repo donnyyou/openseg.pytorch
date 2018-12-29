@@ -134,31 +134,47 @@ class FCNSegmentorTest(object):
     def sscrop_test(self, ori_image):
         ori_width, ori_height = ImageHelper.get_size(ori_image)
         total_logits = np.zeros((ori_height, ori_width, self.configer.get('data', 'num_classes')), np.float32)
-        image, _ = self._get_blob(ori_image, scale=1.0)
+        image, border_hw = self._get_blob(ori_image, scale=1.0)
         crop_size = self.configer.get('test', 'crop_size')
         if image.size()[3] > crop_size[0] and image.size()[2] > crop_size[1]:
             results = self._crop_predict(image, crop_size)
         else:
             results = self._predict(image)
 
-        results = cv2.resize(results, (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
+        results = cv2.resize(results[:border_hw[0], :border_hw[1]],
+                             (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
         total_logits += results
         return total_logits
 
     def mscrop_test(self, ori_image):
         ori_width, ori_height = ImageHelper.get_size(ori_image)
+        crop_size = self.configer.get('test', 'crop_size')
         total_logits = np.zeros((ori_height, ori_width, self.configer.get('data', 'num_classes')), np.float32)
         for scale in self.configer.get('test', 'scale_search'):
-            image, _ = self._get_blob(ori_image, scale=scale)
-            crop_size = self.configer.get('test', 'crop_size')
+            image, border_hw = self._get_blob(ori_image, scale=scale)
             if image.size()[3] > crop_size[0] and image.size()[2] > crop_size[1]:
                 results = self._crop_predict(image, crop_size)
             else:
                 results = self._predict(image)
 
-            results = cv2.resize(results, (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
+            results = cv2.resize(results[:border_hw[0], :border_hw[1]],
+                                 (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
             total_logits += results
 
+        if self.configer.get('data', 'image_tool') == 'cv2':
+            mirror_image = cv2.flip(ori_image, 1)
+        else:
+            mirror_image = ori_image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        image, border_hw = self._get_blob(mirror_image, scale=1.0)
+        if image.size()[3] > crop_size[0] and image.size()[2] > crop_size[1]:
+            results = self._crop_predict(image, crop_size)
+        else:
+            results = self._predict(image)
+
+        results = results[:border_hw[0], :border_hw[1]]
+        results = cv2.resize(results[:, ::-1], (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
+        total_logits += results
         return total_logits
 
     def ms_test(self, ori_image):

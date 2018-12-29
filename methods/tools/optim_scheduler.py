@@ -60,7 +60,8 @@ class OptimScheduler(object):
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_linear)
 
         elif policy == 'lambda_cosine':
-            lambda_cosine = lambda iters: 1.0 + math.cos(math.pi * iters / self.configer.get('solver', 'max_iters')) / 2
+            lambda_cosine = lambda iters: (math.cos(math.pi * iters / self.configer.get('solver', 'max_iters'))
+                                           + 1.0) / 2
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_cosine)
 
         elif policy == 'plateau':
