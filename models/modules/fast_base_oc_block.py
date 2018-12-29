@@ -88,10 +88,10 @@ class _ObjectAttentionBlock(nn.Module):
 
 
 class ObjectAttentionBlock2D(_ObjectAttentionBlock):
-    def __init__(self, in_channels, key_channels, scale=1):
+    def __init__(self, in_channels, key_channels, scale=1, bn_type=None):
         super(ObjectAttentionBlock2D, self).__init__(in_channels,
                                                     key_channels,
-                                                    scale)
+                                                    scale, bn_type=bn_type)
 
 
 class FastBaseOC_Module(nn.Module):
@@ -101,7 +101,7 @@ class FastBaseOC_Module(nn.Module):
     """
     def __init__(self, in_channels, key_channels, scale, dropout=0.1, bn_type=None):
         super(FastBaseOC_Module, self).__init__()
-        self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale=1)
+        self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale=1, bn_type=bn_type)
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(2*in_channels, in_channels, kernel_size=1, padding=0),
             ModuleHelper.BNReLU(self.in_channels, bn_type=bn_type),
@@ -122,7 +122,7 @@ class FastBaseOC_Context_Module(nn.Module):
     """
     def __init__(self, in_channels, key_channels, scale, bn_type=None):
         super(FastBaseOC_Context_Module, self).__init__()
-        self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale=1)
+        self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale=1, bn_type=bn_type)
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, kernel_size=1, padding=0),
             ModuleHelper.BNReLU(self.in_channels, bn_type=bn_type),
