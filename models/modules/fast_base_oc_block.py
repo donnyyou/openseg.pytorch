@@ -104,7 +104,7 @@ class FastBaseOC_Module(nn.Module):
         self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale=1, bn_type=bn_type)
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(2*in_channels, in_channels, kernel_size=1, padding=0),
-            ModuleHelper.BNReLU(self.in_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(in_channels, bn_type=bn_type),
             nn.Dropout2d(dropout)
         )
 
@@ -125,7 +125,7 @@ class FastBaseOC_Context_Module(nn.Module):
         self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale=1, bn_type=bn_type)
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, kernel_size=1, padding=0),
-            ModuleHelper.BNReLU(self.in_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(in_channels, bn_type=bn_type),
         )
         
     def forward(self, feats, proxy_feats):

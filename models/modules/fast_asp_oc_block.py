@@ -42,7 +42,8 @@ class Fast_ASP_OC_Module(nn.Module):
         super(Fast_ASP_OC_Module, self).__init__()
         self.context = nn.Sequential(nn.Conv2d(features, out_features, kernel_size=3, padding=1, dilation=1, bias=True),
                                    ModuleHelper.BNReLU(out_features, bn_type=bn_type),
-                                   FastBaseOC_Context_Module(in_channels=out_features, key_channels=out_features//2, scale=1),
+                                   FastBaseOC_Context_Module(in_channels=out_features,
+                                                             key_channels=out_features//2, scale=1, bn_type=bn_type),
                                    )
         self.conv2 = nn.Sequential(nn.Conv2d(features, out_features, kernel_size=1, padding=0, dilation=1, bias=False),
                                    ModuleHelper.BNReLU(out_features, bn_type=bn_type),)
