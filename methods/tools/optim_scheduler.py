@@ -8,6 +8,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import math
 from torch.optim import SGD, Adam, lr_scheduler
 
 from utils.tools.logger import Logger as Log
@@ -57,6 +58,10 @@ class OptimScheduler(object):
         elif policy == 'lambda_linear':
             lambda_linear = lambda epoch: 1.0 - (epoch / self.configer.get('solver', 'max_iters'))
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_linear)
+
+        elif policy == 'lambda_cosine':
+            lambda_cosine = lambda iters: 1.0 + math.cos(math.pi * iters / self.configer.get('solver', 'max_iters')) / 2
+            scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_cosine)
 
         elif policy == 'plateau':
             scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,
