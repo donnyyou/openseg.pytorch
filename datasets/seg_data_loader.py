@@ -81,8 +81,7 @@ class SegDataLoader(object):
                              label_transform=self.label_transform,
                              configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), pin_memory=True,
-                num_workers=self.configer.get('data', 'workers'),
-                shuffle=True, drop_last=self.configer.get('data', 'drop_last'),
+                num_workers=self.configer.get('data', 'workers'), shuffle=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('val', 'data_transformer')
                 )
