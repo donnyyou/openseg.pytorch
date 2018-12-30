@@ -15,10 +15,10 @@ from models.backbones.backbone_selector import BackboneSelector
 from models.tools.module_helper import ModuleHelper
 
 
-class BaseOCNetV2(nn.Module):
+class BaseOCNet(nn.Module):
     def __init__(self, configer):
         self.inplanes = 128
-        super(BaseOCNetV2, self).__init__()
+        super(BaseOCNet, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()

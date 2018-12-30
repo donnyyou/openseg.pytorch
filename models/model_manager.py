@@ -14,7 +14,7 @@ from models.nets.deeplabv3 import DeepLabV3
 from models.nets.denseassp import DenseASPP
 from models.nets.pspnet import PSPNet
 from models.nets.pyramid_ocnet import PyramidOCNet
-from models.nets.base_ocnetv2 import BaseOCNetV2
+from models.nets.base_ocnet import BaseOCNet
 from models.nets.fast_base_ocnet import FastBaseOCNet
 from utils.tools.logger import Logger as Log
 
@@ -23,7 +23,7 @@ SEG_MODEL_DICT = {
     'pspnet': PSPNet,
     'denseaspp': DenseASPP,
     'asp_ocnetv4': AspOCNetV4,
-    'base_ocnetv2': BaseOCNetV2,
+    'base_ocnet': BaseOCNet,
     'pyramid_ocnet': PyramidOCNet,
     'fast_base_ocnet': FastBaseOCNet,
     'fast_asp_ocnet': FastAspOCNet

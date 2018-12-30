@@ -12,7 +12,7 @@ DATA_DIR="/msravcshare/v-ansheng/DataSet/ADE20K"
 BACKBONE="deepbase_resnet101_dilated8"
 MODEL_NAME="deeplabv3"
 LOSS_TYPE="fs_auxce_loss"
-CHECKPOINTS_NAME="fs_deeplabv3_ade20k_seg"
+CHECKPOINTS_NAME="fs_res101_deeplabv3_ade20k_seg"$2
 PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
 MAX_ITERS=150000
 

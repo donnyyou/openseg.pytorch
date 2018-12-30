@@ -10,9 +10,9 @@ cd ../../
 
 DATA_DIR="/msravcshare/v-ansheng/DataSet/ADE20K"
 BACKBONE="deepbase_resnet50_dilated8"
-MODEL_NAME="pyramid_ocnet"
+MODEL_NAME="base_ocnet"
 LOSS_TYPE="fs_auxce_loss"
-CHECKPOINTS_NAME="fs_resnet50_pyramidocnet_ade20k_seg_5_15"
+CHECKPOINTS_NAME="fs_res50_baseocnet_ade20k_seg"
 PRETRAINED_MODEL="./pretrained_model/resnet50-imagenet.pth"
 MAX_ITERS=75000
 
@@ -20,14 +20,14 @@ LOG_FILE="./log/ade20k/${CHECKPOINTS_NAME}.log"
 
 
 if [ "$1"x == "train"x ]; then
-  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pyramidocnet_ade20k_seg.json --drop_last y \
+  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_baseocnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --gpu 0 1 2 3 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL} > ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "resume"x ]; then
-  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pyramidocnet_ade20k_seg.json --drop_last y \
+  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_baseocnet_ade20k_seg.json --drop_last y \
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --max_iters ${MAX_ITERS} \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --gpu 0 1 2 3 \
@@ -35,16 +35,16 @@ elif [ "$1"x == "resume"x ]; then
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  >> ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "debug"x ]; then
-  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pyramidocnet_ade20k_seg.json \
-                       --phase debug --gpu 0 --log_to_file n > ${LOG_FILE} 2>&1
+  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_baseocnet_ade20k_seg.json \
+                       --phase debug --gpu 0 --log_to_file n  > ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "test"x ]; then
-  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pyramidocnet_ade20k_seg.json \
+  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_baseocnet_ade20k_seg.json \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
-                       --test_dir ${DATA_DIR}/val/image  >> ${LOG_FILE} 2>&1
+                       --test_dir ${DATA_DIR}/val/image --log_to_file n  >> ${LOG_FILE} 2>&1
   cd val/scripts
-  ${PYTHON} -u ade20k_evaluator.py --hypes_file ../../hypes/ade20k/fs_pyramidocnet_ade20k_seg.json \
+  ${PYTHON} -u ade20k_evaluator.py --hypes_file ../../hypes/ade20k/fs_baseocnet_ade20k_seg.json \
                                    --gt_dir ${DATA_DIR}/val/image \
                                    --pred_dir ../results/ade20k/test_dir/${MODEL_NAME}/label >> ${LOG_FILE} 2>&1
 else
