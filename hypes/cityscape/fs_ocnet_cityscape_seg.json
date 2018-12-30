@@ -129,7 +129,9 @@
                       1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037,
                       1.0865, 1.0955, 1.0865, 1.1529, 1.0507],
         "ce_reduction": "elementwise_mean",
-        "ce_ignore_index": -1
+        "ce_ignore_index": -1,
+        "ohem_minkeep": 0,
+        "ohem_thresh": 0.7
       }
     }
 }
