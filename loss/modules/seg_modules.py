@@ -92,7 +92,7 @@ class FSOhemCELoss(nn.Module):
                                            If given, has to be a Tensor of size "nclasses"
         """
         prob_out = F.softmax(predict, dim=1)
-        tmp_target = target.copy_()
+        tmp_target = target.clone()
         tmp_target[tmp_target == self.ignore_label] = 0
         prob = prob_out.gather(1, tmp_target.unsqueeze(1))
         mask = target.contiguous().view(-1,) != self.ignore_label
