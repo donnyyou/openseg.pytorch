@@ -72,16 +72,17 @@ class SegDataLoader(object):
             Log.error('Method: {} loader is invalid.'.format(self.configer.get('method')))
             return None
 
-    def get_valloader(self):
+    def get_valloader(self, dataset=None):
+        dataset = 'val' if dataset is None else dataset
         if self.configer.get('method') == 'fcn_segmentor':
             valloader = data.DataLoader(
-                FSDataLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
+                FSDataLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
                              aug_transform=self.aug_val_transform,
                              img_transform=self.img_transform,
                              label_transform=self.label_transform,
                              configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), pin_memory=True,
-                num_workers=self.configer.get('data', 'workers'), shuffle=True,
+                num_workers=self.configer.get('data', 'workers'), shuffle=False,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('val', 'data_transformer')
                 )

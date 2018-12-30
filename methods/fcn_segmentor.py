@@ -156,24 +156,23 @@ class FCNSegmentor(object):
                 self.train_losses.reset()
 
             if self.configer.get('iters') == self.configer.get('solver', 'max_iters'):
-                self.__val()
                 break
 
             # Check to val the current model.
             if self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0:
-
                 self.__val()
 
         self.configer.plus_one('epoch')
 
-    def __val(self):
+    def __val(self, data_loader=None):
         """
           Validation function during the train phase.
         """
         self.seg_net.eval()
         start_time = time.time()
 
-        for j, data_dict in enumerate(self.val_loader):
+        data_loader = self.val_loader if data_loader is None else data_loader
+        for j, data_dict in enumerate(data_loader):
             inputs = data_dict['img']
             targets = data_dict['labelmap']
 
@@ -229,6 +228,9 @@ class FCNSegmentor(object):
 
         while self.configer.get('iters') < self.configer.get('solver', 'max_iters'):
             self.__train()
+
+        self.__val(data_loader=self.seg_data_loader.get_valloader(dataset='val'))
+        self.__val(data_loader=self.seg_data_loader.get_valloader(dataset='train'))
 
 
 if __name__ == "__main__":
