@@ -14,7 +14,7 @@ MODEL_NAME="pspnet"
 LOSS_TYPE="fs_auxce_loss"
 CHECKPOINTS_NAME="fs_res50_pspnet_ade20k_seg"
 PRETRAINED_MODEL="./pretrained_model/resnet50-imagenet.pth"
-MAX_ITERS=75000
+MAX_ITERS=150000
 
 LOG_FILE="./log/ade20k/${CHECKPOINTS_NAME}.log"
 
