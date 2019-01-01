@@ -53,14 +53,20 @@ class FCNSegmentorTest(object):
                                                 input_size=self.configer.get('test', 'input_size'),
                                                 scale=scale)
 
-        elif self.configer.exists('test', 'min_side_length'):
+        elif self.configer.exists('test', 'min_side_length') and not self.configer.exists('test', 'max_side_length'):
             image = self.blob_helper.make_input(image=ori_image,
                                                 min_side_length=self.configer.get('test', 'min_side_length'),
                                                 scale=scale)
 
-        elif self.configer.exists('test', 'max_side_length'):
+        elif not self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
             image = self.blob_helper.make_input(image=ori_image,
-                                                min_side_length=self.configer.get('test', 'max_side_length'),
+                                                max_side_length=self.configer.get('test', 'max_side_length'),
+                                                scale=scale)
+
+        elif not self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
+            image = self.blob_helper.make_input(image=ori_image,
+                                                min_side_length=self.configer.get('test', 'min_side_length'),
+                                                max_side_length=self.configer.get('test', 'max_side_length'),
                                                 scale=scale)
 
         else:
