@@ -10,7 +10,7 @@ cd ../../
 
 DATA_DIR="/msravcshare/v-ansheng/DataSet/ADE20K"
 BACKBONE="deepbase_resnet101_dilated8"
-MODEL_NAME="asp_ocnetv4"
+MODEL_NAME="asp_ocnet"
 LOSS_TYPE="fs_auxohemce_loss"
 CHECKPOINTS_NAME="fs_res101_aspocnet_ade20k_ohem_seg"$2
 PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
@@ -38,15 +38,22 @@ elif [ "$1"x == "debug"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json \
                        --phase debug --gpu 0 --log_to_file n > ${LOG_FILE} 2>&1
 
-elif [ "$1"x == "test"x ]; then
+elif [ "$1"x == "val"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_aspocnet_ade20k_seg.json \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
-                       --test_dir ${DATA_DIR}/val/image --log_to_file n  >> ${LOG_FILE} 2>&1
+                       --test_dir ${DATA_DIR}/val/image --log_to_file n --out_dir val >> ${LOG_FILE} 2>&1
   cd val/scripts
   ${PYTHON} -u ade20k_evaluator.py --hypes_file ../../hypes/ade20k/fs_aspocnet_ade20k_seg.json \
-                                   --gt_dir ${DATA_DIR}/val/image \
-                                   --pred_dir ../results/ade20k/test_dir/${MODEL_NAME}/label >> ${LOG_FILE} 2>&1
+                                   --pred_dir ../results/ade20k/test_dir/${CHECKPOINTS_NAME}/val/label \
+                                   --gt_dir ${DATA_DIR}/val/label  >> "../../"${LOG_FILE} 2>&1
+
+elif [ "$1"x == "test"x ]; then
+  ${PYTHON} -u main.py --hypes hypes/ade20k/fs_ocnet_ade20k_seg.json \
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
+                       --phase test --gpu 0 --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
+                       --test_dir ${DATA_DIR}/test --log_to_file n --out_dir test >> ${LOG_FILE} 2>&1
+
 else
   echo "$1"x" is invalid..."
 fi

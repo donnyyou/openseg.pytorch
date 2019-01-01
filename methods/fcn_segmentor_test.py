@@ -263,8 +263,8 @@ class FCNSegmentorTest(object):
     def test(self):
         base_dir = os.path.join(self.configer.get('project_dir'), 'val/results', self.configer.get('dataset'))
 
-        test_img = self.configer.get('test_img')
-        test_dir = self.configer.get('test_dir')
+        test_img = self.configer.get('test', 'test_img')
+        test_dir = self.configer.get('test', 'test_dir')
         if test_img is None and test_dir is None:
             Log.error('test_img & test_dir not exists.')
             exit(1)
@@ -286,7 +286,9 @@ class FCNSegmentorTest(object):
             self.__test_img(test_img, label_path, vis_path, raw_path)
 
         else:
-            base_dir = os.path.join(base_dir, 'test_dir', self.configer.get('network', 'model_name'))
+            base_dir = os.path.join(base_dir, 'test_dir',
+                                    self.configer.get('checkpoints', 'checkpoints_name'),
+                                    self.configer.get('test', 'out_dir'))
             FileHelper.make_dirs(base_dir)
 
             for filename in FileHelper.list_dir(test_dir):
