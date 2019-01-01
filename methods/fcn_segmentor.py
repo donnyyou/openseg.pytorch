@@ -86,10 +86,10 @@ class FCNSegmentor(object):
                 group_decay.append(m.weight)
                 if m.bias is not None:
                     group_no_decay.append(m.bias)
-            elif isinstance(m, nn.modules.batchnorm._BatchNorm):
-                if m.weight is not None:
+            else:
+                if hasattr(m, 'weight'):
                     group_no_decay.append(m.weight)
-                if m.bias is not None:
+                if hasattr(m, 'bias'):
                     group_no_decay.append(m.bias)
 
         assert len(list(module.parameters())) == len(group_decay) + len(group_no_decay)
