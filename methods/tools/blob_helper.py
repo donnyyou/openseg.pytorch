@@ -62,6 +62,14 @@ class BlobHelper(object):
             w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
             in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
 
+        elif input_size is None and min_side_length is not None and max_side_length is not None:
+            width, height = ImageHelper.get_size(image)
+            scale_ratio = min_side_length / min(width, height)
+            bound_scale_ratio = max_side_length / max(width, height)
+            scale_ratio = min(scale_ratio, bound_scale_ratio)
+            w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
+            in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
+
         else:
             in_width, in_height = ImageHelper.get_size(image)
 
