@@ -40,7 +40,7 @@ elif [ "$1"x == "debug"x ]; then
 
 elif [ "$1"x == "val"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pyramidocnet_ade20k_seg.json \
-                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --log_to_file n --out_dir val >> ${LOG_FILE} 2>&1
   cd val/scripts
@@ -50,7 +50,7 @@ elif [ "$1"x == "val"x ]; then
 
 elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u main.py --hypes hypes/ade20k/fs_pyramidocnet_ade20k_seg.json \
-                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} \
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/test --log_to_file n --out_dir test >> ${LOG_FILE} 2>&1
 
