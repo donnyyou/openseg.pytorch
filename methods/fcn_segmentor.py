@@ -59,7 +59,14 @@ class FCNSegmentor(object):
         self.seg_net = self.seg_model_manager.semantic_segmentor()
         self.seg_net = self.module_runner.load_net(self.seg_net)
 
-        self.optimizer, self.scheduler = self.optim_scheduler.init_optimizer(self._get_parameters())
+        Log.info('Params Group Method: {}'.format(self.configer.get('optim', 'group_method')))
+        if self.configer.get('optim', 'group_method') == 'decay':
+            params_group = self.group_weight(self.seg_net)
+        else:
+            assert self.configer.get('optim', 'group_method') is None
+            params_group = self._get_parameters()
+
+        self.optimizer, self.scheduler = self.optim_scheduler.init_optimizer(params_group)
 
         self.train_loader = self.seg_data_loader.get_trainloader()
         self.val_loader = self.seg_data_loader.get_valloader()

@@ -90,6 +90,8 @@ if __name__ == "__main__":
     # ***********  Params for solver.  **********
     parser.add_argument('--optim_method', default=None, type=str,
                         dest='optim:optim_method', help='The optim method that used.')
+    parser.add_argument('--group_method', default=None, type=str,
+                        dest='optim:group_method', help='The group method that used.')
     parser.add_argument('--base_lr', default=None, type=float,
                         dest='lr:base_lr', help='The learning rate.')
     parser.add_argument('--nbb_mult', default=1.0, type=float,
