@@ -15,10 +15,10 @@ from models.backbones.backbone_selector import BackboneSelector
 from models.tools.module_helper import ModuleHelper
 
 
-class AspOCNetV4(nn.Module):
+class AspOCNet(nn.Module):
     def __init__(self, configer):
         self.inplanes = 128
-        super(AspOCNetV4, self).__init__()
+        super(AspOCNet, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()

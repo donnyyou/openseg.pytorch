@@ -8,7 +8,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from models.nets.asp_ocnetv4 import AspOCNetV4
+from models.nets.asp_ocnet import AspOCNet
 from models.nets.fast_asp_ocnet import FastAspOCNet
 from models.nets.deeplabv3 import DeepLabV3
 from models.nets.denseassp import DenseASPP
@@ -22,7 +22,7 @@ SEG_MODEL_DICT = {
     'deeplabv3': DeepLabV3,
     'pspnet': PSPNet,
     'denseaspp': DenseASPP,
-    'asp_ocnetv4': AspOCNetV4,
+    'asp_ocnet': AspOCNet,
     'base_ocnet': BaseOCNet,
     'pyramid_ocnet': PyramidOCNet,
     'fast_base_ocnet': FastBaseOCNet,

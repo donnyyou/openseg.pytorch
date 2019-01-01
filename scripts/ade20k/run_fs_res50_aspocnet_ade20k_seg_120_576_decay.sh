@@ -10,7 +10,7 @@ cd ../../
 
 DATA_DIR="/msravcshare/v-ansheng/DataSet/ADE20K"
 BACKBONE="deepbase_resnet50_dilated8"
-MODEL_NAME="asp_ocnetv4"
+MODEL_NAME="asp_ocnet"
 LOSS_TYPE="fs_auxce_loss"
 CHECKPOINTS_NAME="fs_res50_aspocnet_ade20k_seg_120_576_decay"
 PRETRAINED_MODEL="./pretrained_model/resnet50-imagenet.pth"
