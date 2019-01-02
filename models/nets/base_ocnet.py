@@ -28,8 +28,8 @@ class BaseOCNet(nn.Module):
             nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
             ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
         )
-        from models.modules.base_oc_block_v2 import BaseOC_Module_v2
-        self.oc_module = BaseOC_Module_v2(in_channels=512, out_channels=512,
+        from models.modules.base_oc_block import BaseOC_Module
+        self.oc_module = BaseOC_Module(in_channels=512, out_channels=512,
                                           key_channels=256, value_channels=256,
                                           dropout=0.05, sizes=([1]),
                                           bn_type=self.configer.get('network', 'bn_type'))
