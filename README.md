@@ -35,7 +35,7 @@ This repository provides source code for some deep learning based cv problems. W
 | [FastAspOCNet1](https://drive.google.com/open?id=1vGNC0pUMhJaS_b0Xn2-p968iityGY2lu)<br>[FastAspOCNet2](https://drive.google.com/open?id=15ojuzRS9_xFzSsT5GOlJkn2YbibCA3J_)<br>[FastAspOCNet3](https://drive.google.com/open?id=1pibZba-l7rGgGcprYkzspiV5SeTfaIPh) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | train/val/test | 86.32/80.13/78.50<br>86.32/79.28/79.21<br>86.38/79.96/78.60 | 8 | 4W | [FastAspOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_fastaspocnet_cityscape_seg.sh) |
 
 
-- ADE20K (Single Scale Whole Image Test): Epoch 120, Base LR 0.02, Crop Size 576
+- ADE20K (Single Scale Whole Image Test): Epoch 120, Base LR 0.02, Crop Size 520
 
 | Checkpoints | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
 |--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------:|:------|
@@ -48,7 +48,7 @@ This repository provides source code for some deep learning based cv problems. W
 | [DeepLabv3](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | - | 16 | 150000 | [DeepLabV3](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_deeplabv3_ade20k_seg.sh) |
 | [BaseOCNet](https://drive.google.com/open?id=1s-5caZSXy-fL2RYH4-JY2WYBZbd5PTFp) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | - | 16 | 150000 | [BaseOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_baseocnet_ade20k_seg.sh) |
 | [PyramidOCNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | - | 16 | 150000 | [PyramidOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_pyramidocnet_ade20k_seg.sh) |
-| [AspOCNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 42.62 | 80.35 | 16 | 150000 | [AspOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_aspocnet_ade20k_seg.sh) |
+| [AspOCNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | - | 16 | 150000 | [AspOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_aspocnet_ade20k_seg.sh) |
 
 - ADE20K (Single Scale Whole Image Test): Epoch 80, Base LR 0.02, Crop Size 576
 
