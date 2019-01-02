@@ -24,7 +24,7 @@ This repository provides source code for some deep learning based cv problems. W
 
 - CityScapes (Single Scale Whole Image Test)
 
-| Model | Backbone | Train | Test | mIOU | BS | Iters | Scripts |
+| Checkpoints | Backbone | Train | Test | mIOU | BS | Iters | Scripts |
 |--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------|
 | [PSPNet](https://drive.google.com/open?id=1bjQ8c-h1IBQPgp7DDwXl-U3tBo1lW6wB) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 78.13 | 8 | 4W | [PSPNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_pspnet_cityscape_seg.sh) |
 | [DeepLabV3](https://drive.google.com/open?id=15f--MUIMtiPHL8HyH_2A7EofJIPmA-oa) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 79.15 | 8 | 4W | [DeepLabV3](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_deeplabv3_cityscape_seg.sh) |
@@ -32,12 +32,12 @@ This repository provides source code for some deep learning based cv problems. W
 | [PyramidOCNet](https://drive.google.com/open?id=1oXiMpIxbcfoFC4xMZmhJ-c3yxpzRFcAS) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 78.87 | 8 | 4W| [PyramidOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_pyramidocnet_cityscape_seg.sh) |
 | [AspOCNet](https://drive.google.com/open?id=1TyaDXOeGwP1yy55kYQJd2rQch3QxXzCr) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val/test | 79.52/78.95 | 8 | 4W | [AspOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_aspocnet_cityscape_seg.sh) |
 | [FastBaseOCNet](https://drive.google.com/open?id=13-z3PTLMxt2XdcQgP80nddkDS9Jz5SXI) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | train/val/test | 85.57/78.70/-<br>85.47/79.72/-<br>85.50/77.01/- | 8 | 4W| [FastBaseOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_fastbaseocnet_cityscape_seg.sh) |
-| [FastAspOCNet1](https://drive.google.com/open?id=1vGNC0pUMhJaS_b0Xn2-p968iityGY2lu)<br>[FastAspOCNet2](https://drive.google.com/open?id=15ojuzRS9_xFzSsT5GOlJkn2YbibCA3J_)<br>[FastAspOCNet3](https://drive.google.com/open?id=1pibZba-l7rGgGcprYkzspiV5SeTfaIPh) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | train/val/test | 86.32/80.13/78.50<br>86.32/79.28/79.21<br>86.38/79.96/78.60 | 8 | 4W | [FastAspOCNet1](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_fastaspocnet_cityscape_seg.sh) |
+| [FastAspOCNet1](https://drive.google.com/open?id=1vGNC0pUMhJaS_b0Xn2-p968iityGY2lu)<br>[FastAspOCNet2](https://drive.google.com/open?id=15ojuzRS9_xFzSsT5GOlJkn2YbibCA3J_)<br>[FastAspOCNet3](https://drive.google.com/open?id=1pibZba-l7rGgGcprYkzspiV5SeTfaIPh) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | train/val/test | 86.32/80.13/78.50<br>86.32/79.28/79.21<br>86.38/79.96/78.60 | 8 | 4W | [FastAspOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_fastaspocnet_cityscape_seg.sh) |
 
 
 - ADE20K (Single Scale Whole Image Test): Epoch 120, Base LR 0.02, Crop Size 576
 
-| Model | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
+| Checkpoints | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
 |--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------:|:------|
 | [PSPNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | - | - | 16 | 150000 | [PSPNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_pspnet_ade20k_seg.sh) |
 | [DeepLabv3](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | - | - | 16 | 150000 | [DeepLabV3](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_deeplabv3_ade20k_seg.sh) |
@@ -52,7 +52,7 @@ This repository provides source code for some deep learning based cv problems. W
 
 - ADE20K (Single Scale Whole Image Test): Epoch 80, Base LR 0.02, Crop Size 576
 
-| Model | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
+| Checkpoints | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
 |--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------:|:------|
 | [DeepLabv3](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 42.26 | 80.34 | 16 | 100000 | [DeepLabV3](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_deeplabv3_ade20k_seg.sh) |
 | [AspOCNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 42.67 | 80.53 | 16 | 100000 | [AspOCNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_aspocnet_ade20k_seg.sh) |
@@ -60,7 +60,7 @@ This repository provides source code for some deep learning based cv problems. W
 
 - ADE20K (Single Scale Whole Image Test): Epoch 60, Base LR 0.02, Crop Size 520
 
-| Model | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
+| Checkpoints | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
 |--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------:|:------|
 | [PSPNet](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 40.98 | 79.75 | 16 | 75000 | [PSPNet](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_pspnet_ade20k_seg.sh) |
 | [DeepLabv3](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 41.49 | 80.09 | 16 | 75000 | [DeepLabV3](https://github.com/youansheng/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_resnet50_deeplabv3_ade20k_seg.sh) |
