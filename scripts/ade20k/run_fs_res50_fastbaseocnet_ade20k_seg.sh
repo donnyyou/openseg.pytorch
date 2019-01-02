@@ -12,9 +12,9 @@ DATA_DIR="/msravcshare/v-ansheng/DataSet/ADE20K"
 BACKBONE="deepbase_resnet50_dilated8"
 MODEL_NAME="fast_base_ocnet"
 LOSS_TYPE="fs_auxce_loss"
-CHECKPOINTS_NAME="fs_resnet50_fastbaseocnet_ade20k_seg"
+CHECKPOINTS_NAME="fs_res50_fastbaseocnet_ade20k_seg"$2
 PRETRAINED_MODEL="./pretrained_model/resnet50-imagenet.pth"
-MAX_ITERS=75000
+MAX_ITERS=150000
 
 LOG_FILE="./log/ade20k/${CHECKPOINTS_NAME}.log"
 

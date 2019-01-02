@@ -14,7 +14,7 @@ MODEL_NAME="asp_ocnet"
 LOSS_TYPE="fs_auxce_loss"
 CHECKPOINTS_NAME="fs_res101_aspocnet_ade20k_seg"$2
 PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
-MAX_ITERS=100000
+MAX_ITERS=150000
 
 LOG_FILE="./log/ade20k/${CHECKPOINTS_NAME}.log"
 
