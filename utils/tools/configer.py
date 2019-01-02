@@ -119,6 +119,9 @@ class Configer(object):
             Log.error('{} Key: {} not existed!!!'.format(self._get_caller(), key_tuple))
             exit(1)
 
+    def resume(self, config_dict):
+        self.params_root = config_dict
+
     def plus_one(self, *key):
         if not self.exists(*key):
             Log.error('{} Key: {} not existed!!!'.format(self._get_caller(), key))

@@ -88,12 +88,7 @@ class ModuleRunner(object):
                 self.load_state_dict(net, checkpoint_dict, self.configer.get('network', 'resume_strict'))
 
             if self.configer.get('network', 'resume_continue'):
-                self.configer.update(['epoch'], resume_dict['config_dict']['epoch'])
-                self.configer.update(['iters'], resume_dict['config_dict']['iters'])
-                self.configer.update(['performance'], resume_dict['config_dict']['performance'])
-                self.configer.update(['val_loss'], resume_dict['config_dict']['val_loss'])
-                self.configer.update(['min_val_loss'], resume_dict['config_dict']['min_val_loss'])
-                self.configer.update(['max_performance'], resume_dict['config_dict']['max_performance'])
+                self.configer.resume(resume_dict['config_dict'])
 
         return net
 
