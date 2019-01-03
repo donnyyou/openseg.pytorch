@@ -110,12 +110,79 @@ class FSOhemCELoss(nn.Module):
             raise NotImplementedError('Reduction Error!')
 
 
+class FSSlowOhemCELoss(nn.Module):
+    def __init__(self, configer):
+        super(FSSlowOhemCELoss, self).__init__()
+        self.configer = configer
+        self.thresh = self.configer.get('loss', 'params')['ohem_thresh']
+        self.min_kept = self.configer.get('loss', 'params')['ohem_minkeep']
+        weight = None
+        if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
+            weight = self.configer.get('loss', 'params')['ce_weight']
+            weight = torch.FloatTensor(weight).cuda()
+
+        reduction = 'elementwise_mean'
+        if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
+            reduction = self.configer.get('loss', 'params')['ce_reduction']
+
+        ignore_index = -100
+        if self.configer.exists('loss', 'params') and 'ce_ignore_index' in self.configer.get('loss', 'params'):
+            ignore_index = self.configer.get('loss', 'params')['ce_ignore_index']
+
+        self.ignore_label = ignore_index
+        self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction=reduction)
+
+    def forward(self, predict, target, **kwargs):
+        """
+            Args:
+                predict:(n, c, h, w)
+                target:(n, h, w)
+                weight (Tensor, optional): a manual rescaling weight given to each class.
+                                           If given, has to be a Tensor of size "nclasses"
+        """
+        n, c, h, w = predict.size()
+        input_label = target.data.cpu().numpy().ravel().astype(np.int32)
+        x = np.rollaxis(predict.data.cpu().numpy(), 1).reshape((c, -1))
+        input_prob = np.exp(x - x.max(axis=0).reshape((1, -1)))
+        input_prob /= input_prob.sum(axis=0).reshape((1, -1))
+
+        valid_flag = input_label != self.ignore_label
+        valid_inds = np.where(valid_flag)[0]
+        label = input_label[valid_flag]
+        num_valid = valid_flag.sum()
+        if self.min_kept >= num_valid:
+            print('Labels: {}'.format(num_valid))
+
+        elif num_valid > 0:
+            prob = input_prob[:, valid_flag]
+            pred = prob[label, np.arange(len(label), dtype=np.int32)]
+            threshold = self.thresh
+            if self.min_kept > 0:
+                index = pred.argsort()
+                threshold_index = index[min(len(index), self.min_kept) - 1]
+                if pred[threshold_index] > self.thresh:
+                    threshold = pred[threshold_index]
+            kept_flag = pred <= threshold
+            valid_inds = valid_inds[kept_flag]
+            # print('hard ratio: {} = {} / {} '.format(round(len(valid_inds)/num_valid, 4), len(valid_inds), num_valid))
+
+        label = input_label[valid_inds].copy()
+        input_label.fill(self.ignore_label)
+        input_label[valid_inds] = label
+        target = Variable(torch.from_numpy(input_label.reshape(target.size())).long().cuda())
+        return self.ce_loss(predict, target)
+
+
 class FSAuxOhemCELoss(nn.Module):
     def __init__(self, configer=None):
         super(FSAuxOhemCELoss, self).__init__()
         self.configer = configer
         self.ce_loss = FSCELoss(self.configer)
-        self.ohem_ce_loss = FSOhemCELoss(self.configer)
+        if self.configer.get('loss', 'loss_type') == 'fs_auxohemce_loss':
+            self.ohem_ce_loss = FSOhemCELoss(self.configer)
+        else:
+            assert self.configer.get('loss', 'loss_type') == 'fs_auxslowohemce_loss'
+            self.ohem_ce_loss = FSSlowOhemCELoss(self.configer)
 
     def forward(self, inputs, targets, **kwargs):
         aux_out, seg_out = inputs
