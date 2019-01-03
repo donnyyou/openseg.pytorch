@@ -19,7 +19,7 @@ SEG_LOSS_DICT = {
     'fs_auxce_loss':FSAuxCELoss,
     'fs_auxencce_loss': FSAuxEncCELoss,
     'fs_auxohemce_loss': FSAuxOhemCELoss,
-    'fs_auxslowohemce_loss': FSOhemCELoss
+    'fs_auxslowohemce_loss': FSAuxOhemCELoss
 }
 
 
