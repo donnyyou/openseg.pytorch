@@ -49,42 +49,42 @@ class FCNSegmentorTest(object):
         assert scale is not None
         image = None
         if self.configer.exists('test', 'input_size'):
-            image = self.blob_helper.make_input(image=ori_image,
-                                                input_size=self.configer.get('test', 'input_size'),
-                                                scale=scale)
+            input_size = self.configer.get('test', 'input_size')
 
         elif self.configer.exists('test', 'min_side_length') and not self.configer.exists('test', 'max_side_length'):
-            image = self.blob_helper.make_input(image=ori_image,
-                                                min_side_length=self.configer.get('test', 'min_side_length'),
-                                                scale=scale)
+            width, height = ImageHelper.get_size(ori_image)
+            scale_ratio = self.configer.get('test', 'min_side_length') / min(width, height)
+            w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
+            input_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
         elif not self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
-            image = self.blob_helper.make_input(image=ori_image,
-                                                max_side_length=self.configer.get('test', 'max_side_length'),
-                                                scale=scale)
+            width, height = ImageHelper.get_size(image)
+            scale_ratio = self.configer.get('test', 'max_side_length') / max(width, height)
+            w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
+            input_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
         elif self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
-            image = self.blob_helper.make_input(image=ori_image,
-                                                min_side_length=self.configer.get('test', 'min_side_length'),
-                                                max_side_length=self.configer.get('test', 'max_side_length'),
-                                                scale=scale)
-
+            width, height = ImageHelper.get_size(image)
+            scale_ratio = self.configer.get('test', 'min_side_length') / min(width, height)
+            bound_scale_ratio = self.configer.get('test', 'max_side_length') / max(width, height)
+            scale_ratio = min(scale_ratio, bound_scale_ratio)
+            w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
+            input_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
         else:
-            Log.error('Test setting error')
-            exit(1)
+            input_size = ImageHelper.get_size(ori_image)
 
-        b, c, h, w = image.size()
-        border_hw = [h, w]
+        w, h = input_size
+
         if self.configer.exists('test', 'fit_stride'):
             stride = self.configer.get('test', 'fit_stride')
 
             pad_w = 0 if (w % stride == 0) else stride - (w % stride)  # right
             pad_h = 0 if (h % stride == 0) else stride - (h % stride)  # down
 
-            expand_image = torch.zeros((b, c, h + pad_h, w + pad_w)).to(image.device)
-            expand_image[:, :, 0:h, 0:w] = image
-            image = expand_image
+            input_size = [w + pad_w, h + pad_h]
 
+        border_hw = [input_size[1], input_size[0]]
+        image = self.blob_helper.make_input(ori_image, input_size=input_size, scale=scale)
         return image, border_hw
 
     def __test_img(self, image_path, label_path, vis_path, raw_path):
