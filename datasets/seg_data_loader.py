@@ -15,6 +15,7 @@ import datasets.tools.cv2_aug_transforms as cv2_aug_trans
 import datasets.tools.pil_aug_transforms as pil_aug_trans
 import datasets.tools.transforms as trans
 from datasets.fs_data_loader import FSDataLoader
+from datasets.ade20k_data_loader import ADE20KDataLoader
 from datasets.tools.collate import collate
 from utils.tools.logger import Logger as Log
 
@@ -51,7 +52,24 @@ class SegDataLoader(object):
             trans.ReLabel(255, -1), ])
 
     def get_trainloader(self):
-        if self.configer.get('method') == 'fcn_segmentor':
+        if self.configer.get('dataset') == 'ade20k':
+            trainloader = data.DataLoader(
+                ADE20KDataLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
+                                 aug_transform=self.aug_train_transform,
+                                 img_transform=self.img_transform,
+                                 label_transform=self.label_transform,
+                                 configer=self.configer),
+                batch_size=self.configer.get('train', 'batch_size'), pin_memory=True,
+                num_workers=self.configer.get('data', 'workers'),
+                shuffle=True, drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('train', 'data_transformer')
+                )
+            )
+
+            return trainloader
+
+        elif self.configer.get('method') == 'fcn_segmentor':
             trainloader = data.DataLoader(
                 FSDataLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                              aug_transform=self.aug_train_transform,

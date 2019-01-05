@@ -16,15 +16,18 @@ from extensions.parallel.data_container import DataContainer
 from utils.tools.logger import Logger as Log
 
 
-def stack(batch, data_key=None):
+def stack(batch, data_key=None, return_dc=False):
     if isinstance(batch[0][data_key], DataContainer):
         if batch[0][data_key].stack:
             assert isinstance(batch[0][data_key].data, torch.Tensor)
             samples = [sample[data_key].data for sample in batch]
             return default_collate(samples)
 
-        else:
+        elif not return_dc:
             return [sample[data_key].data for sample in batch]
+
+        else:
+            return DataContainer([sample[data_key].data for sample in batch])
 
     else:
         return default_collate([sample[data_key] for sample in batch])
@@ -32,8 +35,10 @@ def stack(batch, data_key=None):
 
 def collate(batch, trans_dict):
     data_keys = batch[0].keys()
+    if trans_dict['size_mode'] == 'ade20k':
+        return dict({key: stack(batch, data_key=key, return_dc=True) for key in data_keys})
 
-    if trans_dict['size_mode'] == 'random_size':
+    elif trans_dict['size_mode'] == 'random_size':
         target_width, target_height = batch[0]['img'].size(2), batch[0]['img'].size(1)
 
     elif trans_dict['size_mode'] == 'fix_size':

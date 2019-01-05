@@ -130,8 +130,7 @@ class FCNSegmentor(object):
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)
             # Change the data type.
-
-            inputs, targets = self.module_runner.to_device(inputs, targets)
+            # inputs, targets = self.module_runner.to_device(inputs, targets)
 
             # Forward pass.
             outputs = self.seg_net(inputs)

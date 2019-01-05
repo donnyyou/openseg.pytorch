@@ -357,10 +357,11 @@ class RandomResize(object):
     """
 
     def __init__(self, scale_range=(0.75, 1.25), aspect_range=(0.9, 1.1), target_size=None,
-                 resize_bound=None, method='random', resize_ratio=0.5):
+                 resize_bound=None, method='random', max_side_bound=None, resize_ratio=0.5):
         self.scale_range = scale_range
         self.aspect_range = aspect_range
         self.resize_bound = resize_bound
+        self.max_side_bound = max_side_bound
         self.method = method
         self.ratio = resize_ratio
 
@@ -425,6 +426,11 @@ class RandomResize(object):
             aspect_ratio = random.uniform(*self.aspect_range)
             w_scale_ratio = math.sqrt(aspect_ratio) * scale_ratio
             h_scale_ratio = math.sqrt(1.0 / aspect_ratio) * scale_ratio
+            if self.max_side_bound is not None and max(height*h_scale_ratio, width*w_scale_ratio) > self.max_side_bound:
+                d_ratio = self.max_side_bound / max(height * h_scale_ratio, width * w_scale_ratio)
+                w_scale_ratio *= d_ratio
+                h_scale_ratio *= d_ratio
+
         else:
             w_scale_ratio, h_scale_ratio = 1.0, 1.0
 
@@ -677,10 +683,11 @@ class Resize(object):
         scale_max: the max scale to resize.
     """
 
-    def __init__(self, target_size=None, min_side_length=None, max_side_length=None):
+    def __init__(self, target_size=None, min_side_length=None, max_side_length=None, max_side_bound=None):
         self.target_size = target_size
         self.min_side_length = min_side_length
         self.max_side_length = max_side_length
+        self.max_side_bound = max_side_bound
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
         assert isinstance(img, np.ndarray)
@@ -701,6 +708,12 @@ class Resize(object):
         else:
             scale_ratio = self.max_side_length / max(width, height)
             w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
+            target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
+
+        if self.max_side_bound is not None and  max(target_size) > self.max_side_bound:
+            d_ratio = self.max_side_bound / max(target_size)
+            w_scale_ratio = d_ratio * w_scale_ratio
+            h_scale_ratio = d_ratio * h_scale_ratio
             target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
         if kpts is not None and kpts.size > 0:
@@ -814,6 +827,7 @@ class CV2AugCompose(object):
                         method=self.configer.get('train_trans', 'random_resize')['method'],
                         scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
                         aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                        max_side_bound=self.configer.get('train_trans', 'random_resize')['max_side_bound'],
                         resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
                     )
 
@@ -882,7 +896,8 @@ class CV2AugCompose(object):
                     )
                 if 'min_side_length' in self.configer.get('train_trans', 'resize'):
                     self.transforms['resize'] = Resize(
-                        min_side_length=self.configer.get('train_trans', 'resize')['min_side_length']
+                        min_side_length=self.configer.get('train_trans', 'resize')['min_side_length'],
+                        max_side_bound=self.configer.get('train_trans', 'resize')['max_side_bound'],
                     )
                 if 'max_side_length' in self.configer.get('train_trans', 'resize'):
                     self.transforms['resize'] = Resize(
@@ -948,6 +963,7 @@ class CV2AugCompose(object):
                         method=self.configer.get('val_trans', 'random_resize')['method'],
                         scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
                         aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                        max_side_bound=self.configer.get('train_trans', 'random_resize')['max_side_bound'],
                         resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
                     )
 
@@ -1016,7 +1032,8 @@ class CV2AugCompose(object):
                     )
                 if 'min_side_length' in self.configer.get('val_trans', 'resize'):
                     self.transforms['resize'] = Resize(
-                        min_side_length=self.configer.get('val_trans', 'resize')['min_side_length']
+                        min_side_length=self.configer.get('val_trans', 'resize')['min_side_length'],
+                        max_side_bound=self.configer.get('train_trans', 'resize')['max_side_bound'],
                     )
                 if 'max_side_length' in self.configer.get('val_trans', 'resize'):
                     self.transforms['resize'] = Resize(
