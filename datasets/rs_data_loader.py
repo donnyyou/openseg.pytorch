@@ -91,7 +91,8 @@ class RSDataLoader(data.Dataset):
             target_height = target_height + pad_h
 
         batch_images = torch.zeros(self.configer.get('train', 'batch_per_gpu'), 3, target_height, target_width)
-        batch_labels = torch.zeros(self.configer.get('train', 'batch_per_gpu'), target_height, target_width).long()
+        batch_labels = torch.ones(self.configer.get('train', 'batch_per_gpu'), target_height, target_width)
+        batch_labels = (batch_labels * -1).long()
         for i, (img, labelmap) in enumerate(zip(img_list, labelmap_list)):
             pad_width = target_width - img.size(2)
             pad_height = target_height - img.size(1)
