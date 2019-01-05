@@ -710,7 +710,7 @@ class Resize(object):
             w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
             target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
-        if self.max_side_bound is not None and  max(target_size) > self.max_side_bound:
+        if self.max_side_bound is not None and max(target_size) > self.max_side_bound:
             d_ratio = self.max_side_bound / max(target_size)
             w_scale_ratio = d_ratio * w_scale_ratio
             h_scale_ratio = d_ratio * h_scale_ratio

@@ -25,24 +25,30 @@ class ADE20KDataLoader(data.Dataset):
         self.aug_transform = aug_transform
         self.img_transform = img_transform
         self.label_transform = label_transform
-        self.img_list, self.label_list = self.__list_dirs(root_dir, dataset)
+        self.img_list, self.label_list, self.size_list = self.__list_dirs(root_dir, dataset)
 
     def __len__(self):
         return len(self.img_list)
 
-    def _get_batch_per_gpu(self, img_size, cur_index):
-        img_out = []
-        label_out = []
-        for i in range(self.configer.get('data', 'batch_per_gpu')-1):
+    def _get_batch_per_gpu(self, cur_index):
+        img = ImageHelper.read_image(self.img_list[cur_index],
+                                     tool=self.configer.get('data', 'image_tool'),
+                                     mode=self.configer.get('data', 'input_mode'))
+        labelmap = ImageHelper.read_image(self.label_list[cur_index],
+                                          tool=self.configer.get('data', 'image_tool'), mode='P')
+        img_size = self.size_list[cur_index]
+        img_out = [img]
+        label_out = [labelmap]
+        for i in range(self.configer.get('train', 'batch_per_gpu')-1):
             while True:
                 cur_index = (cur_index + 1) % len(self.img_list)
-                img = ImageHelper.read_image(self.img_list[cur_index],
-                                             tool=self.configer.get('data', 'image_tool'),
-                                             mode=self.configer.get('data', 'input_mode'))
-                now_img_size = ImageHelper.get_size(img)
+                now_img_size = self.size_list[cur_index]
                 now_mark = 0 if now_img_size[0] > now_img_size[1] else 1
                 mark = 0 if img_size[0] > img_size[1] else 1
                 if now_mark == mark:
+                    img = ImageHelper.read_image(self.img_list[cur_index],
+                                                 tool=self.configer.get('data', 'image_tool'),
+                                                 mode=self.configer.get('data', 'input_mode'))
                     img_out.append(img)
                     labelmap = ImageHelper.read_image(self.label_list[cur_index],
                                                       tool=self.configer.get('data', 'image_tool'), mode='P')
@@ -52,15 +58,7 @@ class ADE20KDataLoader(data.Dataset):
         return img_out, label_out
 
     def __getitem__(self, index):
-        img = ImageHelper.read_image(self.img_list[index],
-                                     tool=self.configer.get('data', 'image_tool'),
-                                     mode=self.configer.get('data', 'input_mode'))
-        img_size = ImageHelper.get_size(img)
-        img_out, label_out = self._get_batch_per_gpu(img_size, index)
-        img_out.append(img)
-        labelmap = ImageHelper.read_image(self.label_list[index],
-                                          tool=self.configer.get('data', 'image_tool'), mode='P')
-        label_out.append(labelmap)
+        img_out, label_out = self._get_batch_per_gpu(index)
         img_list = []
         labelmap_list = []
         for img, labelmap in zip(img_out, label_out):
@@ -92,8 +90,8 @@ class ADE20KDataLoader(data.Dataset):
             target_width = target_width + pad_w
             target_height = target_height + pad_h
 
-        batch_images = torch.zeros(self.configer.get('data', 'batch_per_gpu'), 3, target_height, target_width)
-        batch_labels = torch.zeros(self.configer.get('data', 'batch_per_gpu'), target_height, target_width).long()
+        batch_images = torch.zeros(self.configer.get('train', 'batch_per_gpu'), 3, target_height, target_width)
+        batch_labels = torch.zeros(self.configer.get('train', 'batch_per_gpu'), target_height, target_width).long()
         for i, (img, labelmap) in enumerate(zip(img_list, labelmap_list)):
             pad_width = target_width - img.size(2)
             pad_height = target_height - img.size(1)
@@ -105,7 +103,7 @@ class ADE20KDataLoader(data.Dataset):
                 up_pad = 0
 
             batch_images[i, :, up_pad:up_pad+img.size(1), left_pad:left_pad+img.size(2)] = img
-            batch_labels[i, :, up_pad:up_pad+labelmap.size(1), left_pad:left_pad+labelmap.size(2)] = labelmap
+            batch_labels[i, up_pad:up_pad+labelmap.size(0), left_pad:left_pad+labelmap.size(1)] = labelmap
 
         return dict(
             img=DataContainer(batch_images, stack=False),
@@ -140,6 +138,7 @@ class ADE20KDataLoader(data.Dataset):
     def __list_dirs(self, root_dir, dataset):
         img_list = list()
         label_list = list()
+        size_list = list()
         image_dir = os.path.join(root_dir, dataset, 'image')
         label_dir = os.path.join(root_dir, dataset, 'label')
         img_extension = os.listdir(image_dir)[0].split('.')[-1]
@@ -154,6 +153,10 @@ class ADE20KDataLoader(data.Dataset):
 
             img_list.append(img_path)
             label_list.append(label_path)
+            img = ImageHelper.read_image(img_path,
+                                         tool=self.configer.get('data', 'image_tool'),
+                                         mode=self.configer.get('data', 'input_mode'))
+            size_list.append(ImageHelper.get_size(img))
 
         if dataset == 'train' and self.configer.get('data', 'include_val'):
             image_dir = os.path.join(root_dir, 'val/image')
@@ -168,8 +171,12 @@ class ADE20KDataLoader(data.Dataset):
 
                 img_list.append(img_path)
                 label_list.append(label_path)
+                img = ImageHelper.read_image(img_path,
+                                             tool=self.configer.get('data', 'image_tool'),
+                                             mode=self.configer.get('data', 'input_mode'))
+                size_list.append(ImageHelper.get_size(img))
 
-        return img_list, label_list
+        return img_list, label_list, size_list
 
 
 if __name__ == "__main__":

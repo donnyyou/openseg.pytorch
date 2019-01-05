@@ -137,7 +137,12 @@ class FCNSegmentor(object):
             # outputs = self.module_utilizer.gather(outputs)
             # Compute the loss of the train batch & backward.
             loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
-            self.train_losses.update(loss.item(), inputs.size(0))
+            if self.configer.get('dataset') == 'ade20k':
+                batch_size = self.configer.get('train', 'batch_size')*self.configer.get('train', 'batch_per_gpu')
+                self.train_losses.update(loss.item(), batch_size)
+            else:
+                self.train_losses.update(loss.item(), inputs.size(0))
+
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()

@@ -40,7 +40,8 @@
         "shift_value": 10
       },
       "resize": {
-        "min_side_length": 450
+        "min_side_length": 450,
+        "max_side_bound": 2000
       },
       "random_hflip": {
         "ratio": 0.5,
