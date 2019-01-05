@@ -11,7 +11,9 @@ from __future__ import print_function
 import os
 import json
 import time
+import random
 import argparse
+import torch
 
 from utils.tools.configer import Configer
 from utils.tools.logger import Logger as Log
@@ -132,8 +134,11 @@ if __name__ == "__main__":
                         dest='test:test_dir', help='The test directory of images.')
     parser.add_argument('--out_dir', default='none', type=str,
                         dest='test:out_dir', help='The test out directory of images.')
+    parser.add_argument('--seed', default=304, type=int, help='manual seed')
 
     args_parser = parser.parse_args()
+    random.seed(args_parser.seed)
+    torch.manual_seed(args_parser.seed)
 
     configer = Configer(args_parser=args_parser)
     abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
