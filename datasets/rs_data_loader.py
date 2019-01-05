@@ -18,7 +18,7 @@ from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
 
-class ADE20KDataLoader(data.Dataset):
+class RSDataLoader(data.Dataset):
     def __init__(self, root_dir, aug_transform=None, dataset=None,
                  img_transform=None, label_transform=None, configer=None):
         self.configer = configer
