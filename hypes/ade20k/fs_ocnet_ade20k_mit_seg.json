@@ -50,7 +50,7 @@
       "random_resize": {
         "ratio": 1.0,
         "method": "random",
-        "scale_range": [0.67, 1.33],
+        "scale_list": [0.6667, 0.8333, 1.0, 1.1667, 1.3333],
         "aspect_range": [1.0, 1.0],
         "max_side_bound": 1000
       },

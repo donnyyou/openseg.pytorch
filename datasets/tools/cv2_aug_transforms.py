@@ -357,11 +357,12 @@ class RandomResize(object):
     """
 
     def __init__(self, scale_range=(0.75, 1.25), aspect_range=(0.9, 1.1), target_size=None,
-                 resize_bound=None, method='random', max_side_bound=None, resize_ratio=0.5):
+                 resize_bound=None, method='random', max_side_bound=None, scale_list=None, resize_ratio=0.5):
         self.scale_range = scale_range
         self.aspect_range = aspect_range
         self.resize_bound = resize_bound
         self.max_side_bound = max_side_bound
+        self.scale_list = scale_list
         self.method = method
         self.ratio = resize_ratio
 
@@ -422,7 +423,11 @@ class RandomResize(object):
 
         height, width, _ = img.shape
         if random.random() < self.ratio:
-            scale_ratio = self.get_scale([width, height], bboxes)
+            if self.scale_list is None:
+                scale_ratio = self.get_scale([width, height], bboxes)
+            else:
+                scale_ratio = self.scale_list[random.randint(0, len(self.scale_list)-1)]
+
             aspect_ratio = random.uniform(*self.aspect_range)
             w_scale_ratio = math.sqrt(aspect_ratio) * scale_ratio
             h_scale_ratio = math.sqrt(1.0 / aspect_ratio) * scale_ratio
@@ -823,21 +828,38 @@ class CV2AugCompose(object):
 
             if 'random_resize' in self.configer.get('train_trans', 'trans_seq') + shuffle_train_trans:
                 if self.configer.get('train_trans', 'random_resize')['method'] == 'random':
-                    if 'max_side_bound' in self.configer.get('train_trans', 'random_resize'):
-                        self.transforms['random_resize'] = RandomResize(
-                            method=self.configer.get('train_trans', 'random_resize')['method'],
-                            scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
-                            aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
-                            max_side_bound=self.configer.get('train_trans', 'random_resize')['max_side_bound'],
-                            resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
-                        )
+                    if 'scale_list' not in self.configer.get('train_trans', 'random_resize'):
+                        if 'max_side_bound' in self.configer.get('train_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('train_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
                     else:
-                        self.transforms['random_resize'] = RandomResize(
-                            method=self.configer.get('train_trans', 'random_resize')['method'],
-                            scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
-                            aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
-                            resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
-                        )
+                        if 'max_side_bound' in self.configer.get('train_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('train_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('train_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('train_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
 
                 elif self.configer.get('train_trans', 'random_resize')['method'] == 'focus':
                     self.transforms['random_resize'] = RandomResize(
@@ -971,22 +993,39 @@ class CV2AugCompose(object):
                 )
 
             if 'random_resize' in self.configer.get('val_trans', 'trans_seq'):
-                if self.configer.get('val_trans', 'random_resize')['method'] == 'random':
-                    if 'max_side_bound' in self.configer.get('val_trans', 'random_resize'):
-                        self.transforms['random_resize'] = RandomResize(
-                            method=self.configer.get('val_trans', 'random_resize')['method'],
-                            scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
-                            aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
-                            max_side_bound=self.configer.get('val_trans', 'random_resize')['max_side_bound'],
-                            resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
-                        )
+                if self.configer.get('train_trans', 'random_resize')['method'] == 'random':
+                    if 'scale_list' not in self.configer.get('val_trans', 'random_resize'):
+                        if 'max_side_bound' in self.configer.get('val_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('val_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
                     else:
-                        self.transforms['random_resize'] = RandomResize(
-                            method=self.configer.get('val_trans', 'random_resize')['method'],
-                            scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
-                            aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
-                            resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
-                        )
+                        if 'max_side_bound' in self.configer.get('val_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('val_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('val_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('val_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
 
                 elif self.configer.get('val_trans', 'random_resize')['method'] == 'focus':
                     self.transforms['random_resize'] = RandomResize(
