@@ -80,20 +80,6 @@ def collate(batch, trans_dict):
                 w_scale_ratio = min(w_scale_ratio, h_scale_ratio)
                 h_scale_ratio = w_scale_ratio
 
-            if 'kpts' in data_keys and batch[i]['kpts'].numel() > 0:
-                batch[i]['kpts'].data[:, :, 0] *= w_scale_ratio
-                batch[i]['kpts'].data[:, :, 1] *= h_scale_ratio
-
-            if 'bboxes' in data_keys and batch[i]['bboxes'].numel() > 0:
-                batch[i]['bboxes'].data[:, 0::2] *= w_scale_ratio
-                batch[i]['bboxes'].data[:, 1::2] *= h_scale_ratio
-
-            if 'polygons' in data_keys:
-                for object_id in range(len(batch[i]['polygons'])):
-                    for polygon_id in range(len(batch[i]['polygons'][object_id])):
-                        batch[i]['polygons'].data[object_id][polygon_id][0::2] *= w_scale_ratio
-                        batch[i]['polygons'].data[object_id][polygon_id][1::2] *= h_scale_ratio
-
             scaled_size = (int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio)))
             if 'meta' in data_keys and 'border_size' in batch[i]['meta'].data:
                 batch[i]['meta'].data['border_size'] = scaled_size
@@ -154,20 +140,6 @@ def collate(batch, trans_dict):
 
             if 'maskmap' in data_keys:
                 batch[i]['maskmap'] = DataContainer(F.pad(batch[i]['maskmap'].data, pad=pad, value=1), stack=True)
-
-            if 'polygons' in data_keys:
-                for object_id in range(len(batch[i]['polygons'])):
-                    for polygon_id in range(len(batch[i]['polygons'][object_id])):
-                        batch[i]['polygons'].data[object_id][polygon_id][0::2] += left_pad
-                        batch[i]['polygons'].data[object_id][polygon_id][1::2] += up_pad
-
-            if 'kpts' in data_keys and batch[i]['kpts'].numel() > 0:
-                batch[i]['kpts'].data[:, :, 0] += left_pad
-                batch[i]['kpts'].data[:, :, 1] += up_pad
-
-            if 'bboxes' in data_keys and batch[i]['bboxes'].numel() > 0:
-                batch[i]['bboxes'].data[:, 0::2] += left_pad
-                batch[i]['bboxes'].data[:, 1::2] += up_pad
 
     return dict({key: stack(batch, data_key=key) for key in data_keys})
 
