@@ -8,16 +8,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import json
-import time
-import random
 import argparse
+import json
+import os
+import random
+import time
+
 import torch
 import torch.backends.cudnn as cudnn
-
-from utils.tools.configer import Configer
 from utils.tools.logger import Logger as Log
+
+from lib.utils.tools.configer import Configer
 
 
 def str2bool(v):
