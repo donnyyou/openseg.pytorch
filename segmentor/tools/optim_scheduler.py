@@ -9,9 +9,10 @@ from __future__ import division
 from __future__ import print_function
 
 import math
+
 from torch.optim import SGD, Adam, lr_scheduler
 
-from utils.tools.logger import Logger as Log
+from lib.utils.tools.logger import Logger as Log
 
 
 class OptimScheduler(object):
@@ -54,10 +55,6 @@ class OptimScheduler(object):
         elif policy == 'lambda_poly':
             lambda_poly = lambda iters: pow((1.0 - iters / self.configer.get('solver', 'max_iters')), 0.9)
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_poly)
-
-        elif policy == 'lambda_linear':
-            lambda_linear = lambda epoch: 1.0 - (epoch / self.configer.get('solver', 'max_iters'))
-            scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_linear)
 
         elif policy == 'lambda_cosine':
             lambda_cosine = lambda iters: (math.cos(math.pi * iters / self.configer.get('solver', 'max_iters'))

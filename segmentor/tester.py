@@ -14,16 +14,16 @@ import cv2
 import numpy as np
 import torch
 from PIL import Image
-
-from datasets.seg_data_loader import SegDataLoader
-from segmentor.tools.blob_helper import BlobHelper
-from segmentor.tools.module_runner import ModuleRunner
-from models.model_manager import ModelManager
 from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
-from vis.seg_parser import SegParser
 from vis.seg_visualizer import SegVisualizer
+
+from lib.datasets import SegDataLoader
+from lib.models.model_manager import ModelManager
+from lib.utils.tools.logger import Logger as Log
+from lib.vis.seg_parser import SegParser
+from segmentor.tools.blob_helper import BlobHelper
+from segmentor.tools.module_runner import ModuleRunner
 
 
 class Tester(object):
