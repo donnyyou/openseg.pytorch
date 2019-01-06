@@ -26,7 +26,7 @@ from val.scripts.seg_running_score import SegRunningScore
 from vis.seg_visualizer import SegVisualizer
 
 
-cudnn.enabled = True
+# cudnn.enabled = True
 
 
 class FCNSegmentor(object):
@@ -137,7 +137,7 @@ class FCNSegmentor(object):
             # outputs = self.module_utilizer.gather(outputs)
             # Compute the loss of the train batch & backward.
             loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
-            if self.configer.get('train', 'loader') == 'rs':
+            if self.configer.exists('train', 'loader') and self.configer.get('train', 'loader') == 'rs':
                 batch_size = self.configer.get('train', 'batch_size')*self.configer.get('train', 'batch_per_gpu')
                 self.train_losses.update(loss.item(), batch_size)
             else:
@@ -233,7 +233,7 @@ class FCNSegmentor(object):
             self.seg_running_score.update(labelmap[None], ori_target[None])
 
     def train(self):
-        cudnn.benchmark = True
+        # cudnn.benchmark = True
         if self.configer.get('network', 'resume') is not None and self.configer.get('network', 'resume_val'):
             self.__val()
 

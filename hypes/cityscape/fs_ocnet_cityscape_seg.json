@@ -28,8 +28,8 @@
     },
     "test": {
       "input_size": [2048, 1024],
-      "scale_search": [1.0],
-      "mode": "ss_test"
+      "scale_search": [0.75, 1.0, 1.25],
+      "mode": "ms_test"
     },
     "train_trans": {
       "trans_seq": ["random_resize", "random_crop", "random_hflip", "random_brightness"],

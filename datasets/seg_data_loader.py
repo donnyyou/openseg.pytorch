@@ -52,7 +52,7 @@ class SegDataLoader(object):
             trans.ReLabel(255, -1), ])
 
     def get_trainloader(self):
-        if self.configer.get('train', 'loader') == 'rs':
+        if self.configer.exists('train', 'loader') and self.configer.get('train', 'loader') == 'rs':
             trainloader = data.DataLoader(
                 RSDataLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                              aug_transform=self.aug_train_transform,
