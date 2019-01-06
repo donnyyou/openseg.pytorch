@@ -13,12 +13,11 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.backends.cudnn as cudnn
 
 from datasets.seg_data_loader import SegDataLoader
 from loss.loss_manager import LossManager
-from methods.tools.module_runner import ModuleRunner
-from methods.tools.optim_scheduler import OptimScheduler
+from segmentor.tools.module_runner import ModuleRunner
+from segmentor.tools.optim_scheduler import OptimScheduler
 from models.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
@@ -26,10 +25,10 @@ from val.scripts.seg_running_score import SegRunningScore
 from vis.seg_visualizer import SegVisualizer
 
 
-# cudnn.enabled = True
+#
 
 
-class FCNSegmentor(object):
+class Trainer(object):
     """
       The class for Pose Estimation. Include train, val, val & predict.
     """
