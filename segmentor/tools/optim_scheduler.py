@@ -55,10 +55,6 @@ class OptimScheduler(object):
             lambda_poly = lambda iters: pow((1.0 - iters / self.configer.get('solver', 'max_iters')), 0.9)
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_poly)
 
-        elif policy == 'lambda_linear':
-            lambda_linear = lambda epoch: 1.0 - (epoch / self.configer.get('solver', 'max_iters'))
-            scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_linear)
-
         elif policy == 'lambda_cosine':
             lambda_cosine = lambda iters: (math.cos(math.pi * iters / self.configer.get('solver', 'max_iters'))
                                            + 1.0) / 2
