@@ -11,8 +11,8 @@ from __future__ import print_function
 import cv2
 import numpy as np
 import torch
-from utils.helpers.image_helper import ImageHelper
 
+from lib.utils.helpers.image_helper import ImageHelper
 from lib.datasets.tools.transforms import DeNormalize, ToTensor, Normalize
 
 

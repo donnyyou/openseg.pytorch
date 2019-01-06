@@ -7,8 +7,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from libmodels.backbones.mobilenet.mobilenet_backbone import MobileNetBackbone
-
+from lib.models.backbones.mobilenet.mobilenet_backbone import MobileNetBackbone
 from lib.models.backbones.densenet.densenet_backbone import DenseNetBackbone
 from lib.models.backbones.resnet.resnet_backbone import ResNetBackbone
 from lib.models.backbones.squeezenet.squeezenet_backbone import SqueezeNetBackbone

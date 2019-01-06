@@ -11,11 +11,11 @@
 
 import torch
 import torch.nn as nn
-from models.modules.fast_base_oc_block import FastBaseOC_Context_Module
 from torch.autograd import Variable
 from torch.nn import functional as F
 
-from lib.models.tools import ModuleHelper
+from lib.models.modules.fast_base_oc_block import FastBaseOC_Context_Module
+from lib.models.tools.module_helper import ModuleHelper
 
 
 class ObjectContext_Module(nn.Module):

@@ -15,6 +15,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 
 
+
 class FSCELoss(nn.Module):
     def __init__(self, configer=None):
         super(FSCELoss, self).__init__()

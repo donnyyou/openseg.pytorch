@@ -7,9 +7,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.backbones.backbone_selector import BackboneSelector
 
-from lib.models.tools import ModuleHelper
+from lib.models.backbones.backbone_selector import BackboneSelector
+from lib.models.tools.module_helper import ModuleHelper
 
 
 class ASPPModule(nn.Module):

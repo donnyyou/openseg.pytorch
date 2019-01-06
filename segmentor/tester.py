@@ -14,11 +14,11 @@ import cv2
 import numpy as np
 import torch
 from PIL import Image
-from utils.helpers.file_helper import FileHelper
-from utils.helpers.image_helper import ImageHelper
-from vis.seg_visualizer import SegVisualizer
 
-from lib.datasets import SegDataLoader
+from lib.utils.helpers.file_helper import FileHelper
+from lib.utils.helpers.image_helper import ImageHelper
+from lib.vis.seg_visualizer import SegVisualizer
+from lib.datasets.seg_data_loader import SegDataLoader
 from lib.models.model_manager import ModelManager
 from lib.utils.tools.logger import Logger as Log
 from lib.vis.seg_parser import SegParser
@@ -263,7 +263,7 @@ class Tester(object):
         return label_dst
 
     def test(self):
-        base_dir = os.path.join(self.configer.get('project_dir'), 'val/results', self.configer.get('dataset'))
+        base_dir = os.path.join(self.configer.get('project_dir'), 'results', self.configer.get('dataset'))
 
         test_img = self.configer.get('test', 'test_img')
         test_dir = self.configer.get('test', 'test_dir')

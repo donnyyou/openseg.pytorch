@@ -13,7 +13,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data.dataloader import default_collate
 
-from lib.extensions import DataContainer
+from lib.extensions.parallel.data_container import DataContainer
 from lib.utils.tools.logger import Logger as Log
 
 

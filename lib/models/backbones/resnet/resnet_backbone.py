@@ -9,7 +9,7 @@ from __future__ import print_function
 
 import torch.nn as nn
 
-from lib.models import ResNetModels
+from lib.models.backbones.resnet.resnet_models import ResNetModels
 
 
 class NormalResnetBackbone(nn.Module):

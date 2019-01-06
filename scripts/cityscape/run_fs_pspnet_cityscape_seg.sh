@@ -43,10 +43,10 @@ elif [ "$1"x == "val"x ]; then
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/cityscape/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --log_to_file n --out_dir val >> ${LOG_FILE} 2>&1
-  cd val/scripts
-  ${PYTHON} -u cityscape_evaluator.py --hypes_file ../../hypes/cityscape/fs_pspnet_cityscape_seg.json \
-                                      --pred_dir ../results/cityscape/test_dir/${CHECKPOINTS_NAME}/val/label \
-                                      --gt_dir ${DATA_DIR}/val/label  >> "../../"${LOG_FILE} 2>&1
+  cd lib/val/scripts
+  ${PYTHON} -u cityscape_evaluator.py --hypes_file ../../../hypes/cityscape/fs_pspnet_cityscape_seg.json \
+                                      --pred_dir ../../../results/cityscape/test_dir/${CHECKPOINTS_NAME}/val/label \
+                                      --gt_dir ${DATA_DIR}/val/label  >> "../../../"${LOG_FILE} 2>&1
 
 elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u main.py --hypes hypes/cityscape/fs_pspnet_cityscape_seg.json \
