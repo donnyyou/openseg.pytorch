@@ -27,10 +27,11 @@
       }
     },
     "test": {
-      "mode": "ss_test",
+      "mode": "ms_test",
       "min_side_length": 520,
+      "max_side_length": 1040,
       "fit_stride": 8,
-      "scale_search": [1.0]
+      "scale_search": [0.6667, 0.8333, 1.0, 1.1667, 1.3333]
     },
     "train_trans": {
       "trans_seq": ["random_hflip", "resize", "random_resize", "random_crop", "random_brightness"],

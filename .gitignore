@@ -1,4 +1,5 @@
-.reviewboardrc
+.*
+*.out
 *.pyc
 *.pth
 *.zip

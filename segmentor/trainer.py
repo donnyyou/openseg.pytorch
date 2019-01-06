@@ -13,12 +13,11 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.backends.cudnn as cudnn
 
 from datasets.seg_data_loader import SegDataLoader
 from loss.loss_manager import LossManager
-from methods.tools.module_runner import ModuleRunner
-from methods.tools.optim_scheduler import OptimScheduler
+from segmentor.tools.module_runner import ModuleRunner
+from segmentor.tools.optim_scheduler import OptimScheduler
 from models.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
@@ -26,10 +25,10 @@ from val.scripts.seg_running_score import SegRunningScore
 from vis.seg_visualizer import SegVisualizer
 
 
-cudnn.enabled = True
+#
 
 
-class FCNSegmentor(object):
+class Trainer(object):
     """
       The class for Pose Estimation. Include train, val, val & predict.
     """
@@ -130,15 +129,19 @@ class FCNSegmentor(object):
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)
             # Change the data type.
-
-            inputs, targets = self.module_runner.to_device(inputs, targets)
+            # inputs, targets = self.module_runner.to_device(inputs, targets)
 
             # Forward pass.
             outputs = self.seg_net(inputs)
             # outputs = self.module_utilizer.gather(outputs)
             # Compute the loss of the train batch & backward.
             loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
-            self.train_losses.update(loss.item(), inputs.size(0))
+            if self.configer.exists('train', 'loader') and self.configer.get('train', 'loader') == 'rs':
+                batch_size = self.configer.get('train', 'batch_size')*self.configer.get('train', 'batch_per_gpu')
+                self.train_losses.update(loss.item(), batch_size)
+            else:
+                self.train_losses.update(loss.item(), inputs.size(0))
+
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -229,7 +232,7 @@ class FCNSegmentor(object):
             self.seg_running_score.update(labelmap[None], ori_target[None])
 
     def train(self):
-        cudnn.benchmark = True
+        # cudnn.benchmark = True
         if self.configer.get('network', 'resume') is not None and self.configer.get('network', 'resume_val'):
             self.__val()
 

@@ -11,7 +11,10 @@ from __future__ import print_function
 import os
 import json
 import time
+import random
 import argparse
+import torch
+import torch.backends.cudnn as cudnn
 
 from utils.tools.configer import Configer
 from utils.tools.logger import Logger as Log
@@ -133,7 +136,14 @@ if __name__ == "__main__":
     parser.add_argument('--out_dir', default='none', type=str,
                         dest='test:out_dir', help='The test out directory of images.')
 
+    # ***********  Params for env.  **********
+    parser.add_argument('--seed', default=304, type=int, help='manual seed')
+    parser.add_argument('--cudnn', type=str2bool, nargs='?', default=False, help='Use CUDNN.')
+
     args_parser = parser.parse_args()
+    random.seed(args_parser.seed)
+    torch.manual_seed(args_parser.seed)
+    cudnn.enabled = args_parser.cudnn
 
     configer = Configer(args_parser=args_parser)
     abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
@@ -162,11 +172,11 @@ if __name__ == "__main__":
     model = None
     if configer.get('method') == 'fcn_segmentor':
         if configer.get('phase') == 'train':
-            from methods.fcn_segmentor import FCNSegmentor
-            model = FCNSegmentor(configer)
+            from segmentor.trainer import Trainer
+            model = Trainer(configer)
         else:
-            from methods.fcn_segmentor_test import FCNSegmentorTest
-            model = FCNSegmentorTest(configer)
+            from segmentor.tester import Tester
+            model = Tester(configer)
 
     else:
         Log.error('Method: {} is not valid.'.format(configer.get('task')))

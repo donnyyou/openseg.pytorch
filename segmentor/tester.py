@@ -16,8 +16,8 @@ import torch
 from PIL import Image
 
 from datasets.seg_data_loader import SegDataLoader
-from methods.tools.blob_helper import BlobHelper
-from methods.tools.module_runner import ModuleRunner
+from segmentor.tools.blob_helper import BlobHelper
+from segmentor.tools.module_runner import ModuleRunner
 from models.model_manager import ModelManager
 from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
@@ -26,7 +26,7 @@ from vis.seg_parser import SegParser
 from vis.seg_visualizer import SegVisualizer
 
 
-class FCNSegmentorTest(object):
+class Tester(object):
     def __init__(self, configer):
         self.configer = configer
         self.blob_helper = BlobHelper(configer)
@@ -167,20 +167,21 @@ class FCNSegmentorTest(object):
                                  (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
             total_logits += results
 
-        if self.configer.get('data', 'image_tool') == 'cv2':
-            mirror_image = cv2.flip(ori_image, 1)
-        else:
-            mirror_image = ori_image.transpose(Image.FLIP_LEFT_RIGHT)
+            if self.configer.get('data', 'image_tool') == 'cv2':
+                mirror_image = cv2.flip(ori_image, 1)
+            else:
+                mirror_image = ori_image.transpose(Image.FLIP_LEFT_RIGHT)
 
-        image, border_hw = self._get_blob(mirror_image, scale=1.0)
-        if image.size()[3] > crop_size[0] and image.size()[2] > crop_size[1]:
-            results = self._crop_predict(image, crop_size)
-        else:
-            results = self._predict(image)
+            image, border_hw = self._get_blob(mirror_image, scale=1.0)
+            if image.size()[3] > crop_size[0] and image.size()[2] > crop_size[1]:
+                results = self._crop_predict(image, crop_size)
+            else:
+                results = self._predict(image)
 
-        results = results[:border_hw[0], :border_hw[1]]
-        results = cv2.resize(results[:, ::-1], (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
-        total_logits += results
+            results = results[:border_hw[0], :border_hw[1]]
+            results = cv2.resize(results[:, ::-1], (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
+            total_logits += results
+
         return total_logits
 
     def ms_test(self, ori_image):
@@ -193,16 +194,17 @@ class FCNSegmentorTest(object):
                                  (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
             total_logits += results
 
-        if self.configer.get('data', 'image_tool') == 'cv2':
-            mirror_image = cv2.flip(ori_image, 1)
-        else:
-            mirror_image = ori_image.transpose(Image.FLIP_LEFT_RIGHT)
+            if self.configer.get('data', 'image_tool') == 'cv2':
+                mirror_image = cv2.flip(ori_image, 1)
+            else:
+                mirror_image = ori_image.transpose(Image.FLIP_LEFT_RIGHT)
 
-        image, border_hw = self._get_blob(mirror_image, scale=1.0)
-        results = self._predict(image)
-        results = results[:border_hw[0], :border_hw[1]]
-        results = cv2.resize(results[:, ::-1], (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
-        total_logits += results
+            image, border_hw = self._get_blob(mirror_image, scale=scale)
+            results = self._predict(image)
+            results = results[:border_hw[0], :border_hw[1]]
+            results = cv2.resize(results[:, ::-1], (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
+            total_logits += results
+
         return total_logits
 
     def _crop_predict(self, image, crop_size):

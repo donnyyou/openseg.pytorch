@@ -18,80 +18,6 @@ from PIL import Image, ImageFilter, ImageOps
 from utils.tools.logger import Logger as Log
 
 
-class RandomPad(object):
-    """ Padding the Image to proper size.
-            Args:
-                stride: the stride of the network.
-                pad_value: the value that pad to the image border.
-                img: Image object as input.
-
-            Returns::
-                img: Image object.
-    """
-    def __init__(self, up_scale_range=None, pad_ratio=0.5, mean=(104, 117, 123)):
-        # do something
-        assert isinstance(up_scale_range, (list, tuple))
-        self.up_scale_range = up_scale_range
-        self.ratio = pad_ratio
-        self.mean = tuple(mean)
-
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
-        assert isinstance(img, Image.Image)
-        assert labelmap is None or isinstance(labelmap, Image.Image)
-        assert maskmap is None or isinstance(maskmap, Image.Image)
-
-        if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
-
-        width, height = img.size
-        ws = random.uniform(self.up_scale_range[0], self.up_scale_range[1])
-        hs = ws
-        for _ in range(50):
-            scale = random.uniform(self.up_scale_range[0], self.up_scale_range[1])
-            min_ratio = max(0.5, 1. / scale / scale)
-            max_ratio = min(2, scale * scale)
-            ratio = math.sqrt(random.uniform(min_ratio, max_ratio))
-            ws = scale * ratio
-            hs = scale / ratio
-            if ws >= 1 and hs >= 1:
-                break
-
-        w = int(ws * width)
-        h = int(hs * height)
-
-        pad_width = random.randint(0, w - width)
-        pad_height = random.randint(0, h - height)
-
-        left_pad = random.randint(0, pad_width)  # pad_left
-        up_pad = random.randint(0, pad_height)  # pad_up
-        right_pad = pad_width - left_pad  # pad_right
-        down_pad = pad_height - up_pad  # pad_down
-
-        img = ImageOps.expand(img, (left_pad, up_pad, right_pad, down_pad), fill=self.mean)
-
-        if labelmap is not None:
-            labelmap = ImageOps.expand(labelmap, (left_pad, up_pad, right_pad, down_pad), fill=255)
-
-        if maskmap is not None:
-            maskmap = ImageOps.expand(maskmap, (left_pad, up_pad, right_pad, down_pad), fill=1)
-
-        if polygons is not None:
-            for object_id in range(len(polygons)):
-                for polygon_id in range(len(polygons[object_id])):
-                    polygons[object_id][polygon_id][0::2] += left_pad
-                    polygons[object_id][polygon_id][1::2] += up_pad
-
-        if kpts is not None and kpts.size > 0:
-            kpts[:, :, 0] += left_pad
-            kpts[:, :, 1] += up_pad
-
-        if bboxes is not None and bboxes.size > 0:
-            bboxes[:, 0::2] += left_pad
-            bboxes[:, 1::2] += up_pad
-
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
-
-
 class Padding(object):
     """ Padding the Image to proper size.
             Args:
@@ -107,60 +33,19 @@ class Padding(object):
         self.mean = tuple(mean)
         self.allow_outside_center = allow_outside_center
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         width, height = img.size
         left_pad, up_pad, right_pad, down_pad = self.pad
         target_size = [width + left_pad + right_pad, height + up_pad + down_pad]
         offset_left = -left_pad
         offset_up = -up_pad
-
-        if kpts is not None and kpts.size > 0:
-            kpts[:, :, 0] -= offset_left
-            kpts[:, :, 1] -= offset_up
-            mask = np.logical_or.reduce((kpts[:, :, 0] >= target_size[0], kpts[:, :, 0] < 0,
-                                         kpts[:, :, 1] >= target_size[1], kpts[:, :, 1] < 0))
-            kpts[mask == 1, 2] = -1
-
-        if bboxes is not None and bboxes.size > 0:
-            if self.allow_outside_center:
-                mask = np.ones(bboxes.shape[0], dtype=bool)
-            else:
-                crop_bb = np.array([offset_left, offset_up, offset_left + target_size[0], offset_up + target_size[1]])
-                center = (bboxes[:, :2] + bboxes[:, 2:]) / 2
-                mask = np.logical_and(crop_bb[:2] <= center, center < crop_bb[2:]).all(axis=1)
-
-            bboxes[:, 0::2] -= offset_left
-            bboxes[:, 1::2] -= offset_up
-            bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, target_size[0] - 1)
-            bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, target_size[1] - 1)
-
-            mask = np.logical_and(mask, (bboxes[:, :2] < bboxes[:, 2:]).all(axis=1))
-            bboxes = bboxes[mask]
-            if labels is not None:
-                labels = labels[mask]
-
-            if polygons is not None:
-                new_polygons = list()
-                for object_id in range(len(polygons)):
-                    if mask[object_id] == 1:
-                        for polygon_id in range(len(polygons[object_id])):
-                            polygons[object_id][polygon_id][0::2] -= offset_left
-                            polygons[object_id][polygon_id][1::2] -= offset_up
-                            polygons[object_id][polygon_id][0::2] = np.clip(polygons[object_id][polygon_id][0::2],
-                                                                            0, target_size[0] - 1)
-                            polygons[object_id][polygon_id][1::2] = np.clip(polygons[object_id][polygon_id][1::2],
-                                                                            0, target_size[1] - 1)
-
-                        new_polygons.append(polygons[object_id])
-
-                polygons = new_polygons
 
         img = ImageOps.expand(img, border=tuple(self.pad), fill=tuple(self.mean))
         if maskmap is not None:
@@ -169,7 +54,7 @@ class Padding(object):
         if labelmap is not None:
             labelmap = ImageOps.expand(labelmap, border=tuple(self.pad), fill=255)
 
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return img, labelmap, maskmap
 
 
 class RandomHFlip(object):
@@ -177,15 +62,14 @@ class RandomHFlip(object):
         self.swap_pair = swap_pair
         self.ratio = flip_ratio
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
-        width, height = img.size
         img = img.transpose(Image.FLIP_LEFT_RIGHT)
         if labelmap is not None:
             labelmap = labelmap.transpose(Image.FLIP_LEFT_RIGHT)
@@ -193,26 +77,7 @@ class RandomHFlip(object):
         if maskmap is not None:
             maskmap = maskmap.transpose(Image.FLIP_LEFT_RIGHT)
 
-        if polygons is not None:
-            for object_id in range(len(polygons)):
-                for polygon_id in range(len(polygons[object_id])):
-                    polygons[object_id][polygon_id][0::2] = width - 1 - polygons[object_id][polygon_id][0::2]
-
-        if bboxes is not None and bboxes.size > 0:
-            xmin = width - 1 - bboxes[:, 2]
-            xmax = width - 1 - bboxes[:, 0]
-            bboxes[:, 0] = xmin
-            bboxes[:, 2] = xmax
-
-        if kpts is not None and kpts.size > 0:
-            kpts[:, :, 0] = width - 1 - kpts[:, :, 0]
-
-            for pair in self.swap_pair:
-                temp_point = np.copy(kpts[:, pair[0] - 1])
-                kpts[:, pair[0] - 1] = kpts[:, pair[1] - 1]
-                kpts[:, pair[1] - 1] = temp_point
-
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return img, labelmap, maskmap
 
 
 class RandomSaturation(object):
@@ -223,13 +88,13 @@ class RandomSaturation(object):
         assert self.upper >= self.lower, "saturation upper must be >= lower."
         assert self.lower >= 0, "saturation lower must be non-negative."
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         img = np.array(img).astype(np.float32)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
@@ -237,7 +102,7 @@ class RandomSaturation(object):
         img[:, :, 1] *= random.uniform(self.lower, self.upper)
         img = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
         img = np.clip(img, 0, 255)
-        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap, kpts, bboxes, labels, polygons
+        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap
 
 
 class RandomHue(object):
@@ -246,13 +111,13 @@ class RandomHue(object):
         self.delta = delta
         self.ratio = hue_ratio
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         img = np.array(img).astype(np.float32)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
@@ -262,7 +127,7 @@ class RandomHue(object):
         img[:, :, 0][img[:, :, 0] < 0] += 360
         img = cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
         img = np.clip(img, 0, 255)
-        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap, kpts, bboxes, labels, polygons
+        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap
 
 
 class RandomPerm(object):
@@ -272,18 +137,18 @@ class RandomPerm(object):
                       (1, 0, 2), (1, 2, 0),
                       (2, 0, 1), (2, 1, 0))
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         swap = self.perms[random.randint(0, len(self.perms)-1)]
         img = np.array(img)
         img = img[:, :, swap]
-        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap, kpts, bboxes, labels, polygons
+        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap
 
 
 class RandomContrast(object):
@@ -294,19 +159,19 @@ class RandomContrast(object):
         assert self.upper >= self.lower, "contrast upper must be >= lower."
         assert self.lower >= 0, "contrast lower must be non-negative."
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         img = np.array(img).astype(np.float32)
         img *= random.uniform(self.lower, self.upper)
         img = np.clip(img, 0, 255)
 
-        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap, kpts, bboxes, labels, polygons
+        return Image.fromarray(img.astype(np.uint8)), labelmap, maskmap
 
 
 class RandomBrightness(object):
@@ -314,13 +179,13 @@ class RandomBrightness(object):
         self.shift_value = shift_value
         self.ratio = brightness_ratio
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         shift = np.random.uniform(-self.shift_value, self.shift_value, size=1)
         image = np.array(img).astype(np.float32)
@@ -330,7 +195,7 @@ class RandomBrightness(object):
         image = image.astype(np.uint8)
         image = Image.fromarray(image)
 
-        return image, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return image, labelmap, maskmap
 
 
 class RandomGaussBlur(object):
@@ -338,17 +203,17 @@ class RandomGaussBlur(object):
         self.max_blur = max_blur
         self.ratio = blur_ratio
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         blur_value = np.random.uniform(0, self.max_blur)
         img = img.filter(ImageFilter.GaussianBlur(radius=blur_value))
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return img, labelmap, maskmap
 
 
 class RandomHSV(object):
@@ -375,13 +240,13 @@ class RandomHSV(object):
         self.v_range = v_range
         self.ratio = hsv_ratio
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         img = np.array(img)
         img_hsv = matplotlib.colors.rgb_to_hsv(img)
@@ -395,7 +260,7 @@ class RandomHSV(object):
         img_hsv = np.stack([img_h, img_s, img_v], axis=2)
         img_new = matplotlib.colors.hsv_to_rgb(img_hsv)
 
-        return Image.fromarray(img_new.astype(np.uint8)), labelmap, maskmap, kpts, bboxes, labels, polygons
+        return Image.fromarray(img_new.astype(np.uint8)), labelmap, maskmap
 
 
 class RandomResize(object):
@@ -407,10 +272,12 @@ class RandomResize(object):
     """
 
     def __init__(self, scale_range=(0.75, 1.25), aspect_range=(0.9, 1.1), target_size=None,
-                 resize_bound=None, method='random', resize_ratio=0.5):
+                 resize_bound=None, method='random', max_side_bound=None, scale_list=None, resize_ratio=0.5):
         self.scale_range = scale_range
         self.aspect_range = aspect_range
         self.resize_bound = resize_bound
+        self.max_side_bound = max_side_bound
+        self.scale_list = scale_list
         self.method = method
         self.ratio = resize_ratio
 
@@ -424,22 +291,10 @@ class RandomResize(object):
         else:
             self.input_size = None
 
-    def get_scale(self, img_size, bboxes):
+    def get_scale(self, img_size):
         if self.method == 'random':
             scale_ratio = random.uniform(self.scale_range[0], self.scale_range[1])
             return scale_ratio
-
-        elif self.method == 'focus':
-            if self.input_size is not None and bboxes is not None and len(bboxes) > 0:
-                bboxes = np.array(bboxes)
-                border = bboxes[:, 2:] - bboxes[:, 0:2]
-                scale = 0.6 / max(max(border[:, 0]) / self.input_size[0], max(border[:, 1]) / self.input_size[1])
-                scale_ratio = random.uniform(self.scale_range[0], self.scale_range[1]) * scale
-                return scale_ratio
-
-            else:
-                scale_ratio = random.uniform(self.scale_range[0], self.scale_range[1])
-                return scale_ratio
 
         elif self.method == 'bound':
             scale1 = self.resize_bound[0] / min(img_size)
@@ -451,7 +306,7 @@ class RandomResize(object):
             Log.error('Resize method {} is invalid.'.format(self.method))
             exit(1)
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         """
         Args:
             img     (Image):   Image to be resized.
@@ -471,26 +326,20 @@ class RandomResize(object):
 
         width, height = img.size
         if random.random() < self.ratio:
-            scale_ratio = self.get_scale([width, height], bboxes)
+            if self.scale_list is None:
+                scale_ratio = self.get_scale([width, height])
+            else:
+                scale_ratio = self.scale_list[random.randint(0, len(self.scale_list)-1)]
+
             aspect_ratio = random.uniform(*self.aspect_range)
             w_scale_ratio = math.sqrt(aspect_ratio) * scale_ratio
             h_scale_ratio = math.sqrt(1.0 / aspect_ratio) * scale_ratio
+            if self.max_side_bound is not None and max(height*h_scale_ratio, width*w_scale_ratio) > self.max_side_bound:
+                d_ratio = self.max_side_bound / max(height * h_scale_ratio, width * w_scale_ratio)
+                w_scale_ratio *= d_ratio
+                h_scale_ratio *= d_ratio
         else:
             w_scale_ratio, h_scale_ratio = 1.0, 1.0
-
-        if kpts is not None and kpts.size > 0:
-            kpts[:, :, 0] *= w_scale_ratio
-            kpts[:, :, 1] *= h_scale_ratio
-
-        if bboxes is not None and bboxes.size > 0:
-            bboxes[:, 0::2] *= w_scale_ratio
-            bboxes[:, 1::2] *= h_scale_ratio
-
-        if polygons is not None:
-            for object_id in range(len(polygons)):
-                for polygon_id in range(len(polygons[object_id])):
-                    polygons[object_id][polygon_id][0::2] *= w_scale_ratio
-                    polygons[object_id][polygon_id][1::2] *= h_scale_ratio
 
         converted_size = (int(width * w_scale_ratio), int(height * h_scale_ratio))
 
@@ -500,7 +349,7 @@ class RandomResize(object):
         if maskmap is not None:
             maskmap = maskmap.resize(converted_size, Image.NEAREST)
 
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return img, labelmap, maskmap
 
 
 class RandomRotate(object):
@@ -516,7 +365,7 @@ class RandomRotate(object):
         self.ratio = rotate_ratio
         self.mean = tuple(mean)
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         """
         Args:
             img    (Image):     Image to be rotated.
@@ -535,7 +384,7 @@ class RandomRotate(object):
         if random.random() < self.ratio:
             rotate_degree = random.uniform(-self.max_degree, self.max_degree)
         else:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         img = np.array(img)
         height, width, _ = img.shape
@@ -563,49 +412,7 @@ class RandomRotate(object):
                                      borderValue=(1, 1, 1), flags=cv2.INTER_NEAREST)
             maskmap = Image.fromarray(maskmap.astype(np.uint8))
 
-        if polygons is not None:
-            for object_id in range(len(polygons)):
-                for polygon_id in range(len(polygons[object_id])):
-                    for i in range(len(polygons[object_id][polygon_id]) // 2):
-                        x = polygons[object_id][polygon_id][i * 2]
-                        y = polygons[object_id][polygon_id][i * 2 + 1]
-                        p = np.array([x, y, 1])
-                        p = rotate_mat.dot(p)
-                        polygons[object_id][polygon_id][i * 2] = p[0]
-                        polygons[object_id][polygon_id][i * 2 + 1] = p[1]
-
-        if kpts is not None and kpts.size > 0:
-            num_objects = len(kpts)
-            num_keypoints = len(kpts[0])
-            for i in range(num_objects):
-                for j in range(num_keypoints):
-                    x = kpts[i][j][0]
-                    y = kpts[i][j][1]
-                    p = np.array([x, y, 1])
-                    p = rotate_mat.dot(p)
-                    kpts[i][j][0] = p[0]
-                    kpts[i][j][1] = p[1]
-
-        # It is not right for object detection tasks.
-        if bboxes is not None and bboxes.size > 0:
-            for i in range(len(bboxes)):
-                bbox_temp = [bboxes[i][0], bboxes[i][1], bboxes[i][2], bboxes[i][1],
-                             bboxes[i][0], bboxes[i][3], bboxes[i][2], bboxes[i][3]]
-
-                for node in range(4):
-                    x = bbox_temp[node * 2]
-                    y = bbox_temp[node * 2 + 1]
-                    p = np.array([x, y, 1])
-                    p = rotate_mat.dot(p)
-                    bbox_temp[node * 2] = p[0]
-                    bbox_temp[node * 2 + 1] = p[1]
-
-                bboxes[i] = [min(bbox_temp[0], bbox_temp[2], bbox_temp[4], bbox_temp[6]),
-                             min(bbox_temp[1], bbox_temp[3], bbox_temp[5], bbox_temp[7]),
-                             max(bbox_temp[0], bbox_temp[2], bbox_temp[4], bbox_temp[6]),
-                             max(bbox_temp[1], bbox_temp[3], bbox_temp[5], bbox_temp[7])]
-
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return img, labelmap, maskmap
 
 
 class RandomCrop(object):
@@ -648,7 +455,7 @@ class RandomCrop(object):
             Log.error('Crop method {} is invalid.'.format(self.method))
             exit(1)
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         """
         Args:
             img (Image):   Image to be cropped.
@@ -667,49 +474,11 @@ class RandomCrop(object):
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
         if random.random() > self.ratio:
-            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+            return img, labelmap, maskmap
 
         target_size = (min(self.size[0], img.size[0]), min(self.size[1], img.size[1]))
 
         offset_left, offset_up = self.get_lefttop(target_size, img.size)
-
-        if kpts is not None and kpts.size > 0:
-            kpts[:, :, 0] -= offset_left
-            kpts[:, :, 1] -= offset_up
-
-        if bboxes is not None and bboxes.size > 0:
-            if self.allow_outside_center:
-                mask = np.ones(bboxes.shape[0], dtype=bool)
-            else:
-                crop_bb = np.array([offset_left, offset_up, offset_left + target_size[0], offset_up + target_size[1]])
-                center = (bboxes[:, :2] + bboxes[:, 2:]) / 2
-                mask = np.logical_and(crop_bb[:2] <= center, center < crop_bb[2:]).all(axis=1)
-
-            bboxes[:, 0::2] -= offset_left
-            bboxes[:, 1::2] -= offset_up
-            bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, target_size[0] - 1)
-            bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, target_size[1] - 1)
-
-            mask = np.logical_and(mask, (bboxes[:, :2] < bboxes[:, 2:]).all(axis=1))
-            bboxes = bboxes[mask]
-            if labels is not None:
-                labels = labels[mask]
-
-            if polygons is not None:
-                new_polygons = list()
-                for object_id in range(len(polygons)):
-                    if mask[object_id] == 1:
-                        for polygon_id in range(len(polygons[object_id])):
-                            polygons[object_id][polygon_id][0::2] -= offset_left
-                            polygons[object_id][polygon_id][1::2] -= offset_up
-                            polygons[object_id][polygon_id][0::2] = np.clip(polygons[object_id][polygon_id][0::2],
-                                                                            0, target_size[0] - 1)
-                            polygons[object_id][polygon_id][1::2] = np.clip(polygons[object_id][polygon_id][1::2],
-                                                                            0, target_size[1] - 1)
-
-                        new_polygons.append(polygons[object_id])
-
-                polygons = new_polygons
 
         img = img.crop((offset_left, offset_up, offset_left + target_size[0], offset_up + target_size[1]))
 
@@ -719,16 +488,17 @@ class RandomCrop(object):
         if labelmap is not None:
             labelmap = labelmap.crop((offset_left, offset_up, offset_left + target_size[0], offset_up + target_size[1]))
 
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return img, labelmap, maskmap
 
 
 class Resize(object):
-    def __init__(self, target_size=None, min_side_length=None, max_side_length=None):
+    def __init__(self, target_size=None, min_side_length=None, max_side_length=None, max_side_bound=None):
         self.target_size = target_size
         self.min_side_length = min_side_length
         self.max_side_length = max_side_length
+        self.max_side_bound = max_side_bound
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
         assert isinstance(img, Image.Image)
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
@@ -749,19 +519,11 @@ class Resize(object):
             w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
             target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
-        if kpts is not None and kpts.size > 0:
-            kpts[:, :, 0] *= w_scale_ratio
-            kpts[:, :, 1] *= h_scale_ratio
-
-        if bboxes is not None and bboxes.size > 0:
-            bboxes[:, 0::2] *= w_scale_ratio
-            bboxes[:, 1::2] *= h_scale_ratio
-
-        if polygons is not None:
-            for object_id in range(len(polygons)):
-                for polygon_id in range(len(polygons[object_id])):
-                    polygons[object_id][polygon_id][0::2] *= w_scale_ratio
-                    polygons[object_id][polygon_id][1::2] *= h_scale_ratio
+        if self.max_side_bound is not None and  max(target_size) > self.max_side_bound:
+            d_ratio = self.max_side_bound / max(target_size)
+            w_scale_ratio = d_ratio * w_scale_ratio
+            h_scale_ratio = d_ratio * h_scale_ratio
+            target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
         img = img.resize(target_size, Image.BILINEAR)
         if labelmap is not None:
@@ -770,7 +532,7 @@ class Resize(object):
         if maskmap is not None:
             maskmap = maskmap.resize(target_size, Image.NEAREST)
 
-        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+        return img, labelmap, maskmap
 
 
 class PILAugCompose(object):
@@ -826,13 +588,6 @@ class PILAugCompose(object):
                     contrast_ratio=self.configer.get('train_trans', 'random_contrast')['ratio']
                 )
 
-            if 'random_pad' in self.configer.get('train_trans', 'trans_seq') + shuffle_train_trans:
-                self.transforms['random_pad'] = RandomPad(
-                    up_scale_range=self.configer.get('train_trans', 'random_pad')['up_scale_range'],
-                    pad_ratio=self.configer.get('train_trans', 'random_pad')['ratio'],
-                    mean=self.configer.get('normalize', 'mean_value')
-                )
-
             if 'padding' in self.configer.get('train_trans', 'trans_seq'):
                 self.transforms['padding'] = Padding(
                     pad=self.configer.get('train_trans', 'padding')['pad'],
@@ -869,12 +624,38 @@ class PILAugCompose(object):
 
             if 'random_resize' in self.configer.get('train_trans', 'trans_seq') + shuffle_train_trans:
                 if self.configer.get('train_trans', 'random_resize')['method'] == 'random':
-                    self.transforms['random_resize'] = RandomResize(
-                        method=self.configer.get('train_trans', 'random_resize')['method'],
-                        scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
-                        aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
-                        resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
-                    )
+                    if 'scale_list' not in self.configer.get('train_trans', 'random_resize'):
+                        if 'max_side_bound' in self.configer.get('train_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('train_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('train_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
+                    else:
+                        if 'max_side_bound' in self.configer.get('train_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('train_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('train_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('train_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('train_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('train_trans', 'random_resize')['ratio']
+                            )
 
                 elif self.configer.get('train_trans', 'random_resize')['method'] == 'focus':
                     self.transforms['random_resize'] = RandomResize(
@@ -940,9 +721,15 @@ class PILAugCompose(object):
                         target_size=self.configer.get('train_trans', 'resize')['target_size']
                     )
                 if 'min_side_length' in self.configer.get('train_trans', 'resize'):
-                    self.transforms['resize'] = Resize(
-                        min_side_length=self.configer.get('train_trans', 'resize')['min_side_length']
-                    )
+                    if 'max_side_bound' in self.configer.get('train_trans', 'resize'):
+                        self.transforms['resize'] = Resize(
+                            min_side_length=self.configer.get('train_trans', 'resize')['min_side_length'],
+                            max_side_bound=self.configer.get('train_trans', 'resize')['max_side_bound'],
+                        )
+                    else:
+                        self.transforms['resize'] = Resize(
+                            min_side_length=self.configer.get('train_trans', 'resize')['min_side_length']
+                        )
                 if 'max_side_length' in self.configer.get('train_trans', 'resize'):
                     self.transforms['resize'] = Resize(
                         max_side_length=self.configer.get('train_trans', 'resize')['max_side_length']
@@ -972,13 +759,6 @@ class PILAugCompose(object):
                     lower=self.configer.get('val_trans', 'random_contrast')['lower'],
                     upper=self.configer.get('val_trans', 'random_contrast')['upper'],
                     contrast_ratio=self.configer.get('val_trans', 'random_contrast')['ratio']
-                )
-
-            if 'random_pad' in self.configer.get('val_trans', 'trans_seq'):
-                self.transforms['random_pad'] = RandomPad(
-                    up_scale_range=self.configer.get('val_trans', 'random_pad')['up_scale_range'],
-                    pad_ratio=self.configer.get('val_trans', 'random_pad')['ratio'],
-                    mean=self.configer.get('normalize', 'mean_value')
                 )
 
             if 'padding' in self.configer.get('val_trans', 'trans_seq'):
@@ -1016,13 +796,39 @@ class PILAugCompose(object):
                 )
 
             if 'random_resize' in self.configer.get('val_trans', 'trans_seq'):
-                if self.configer.get('val_trans', 'random_resize')['method'] == 'random':
-                    self.transforms['random_resize'] = RandomResize(
-                        method=self.configer.get('val_trans', 'random_resize')['method'],
-                        scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
-                        aspect_range=self.configer.get('train_trans', 'random_resize')['aspect_range'],
-                        resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
-                    )
+                if self.configer.get('train_trans', 'random_resize')['method'] == 'random':
+                    if 'scale_list' not in self.configer.get('val_trans', 'random_resize'):
+                        if 'max_side_bound' in self.configer.get('val_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('val_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_range=self.configer.get('val_trans', 'random_resize')['scale_range'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
+                    else:
+                        if 'max_side_bound' in self.configer.get('val_trans', 'random_resize'):
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('val_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                max_side_bound=self.configer.get('val_trans', 'random_resize')['max_side_bound'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
+                        else:
+                            self.transforms['random_resize'] = RandomResize(
+                                method=self.configer.get('val_trans', 'random_resize')['method'],
+                                scale_list=self.configer.get('val_trans', 'random_resize')['scale_list'],
+                                aspect_range=self.configer.get('val_trans', 'random_resize')['aspect_range'],
+                                resize_ratio=self.configer.get('val_trans', 'random_resize')['ratio']
+                            )
 
                 elif self.configer.get('val_trans', 'random_resize')['method'] == 'focus':
                     self.transforms['random_resize'] = RandomResize(
@@ -1088,9 +894,15 @@ class PILAugCompose(object):
                         target_size=self.configer.get('val_trans', 'resize')['target_size']
                     )
                 if 'min_side_length' in self.configer.get('val_trans', 'resize'):
-                    self.transforms['resize'] = Resize(
-                        min_side_length=self.configer.get('val_trans', 'resize')['min_side_length']
-                    )
+                    if 'max_side_bound' in self.configer.get('val_trans', 'resize'):
+                        self.transforms['resize'] = Resize(
+                            min_side_length=self.configer.get('val_trans', 'resize')['min_side_length'],
+                            max_side_bound=self.configer.get('val_trans', 'resize')['max_side_bound'],
+                        )
+                    else:
+                        self.transforms['resize'] = Resize(
+                            min_side_length=self.configer.get('val_trans', 'resize')['min_side_length']
+                        )
                 if 'max_side_length' in self.configer.get('val_trans', 'resize'):
                     self.transforms['resize'] = Resize(
                         max_side_length=self.configer.get('val_trans', 'resize')['max_side_length']
@@ -1106,7 +918,7 @@ class PILAugCompose(object):
 
         return True
 
-    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+    def __call__(self, img, labelmap=None, maskmap=None):
 
         if self.split == 'train':
             shuffle_trans_seq = []
@@ -1119,48 +931,23 @@ class PILAugCompose(object):
                     random.shuffle(shuffle_trans_seq)
 
             for trans_key in (shuffle_trans_seq + self.configer.get('train_trans', 'trans_seq')):
-                (img, labelmap, maskmap, kpts,
-                 bboxes, labels, polygons) = self.transforms[trans_key](img, labelmap, maskmap,
-                                                                        kpts, bboxes, labels, polygons)
+                img, labelmap, maskmap = self.transforms[trans_key](img, labelmap, maskmap)
 
         else:
             for trans_key in self.configer.get('val_trans', 'trans_seq'):
-                (img, labelmap, maskmap, kpts,
-                 bboxes, labels, polygons) = self.transforms[trans_key](img, labelmap, maskmap,
-                                                                        kpts, bboxes, labels, polygons)
+                img, labelmap, maskmap = self.transforms[trans_key](img, labelmap, maskmap)
 
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'n', 'n', 'n', 'n', 'n']):
+        if self.__check_none([labelmap, maskmap], ['n', 'n']):
             return img
 
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['y', 'n', 'n', 'n', 'n', 'n']):
+        if self.__check_none([labelmap, maskmap], ['y', 'n']):
             return img, labelmap
 
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'n', 'n', 'y', 'n', 'n']):
-            return img, bboxes
+        if self.__check_none([labelmap, maskmap], ['n', 'y']):
+            return img, maskmap
 
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'n', 'y', 'n', 'n', 'n']):
-            return img, kpts
-
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'n', 'y', 'y', 'n', 'n']):
-            return img, kpts, bboxes
-
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'y', 'y', 'n', 'n', 'n']):
-            return img, maskmap, kpts
-
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['y', 'y', 'y', 'n', 'n', 'n']):
-            return img, labelmap, maskmap, kpts
-
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'y', 'y', 'y', 'n', 'n']):
-            return img, maskmap, kpts, bboxes
-
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['y', 'y', 'y', 'y', 'n', 'n']):
-            return img, labelmap, maskmap, kpts, bboxes
-
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'n', 'n', 'y', 'y', 'n']):
-            return img, bboxes, labels
-
-        if self.__check_none([labelmap, maskmap, kpts, bboxes, labels, polygons], ['n', 'n', 'n', 'y', 'y', 'y']):
-            return img, bboxes, labels, polygons
+        if self.__check_none([labelmap, maskmap], ['y', 'y']):
+            return img, labelmap, maskmap
 
         Log.error('Params is not valid.')
         exit(1)

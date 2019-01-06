@@ -8,8 +8,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from loss.modules.seg_modules import FSCELoss, FSAuxCELoss, FSAuxEncCELoss
-from loss.modules.seg_modules import FSAuxOhemCELoss, FSOhemCELoss
+from loss.modules.loss import FSCELoss, FSAuxCELoss, FSAuxEncCELoss
+from loss.modules.loss import FSAuxOhemCELoss, FSOhemCELoss
 from utils.tools.logger import Logger as Log
 
 
@@ -18,7 +18,8 @@ SEG_LOSS_DICT = {
     'fs_ohemce_loss': FSOhemCELoss,
     'fs_auxce_loss':FSAuxCELoss,
     'fs_auxencce_loss': FSAuxEncCELoss,
-    'fs_auxohemce_loss': FSAuxOhemCELoss
+    'fs_auxohemce_loss': FSAuxOhemCELoss,
+    'fs_auxslowohemce_loss': FSAuxOhemCELoss
 }
 
 
