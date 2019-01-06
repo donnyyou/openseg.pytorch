@@ -1,7 +1,7 @@
 import torch
-from extensions.parallel.data_container import DataContainer
 from torch.nn.parallel._functions import Scatter as OrigScatter
 
+from lib.extensions.parallel.data_container import DataContainer
 from lib.extensions.parallel._functions import Scatter
 
 

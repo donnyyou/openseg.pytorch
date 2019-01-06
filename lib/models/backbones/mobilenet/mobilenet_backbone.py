@@ -8,7 +8,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from lib.models import MobileNetModels
+from lib.models.backbones.mobilenet.mobilenet_models import MobileNetModels
 
 
 class MobileNetBackbone(object):
