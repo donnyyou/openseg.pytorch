@@ -13,8 +13,8 @@ import random
 import numpy as np
 import torch
 from torch.utils import data
-from utils.helpers.image_helper import ImageHelper
 
+from lib.utils.helpers.image_helper import ImageHelper
 from lib.extensions.parallel.data_container import DataContainer
 from lib.utils.tools.logger import Logger as Log
 

@@ -9,10 +9,9 @@ from __future__ import division
 from __future__ import print_function
 
 import math
-
 import torch.nn as nn
 
-from lib.models.tools import ModuleHelper
+from lib.models.tools.module_helper import ModuleHelper
 
 model_urls = {
     'mobilenetv2': 'mobilenetv2.pth',

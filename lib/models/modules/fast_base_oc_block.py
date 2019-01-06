@@ -13,7 +13,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from lib.models.tools import ModuleHelper
+from lib.models.tools.module_helper import ModuleHelper
 
 
 class _ObjectAttentionBlock(nn.Module):

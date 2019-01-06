@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 
-from lib.models.tools import ModuleHelper
+from lib.models.tools.module_helper import ModuleHelper
 
 model_urls = {
     'squeezenet1_0': 'https://download.pytorch.org/models/squeezenet1_0-a815701f.pth',

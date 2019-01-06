@@ -12,11 +12,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.modules.base_oc_block import BaseOC_Context_Module
-from models.modules.self_attention_module import SelfAttentionModuleV2
 from torch.autograd import Variable
 
-from lib.models.tools import ModuleHelper
+from lib.models.modules.base_oc_block import BaseOC_Context_Module
+from lib.models.modules.self_attention_module import SelfAttentionModuleV2
+from lib.models.tools.module_helper import ModuleHelper
 
 
 class ASP_OC_Module(nn.Module):

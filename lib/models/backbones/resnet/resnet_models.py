@@ -9,10 +9,9 @@ from __future__ import print_function
 
 import math
 from collections import OrderedDict
-
 import torch.nn as nn
 
-from lib.models.tools import ModuleHelper
+from lib.models.tools.module_helper import ModuleHelper
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',

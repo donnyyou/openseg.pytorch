@@ -8,14 +8,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from torch.utils import data
+
+import lib.datasets.tools.transforms as trans
 import lib.datasets.tools.cv2_aug_transforms as cv2_aug_trans
 import lib.datasets.tools.pil_aug_transforms as pil_aug_trans
 from lib.datasets.fs_data_loader import FSDataLoader
 from lib.datasets.rs_data_loader import RSDataLoader
 from lib.datasets.tools.collate import collate
-from torch.utils import data
-
-import lib.datasets.tools.transforms as trans
 from lib.utils.tools.logger import Logger as Log
 
 

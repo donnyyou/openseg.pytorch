@@ -15,9 +15,7 @@ import matplotlib.pyplot as plt
 
 class LogVisualizer(object):
 
-
     def vis_loss(self, log_file):
-
         with open(log_file, 'r') as file_stream:
             train_ax = list()
             train_ay = list()

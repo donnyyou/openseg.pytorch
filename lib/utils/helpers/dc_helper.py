@@ -9,7 +9,7 @@ from __future__ import print_function
 
 import itertools
 
-from lib.extensions import DataContainer
+from lib.extensions.parallel.data_container import DataContainer
 
 
 class DCHelper(object):

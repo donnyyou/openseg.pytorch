@@ -14,19 +14,16 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
-from utils.tools.average_meter import AverageMeter
 
-from lib.datasets import SegDataLoader
-from lib.loss import LossManager
+from lib.utils.tools.average_meter import AverageMeter
+from lib.datasets.seg_data_loader import SegDataLoader
+from lib.loss.loss_manager import LossManager
 from lib.models.model_manager import ModelManager
 from lib.utils.tools.logger import Logger as Log
 from lib.val.scripts.seg_running_score import SegRunningScore
-from lib.vis import SegVisualizer
+from lib.vis.seg_visualizer import SegVisualizer
 from segmentor.tools.module_runner import ModuleRunner
 from segmentor.tools.optim_scheduler import OptimScheduler
-
-
-#
 
 
 class Trainer(object):
