@@ -139,11 +139,12 @@ if __name__ == "__main__":
 
     # ***********  Params for env.  **********
     parser.add_argument('--seed', default=304, type=int, help='manual seed')
-    parser.add_argument('--cudnn', type=str2bool, nargs='?', default=False, help='Use CUDNN.')
+    parser.add_argument('--cudnn', type=str2bool, nargs='?', default=True, help='Use CUDNN.')
 
     args_parser = parser.parse_args()
     random.seed(args_parser.seed)
     torch.manual_seed(args_parser.seed)
+
     cudnn.enabled = args_parser.cudnn
 
     configer = Configer(args_parser=args_parser)
