@@ -18,16 +18,16 @@ from lib.utils.tools.logger import Logger as Log
 
 class Configer(object):
 
-    def __init__(self, args_parser=None, hypes_file=None, config_dict=None):
+    def __init__(self, args_parser=None, configs=None, config_dict=None):
         if config_dict is not None:
             self.params_root = config_dict
 
-        elif hypes_file is not None:
-            if not os.path.exists(hypes_file):
-                Log.error('Json Path:{} not exists!'.format(hypes_file))
+        elif configs is not None:
+            if not os.path.exists(configs):
+                Log.error('Json Path:{} not exists!'.format(configs))
                 exit(0)
 
-            json_stream = open(hypes_file, 'r')
+            json_stream = open(configs, 'r')
             self.params_root = json.load(json_stream)
             json_stream.close()
 
@@ -35,11 +35,11 @@ class Configer(object):
             self.args_dict = args_parser.__dict__
             self.params_root = None
 
-            if not os.path.exists(args_parser.hypes):
-                print('Json Path:{} not exists!'.format(args_parser.hypes))
+            if not os.path.exists(args_parser.configs):
+                print('Json Path:{} not exists!'.format(args_parser.configs))
                 exit(1)
 
-            json_stream = open(args_parser.hypes, 'r')
+            json_stream = open(args_parser.configs, 'r')
             self.params_root = json.load(json_stream)
             json_stream.close()
 
@@ -143,8 +143,8 @@ class Configer(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes', default='../../hypes/cls/flower/fc_vgg19_flower_cls.json', type=str,
-                        dest='hypes', help='The file of the hyper parameters.')
+    parser.add_argument('--configs', default='../../configs/cls/flower/fc_vgg19_flower_cls.json', type=str,
+                        dest='configs', help='The file of the hyper parameters.')
     parser.add_argument('--phase', default='train', type=str,
                         dest='phase', help='The phase of Pose Estimator.')
     parser.add_argument('--gpu', default=[0, 1, 2, 3], nargs='+', type=int,
