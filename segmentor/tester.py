@@ -263,7 +263,7 @@ class Tester(object):
         return label_dst
 
     def test(self):
-        base_dir = os.path.join(self.configer.get('project_dir'), 'val/results', self.configer.get('dataset'))
+        base_dir = os.path.join(self.configer.get('project_dir'), 'results', self.configer.get('dataset'))
 
         test_img = self.configer.get('test', 'test_img')
         test_dir = self.configer.get('test', 'test_dir')
