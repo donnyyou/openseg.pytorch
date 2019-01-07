@@ -43,13 +43,13 @@ class ADE20KEvaluator(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The hypes file of pose.')
+    parser.add_argument('--configs', default=None, type=str,
+                        dest='configs', help='The configs file of pose.')
     parser.add_argument('--gt_dir', default=None, type=str,
                         dest='gt_dir', help='The groundtruth annotations.')
     parser.add_argument('--pred_dir', default=None, type=str,
                         dest='pred_dir', help='The label dir of predict annotations.')
     args = parser.parse_args()
 
-    ade20k_evaluator = ADE20KEvaluator(Configer(hypes_file=args.hypes_file))
+    ade20k_evaluator = ADE20KEvaluator(Configer(configs=args.configs))
     ade20k_evaluator.evaluate(args.pred_dir, args.gt_dir)

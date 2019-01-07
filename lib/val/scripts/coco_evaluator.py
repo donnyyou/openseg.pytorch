@@ -75,19 +75,19 @@ class CocoEvaluator(object):
 
 if __name__ == "__main__":
     # Example:
-    # python coco_evaluator.py --hypes ../../../../hypes/pose/coco/op_vgg19_coco_pose.json
+    # python coco_evaluator.py --configs ../../../../configs/pose/coco/op_vgg19_coco_pose.json
     #                          --json_dir ../../../results/pose/coco/test_dir/coco/json/
     #                          --gt_file /home/donny/DataSet/MSCOCO/annotations/person_instances_val2017.json
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The hypes file of pose.')
+    parser.add_argument('--configs', default=None, type=str,
+                        dest='configs', help='The configs file of pose.')
     parser.add_argument('--gt_file', default=None, type=str,
                         dest='gt_file', help='The groundtruth annotations file of coco instances.')
     parser.add_argument('--json_dir', default=None, type=str,
                         dest='json_dir', help='The json dir of predict annotations.')
     args = parser.parse_args()
 
-    coco_evaluator = CocoEvaluator(Configer(hypes_file=args.hypes_file))
+    coco_evaluator = CocoEvaluator(Configer(configs=args.configs))
     if args.gt_file is not None:
         pred_file, img_ids = coco_evaluator.relabel(args.json_dir)
         coco_evaluator.evaluate(pred_file, args.gt_file, img_ids)

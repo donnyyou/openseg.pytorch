@@ -36,6 +36,7 @@ class BasicBlock(nn.Module):
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
         self.relu = nn.ReLU(inplace=False)
+        self.relu_in = nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes, planes)
         self.bn2 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
         self.downsample = downsample
@@ -55,7 +56,7 @@ class BasicBlock(nn.Module):
             residual = self.downsample(x)
 
         out = out + residual
-        out = self.relu(out)
+        out = self.relu_in(out)
 
         return out
 
@@ -73,6 +74,7 @@ class Bottleneck(nn.Module):
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes * 4)
         self.relu = nn.ReLU(inplace=False)
+        self.relu_in = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
 
@@ -94,7 +96,7 @@ class Bottleneck(nn.Module):
             residual = self.downsample(x)
 
         out = out + residual
-        out = self.relu(out)
+        out = self.relu_in(out)
 
         return out
 

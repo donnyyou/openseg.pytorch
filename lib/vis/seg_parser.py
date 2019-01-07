@@ -79,8 +79,8 @@ class SegParser(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The file of the hyper parameters.')
+    parser.add_argument('--configs', default=None, type=str,
+                        dest='configs', help='The file of the hyper parameters.')
     parser.add_argument('--image_file', default=None, type=str,
                         dest='image_file', help='The image file of Seg Parser.')
     parser.add_argument('--label_file', default=None, type=str,
@@ -92,6 +92,6 @@ if __name__ == "__main__":
 
     args_parser = parser.parse_args()
 
-    seg_parser = SegParser(Configer(hypes_file=args_parser.hypes_file))
+    seg_parser = SegParser(Configer(configs=args_parser.configs))
     seg_parser.parse_img_seg(args_parser.image_file, args_parser.label_file)
     seg_parser.parse_dir_seg(args_parser.image_dir, args_parser.label_dir)
