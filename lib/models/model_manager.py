@@ -14,9 +14,13 @@ from lib.models.nets.deeplabv3 import DeepLabV3
 from lib.models.nets.denseassp import DenseASPP
 from lib.models.nets.fast_asp_ocnet import FastAspOCNet
 from lib.models.nets.fast_base_ocnet import FastBaseOCNet
+from lib.models.nets.proxy_base_ocnet import ProxyBaseOCNet
+from lib.models.nets.proxy_asp_ocnet import ProxyAspOCNet
 from lib.models.nets.pspnet import PSPNet
 from lib.models.nets.pyramid_ocnet import PyramidOCNet
 from lib.utils.tools.logger import Logger as Log
+
+from lib.models.nets.rainbow_fast_base_ocnet import RainbowFastBaseOCNet
 
 SEG_MODEL_DICT = {
     'deeplabv3': DeepLabV3,
@@ -26,7 +30,10 @@ SEG_MODEL_DICT = {
     'base_ocnet': BaseOCNet,
     'pyramid_ocnet': PyramidOCNet,
     'fast_base_ocnet': FastBaseOCNet,
-    'fast_asp_ocnet': FastAspOCNet
+    'rainbow_fast_base_ocnet': RainbowFastBaseOCNet,
+    'fast_asp_ocnet': FastAspOCNet,
+    'proxy_base_ocnet': ProxyBaseOCNet,
+    'proxy_asp_ocnet': ProxyAspOCNet,
 }
 
 

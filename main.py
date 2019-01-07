@@ -36,8 +36,8 @@ def str2bool(v):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes', default=None, type=str,
-                        dest='hypes', help='The file of the hyper parameters.')
+    parser.add_argument('--configs', default=None, type=str,
+                        dest='configs', help='The file of the hyper parameters.')
     parser.add_argument('--phase', default='train', type=str,
                         dest='phase', help='The phase of module.')
     parser.add_argument('--gpu', default=[0, 1, 2, 3], nargs='+', type=int,
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     # ***********  Params for env.  **********
     parser.add_argument('--seed', default=304, type=int, help='manual seed')
-    parser.add_argument('--cudnn', type=str2bool, nargs='?', default=False, help='Use CUDNN.')
+    parser.add_argument('--cudnn', type=str2bool, nargs='?', default=True, help='Use CUDNN.')
 
     args_parser = parser.parse_args()
     random.seed(args_parser.seed)

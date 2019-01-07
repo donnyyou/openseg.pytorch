@@ -10,6 +10,7 @@ from __future__ import print_function
 
 import time
 
+import pdb
 import cv2
 import numpy as np
 import torch
@@ -168,7 +169,8 @@ class Trainer(object):
 
             # Check to val the current model.
             if self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0:
-                self.__val()
+                pass
+                # self.__val()
 
         self.configer.plus_one('epoch')
 

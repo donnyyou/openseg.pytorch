@@ -35,11 +35,11 @@ class Configer(object):
             self.args_dict = args_parser.__dict__
             self.params_root = None
 
-            if not os.path.exists(args_parser.hypes):
-                print('Json Path:{} not exists!'.format(args_parser.hypes))
+            if not os.path.exists(args_parser.configs):
+                print('Json Path:{} not exists!'.format(args_parser.configs))
                 exit(1)
 
-            json_stream = open(args_parser.hypes, 'r')
+            json_stream = open(args_parser.configs, 'r')
             self.params_root = json.load(json_stream)
             json_stream.close()
 

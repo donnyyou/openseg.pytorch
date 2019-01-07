@@ -249,4 +249,3 @@ class ModuleRunner(object):
                 base_lr_list = scheduler.get_lr()
                 for backbone_index in backbone_list:
                     optimizer.param_groups[backbone_index]['lr'] = base_lr_list[backbone_index] * (lr_ratio ** 4)
-

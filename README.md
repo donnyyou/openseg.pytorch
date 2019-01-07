@@ -1,8 +1,8 @@
 # FastOCNet branch is used to maintain the experiments of fast-ocnet
-# OpenSeg: Open Source for Semantic Segmentation.
+# openseg.pytorch: open source benchmark for semantic segmentation.
 ```
 @misc{CV2018,
-  author =       {Donny You (youansheng@gmail.com)},
+  author =       {Ansheng You, Jianyuan Guo, Lang Huang, Yuhui Yuan},
   howpublished = {\url{https://github.com/youansheng/OpenSeg}},
   year =         {2018}
 }

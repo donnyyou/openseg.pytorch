@@ -146,7 +146,7 @@ class ResNet(nn.Module):
             downsample = nn.Sequential(
                 nn.Conv2d(self.inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
-                ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes * block.expansion),
+                ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes * block.expansion, affine =True),
             )
 
         layers = []
