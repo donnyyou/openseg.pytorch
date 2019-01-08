@@ -10,7 +10,7 @@
       "workers": 8
     },
    "train": {
-      "loader": "rs",
+      "loader": "ade20k",
       "batch_size": 4,
       "batch_per_gpu": 2,
       "data_transformer": {

@@ -3,11 +3,10 @@
 # Various helper methods and includes for Cityscapes
 #
 
-import json
+import os, sys, getopt
+import glob
 import math
-# Python imports
-import os
-import sys
+import json
 from collections import namedtuple
 
 # Image processing
@@ -35,8 +34,8 @@ except:
 
 # Cityscapes modules
 try:
-    from lib.val.scripts.cityscape import Annotation
-    from lib.val.scripts.cityscape import labels, name2label, id2label, trainId2label, category2labels
+    from lib.val.scripts.cityscapes.helpers.annotation import Annotation
+    from lib.val.scripts.cityscapes.helpers.labels import labels, name2label, id2label, trainId2label, category2labels
 except:
     print("Failed to find all Cityscapes modules")
     sys.exit(-1)
