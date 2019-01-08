@@ -169,7 +169,7 @@ if __name__ == "__main__":
              log_format=configer.get('logging', 'log_format'),
              rewrite=configer.get('logging', 'rewrite'))
 
-    Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
+    # Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     model = None
     if configer.get('method') == 'fcn_segmentor':
         if configer.get('phase') == 'train':

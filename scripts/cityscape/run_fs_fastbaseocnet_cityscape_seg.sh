@@ -24,8 +24,7 @@ if [ "$1"x == "train"x ]; then
                        --phase train --gathered n --loss_balance y --log_to_file n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --gpu 0 1 2 3 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
-                       --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}
-                        # > ${LOG_FILE} 2>&1
+                       --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL} > ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --configs configs/cityscape/fs_ocnet_cityscape_seg.json --drop_last y \

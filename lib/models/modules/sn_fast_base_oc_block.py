@@ -15,6 +15,7 @@ from torch.nn import functional as F
 
 from lib.models.tools.module_helper import ModuleHelper
 
+GLOBAL_BN='sn'
 
 class _ObjectAttentionBlock(nn.Module):
     '''
@@ -39,28 +40,28 @@ class _ObjectAttentionBlock(nn.Module):
         self.f_pixel = nn.Sequential(
             nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
                 kernel_size=1, stride=1, padding=0),
-            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=GLOBAL_BN),
             nn.Conv2d(in_channels=self.key_channels, out_channels=self.key_channels,
                 kernel_size=1, stride=1, padding=0),
-            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=GLOBAL_BN),
         )
         self.f_object = nn.Sequential(
             nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
                 kernel_size=1, stride=1, padding=0),
-            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=GLOBAL_BN),
             nn.Conv2d(in_channels=self.key_channels, out_channels=self.key_channels,
                 kernel_size=1, stride=1, padding=0),
-            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=GLOBAL_BN),
         )
         self.f_down = nn.Sequential(
             nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
                 kernel_size=1, stride=1, padding=0, bias=False),
-            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=GLOBAL_BN),
         )
         self.f_up = nn.Sequential(
             nn.Conv2d(in_channels=self.key_channels, out_channels=self.in_channels,
                 kernel_size=1, stride=1, padding=0, bias=False),
-            ModuleHelper.BNReLU(self.in_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(self.in_channels, bn_type=GLOBAL_BN),
         )
         nn.init.constant(self.f_up[0].weight, 0)
 
@@ -105,7 +106,7 @@ class FastBaseOC_Module(nn.Module):
         self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale=1, bn_type=bn_type)
         self.conv_bn_dropout = nn.Sequential(
             nn.Conv2d(2*in_channels, in_channels, kernel_size=1, padding=0),
-            ModuleHelper.BNReLU(in_channels, bn_type=bn_type),
+            ModuleHelper.BNReLU(in_channels, bn_type=GLOBAL_BN),
             nn.Dropout2d(dropout)
         )
 

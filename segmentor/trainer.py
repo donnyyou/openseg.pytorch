@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.backends.cudnn as cudnn
 
 from lib.utils.tools.average_meter import AverageMeter
 from lib.datasets.seg_data_loader import SegDataLoader
@@ -169,8 +170,7 @@ class Trainer(object):
 
             # Check to val the current model.
             if self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0:
-                pass
-                # self.__val()
+                self.__val()
 
         self.configer.plus_one('epoch')
 
@@ -232,7 +232,7 @@ class Trainer(object):
             self.seg_running_score.update(labelmap[None], ori_target[None])
 
     def train(self):
-        # cudnn.benchmark = True
+        cudnn.benchmark = True
         if self.configer.get('network', 'resume') is not None and self.configer.get('network', 'resume_val'):
             self.__val()
 

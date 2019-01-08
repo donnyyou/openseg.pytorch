@@ -49,3 +49,36 @@ class FastAspOCNet(nn.Module):
         x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         return x_dsn, x
 
+class FastAspOCNet2x(nn.Module):
+    def __init__(self, configer):
+        self.inplanes = 128
+        super(FastAspOCNet2x, self).__init__()
+        self.configer = configer
+        self.num_classes = self.configer.get('data', 'num_classes')
+        self.backbone = BackboneSelector(configer).get_backbone()
+
+        # extra added layers
+        self.down = nn.Sequential(
+            nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            )
+        # self.object_head = ObjectContext_Module(num_classes)
+        from lib.models.modules.fast_asp_oc_block import Fast_ASP_OC_Module_2x
+        self.fast_oc_head = Fast_ASP_OC_Module_2x(512, 512, num_classes=self.num_classes,
+                                               bn_type=self.configer.get('network', 'bn_type'))
+        self.head = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+        self.dsn_head = nn.Sequential(
+            nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+            )
+
+    def forward(self, x_):
+        x = self.backbone(x_)
+        x_dsn = self.dsn_head(x[-2])
+        x = self.down(x[-1])
+        x = self.fast_oc_head(x, x_dsn)
+        x = self.head(x)
+        x_dsn = F.interpolate(x_dsn, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        return x_dsn, x

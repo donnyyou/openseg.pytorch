@@ -39,6 +39,13 @@ class ModuleHelper(object):
         elif bn_type == 'inplace_abn':
             from lib.extensions.inplace_abn.bn import InPlaceABNSync
             return InPlaceABNSync(num_features, **kwargs)
+        elif bn_type == 'sn':
+            from lib.extensions.sn.switchable_norm import SwitchNorm2d
+            return nn.Sequential(
+                SwitchNorm2d(num_features, **kwargs),
+                nn.ReLU(inplace=True)
+            )
+
         else:
             Log.error('Not support BN type: {}.'.format(bn_type))
             exit(1)
@@ -60,6 +67,10 @@ class ModuleHelper(object):
                     return InPlaceABNSync
 
                 return functools.partial(InPlaceABNSync, activation='none')
+
+        elif bn_type == 'sn':
+            from lib.extensions.sn.switchable_norm import SwitchNorm2d
+            return SwitchNorm2d
 
         else:
             Log.error('Not support BN type: {}.'.format(bn_type))

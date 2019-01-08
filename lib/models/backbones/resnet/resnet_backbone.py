@@ -46,7 +46,7 @@ class NormalResnetBackbone(nn.Module):
 
 
 class DilatedResnetBackbone(nn.Module):
-    def __init__(self, orig_resnet, dilate_scale=8, multi_grid=(1, 2, 4)):
+    def __init__(self, orig_resnet, dilate_scale=8, multi_grid=(1, 1, 1)):
         super(DilatedResnetBackbone, self).__init__()
 
         self.num_features = 2048
