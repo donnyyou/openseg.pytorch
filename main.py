@@ -145,7 +145,8 @@ if __name__ == "__main__":
     random.seed(args_parser.seed)
     torch.manual_seed(args_parser.seed)
 
-    cudnn.enabled = args_parser.cudnn
+    cudnn.enabled = True
+    cudnn.benchmark = args_parser.cudnn
 
     configer = Configer(args_parser=args_parser)
     abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
