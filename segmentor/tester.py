@@ -18,7 +18,7 @@ from PIL import Image
 from lib.utils.helpers.file_helper import FileHelper
 from lib.utils.helpers.image_helper import ImageHelper
 from lib.vis.seg_visualizer import SegVisualizer
-from lib.datasets.seg_data_loader import SegDataLoader
+from lib.datasets.data_loader import DataLoader
 from lib.models.model_manager import ModelManager
 from lib.utils.tools.logger import Logger as Log
 from lib.vis.seg_parser import SegParser
@@ -33,7 +33,7 @@ class Tester(object):
         self.seg_visualizer = SegVisualizer(configer)
         self.seg_parser = SegParser(configer)
         self.seg_model_manager = ModelManager(configer)
-        self.seg_data_loader = SegDataLoader(configer)
+        self.seg_data_loader = DataLoader(configer)
         self.module_runner = ModuleRunner(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.seg_net = None

@@ -19,7 +19,7 @@ from lib.extensions.parallel.data_container import DataContainer
 from lib.utils.tools.logger import Logger as Log
 
 
-class RSDataLoader(data.Dataset):
+class ADE20KLoader(data.Dataset):
     def __init__(self, root_dir, aug_transform=None, dataset=None,
                  img_transform=None, label_transform=None, configer=None):
         self.configer = configer

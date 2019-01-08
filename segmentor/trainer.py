@@ -16,7 +16,7 @@ import torch
 import torch.nn as nn
 
 from lib.utils.tools.average_meter import AverageMeter
-from lib.datasets.seg_data_loader import SegDataLoader
+from lib.datasets.data_loader import DataLoader
 from lib.loss.loss_manager import LossManager
 from lib.models.model_manager import ModelManager
 from lib.utils.tools.logger import Logger as Log
@@ -41,7 +41,7 @@ class Trainer(object):
         self.seg_loss_manager = LossManager(configer)
         self.module_runner = ModuleRunner(configer)
         self.seg_model_manager = ModelManager(configer)
-        self.seg_data_loader = SegDataLoader(configer)
+        self.seg_data_loader = DataLoader(configer)
         self.optim_scheduler = OptimScheduler(configer)
 
         self.seg_net = None
@@ -134,7 +134,7 @@ class Trainer(object):
             # outputs = self.module_utilizer.gather(outputs)
             # Compute the loss of the train batch & backward.
             loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
-            if self.configer.exists('train', 'loader') and self.configer.get('train', 'loader') == 'rs':
+            if self.configer.exists('train', 'loader') and self.configer.get('train', 'loader') == 'ade20k':
                 batch_size = self.configer.get('train', 'batch_size')*self.configer.get('train', 'batch_per_gpu')
                 self.train_losses.update(loss.item(), batch_size)
             else:
