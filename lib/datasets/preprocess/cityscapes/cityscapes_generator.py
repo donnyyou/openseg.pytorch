@@ -29,7 +29,7 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Unsupported value encountered.')
 
 
-class CityscapeSegGenerator(object):
+class CityscapesGenerator(object):
 
     def __init__(self, args, image_dir=IMAGE_DIR, label_dir=LABEL_DIR):
         self.args = args
@@ -131,9 +131,9 @@ if __name__ == "__main__":
     parser.add_argument('--save_dir', default=None, type=str,
                         dest='save_dir', help='The directory to save the data.')
     parser.add_argument('--ori_root_dir', default=None, type=str,
-                        dest='ori_root_dir', help='The directory of the cityscape data.')
+                        dest='ori_root_dir', help='The directory of the cityscapes data.')
 
     args = parser.parse_args()
 
-    cityscape_seg_generator = CityscapeSegGenerator(args)
-    cityscape_seg_generator.generate_label()
+    cityscapes_generator = CityscapesGenerator(args)
+    cityscapes_generator.generate_label()

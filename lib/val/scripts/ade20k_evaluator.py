@@ -11,13 +11,13 @@ import numpy as np
 from lib.utils.helpers.image_helper import ImageHelper
 from lib.utils.tools.logger import Logger as Log
 from lib.utils.tools.configer import Configer
-from lib.val.scripts.seg_running_score import SegRunningScore
+from lib.val.scripts.running_score import RunningScore
 
 
 class ADE20KEvaluator(object):
     def __init__(self, configer):
         self.configer = configer
-        self.seg_running_score = SegRunningScore(configer)
+        self.seg_running_score = RunningScore(configer)
 
     def relabel(self, labelmap):
 

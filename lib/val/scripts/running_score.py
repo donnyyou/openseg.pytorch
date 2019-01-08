@@ -11,7 +11,7 @@ from __future__ import print_function
 import numpy as np
 
 
-class SegRunningScore(object):
+class RunningScore(object):
 
     def __init__(self, configer):
         self.configer = configer

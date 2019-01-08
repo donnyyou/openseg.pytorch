@@ -18,7 +18,7 @@ LABEL_DIR = 'label'
 IMAGE_DIR = 'image'
 
 
-class ADE20KSegGenerator(object):
+class ADE20KGenerator(object):
     def __init__(self, args, image_dir=IMAGE_DIR, label_dir=LABEL_DIR):
         self.args = args
         self.train_label_dir = os.path.join(self.args.save_dir, 'train', label_dir)
@@ -77,9 +77,9 @@ if __name__ == "__main__":
     parser.add_argument('--save_dir', default=None, type=str,
                         dest='save_dir', help='The directory to save the data.')
     parser.add_argument('--ori_root_dir', default=None, type=str,
-                        dest='ori_root_dir', help='The directory of the cityscape data.')
+                        dest='ori_root_dir', help='The directory of the cityscapes data.')
 
     args = parser.parse_args()
 
-    ade20k_seg_generator = ADE20KSegGenerator(args)
-    ade20k_seg_generator.generate_label()
+    ade20k_generator = ADE20KGenerator(args)
+    ade20k_generator.generate_label()

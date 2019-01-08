@@ -8,5 +8,5 @@ ORI_ROOT_DIR='/home/donny/DataSet/ADE20K'
 SAVE_DIR='/home/donny/DataSet/ADE20K'
 
 
-python ade20k_seg_generator.py --ori_root_dir $ORI_ROOT_DIR \
-                               --save_dir $SAVE_DIR
+python ade20k_generator.py --ori_root_dir $ORI_ROOT_DIR \
+                           --save_dir $SAVE_DIR

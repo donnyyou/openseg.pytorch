@@ -20,7 +20,7 @@ from lib.datasets.data_loader import DataLoader
 from lib.loss.loss_manager import LossManager
 from lib.models.model_manager import ModelManager
 from lib.utils.tools.logger import Logger as Log
-from lib.val.scripts.seg_running_score import SegRunningScore
+from lib.val.scripts.running_score import RunningScore
 from lib.vis.seg_visualizer import SegVisualizer
 from segmentor.tools.module_runner import ModuleRunner
 from segmentor.tools.optim_scheduler import OptimScheduler
@@ -36,12 +36,12 @@ class Trainer(object):
         self.data_time = AverageMeter()
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
-        self.seg_running_score = SegRunningScore(configer)
+        self.running_score = RunningScore(configer)
         self.seg_visualizer = SegVisualizer(configer)
-        self.seg_loss_manager = LossManager(configer)
+        self.loss_manager = LossManager(configer)
         self.module_runner = ModuleRunner(configer)
-        self.seg_model_manager = ModelManager(configer)
-        self.seg_data_loader = DataLoader(configer)
+        self.model_manager = ModelManager(configer)
+        self.data_loader = DataLoader(configer)
         self.optim_scheduler = OptimScheduler(configer)
 
         self.seg_net = None
@@ -53,7 +53,7 @@ class Trainer(object):
         self._init_model()
 
     def _init_model(self):
-        self.seg_net = self.seg_model_manager.semantic_segmentor()
+        self.seg_net = self.model_manager.semantic_segmentor()
         self.seg_net = self.module_runner.load_net(self.seg_net)
 
         Log.info('Params Group Method: {}'.format(self.configer.get('optim', 'group_method')))
@@ -65,10 +65,10 @@ class Trainer(object):
 
         self.optimizer, self.scheduler = self.optim_scheduler.init_optimizer(params_group)
 
-        self.train_loader = self.seg_data_loader.get_trainloader()
-        self.val_loader = self.seg_data_loader.get_valloader()
+        self.train_loader = self.data_loader.get_trainloader()
+        self.val_loader = self.data_loader.get_valloader()
 
-        self.pixel_loss = self.seg_loss_manager.get_seg_loss()
+        self.pixel_loss = self.loss_manager.get_seg_loss()
 
     @staticmethod
     def group_weight(module):
@@ -201,7 +201,7 @@ class Trainer(object):
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()
 
-        self.configer.update(['performance'], self.seg_running_score.get_mean_iou())
+        self.configer.update(['performance'], self.running_score.get_mean_iou())
         self.configer.update(['val_loss'], self.val_losses.avg)
         self.module_runner.save_net(self.seg_net, save_mode='performance')
         self.module_runner.save_net(self.seg_net, save_mode='val_loss')
@@ -211,11 +211,11 @@ class Trainer(object):
             'Test Time {batch_time.sum:.3f}s, ({batch_time.avg:.3f})\t'
             'Loss {loss.avg:.8f}\n'.format(
                 batch_time=self.batch_time, loss=self.val_losses))
-        Log.info('Mean IOU: {}\n'.format(self.seg_running_score.get_mean_iou()))
-        Log.info('Pixel ACC: {}\n'.format(self.seg_running_score.get_pixel_acc()))
+        Log.info('Mean IOU: {}\n'.format(self.running_score.get_mean_iou()))
+        Log.info('Pixel ACC: {}\n'.format(self.running_score.get_pixel_acc()))
         self.batch_time.reset()
         self.val_losses.reset()
-        self.seg_running_score.reset()
+        self.running_score.reset()
         self.seg_net.train()
 
     def _update_running_score(self, pred, metas):
@@ -227,7 +227,7 @@ class Trainer(object):
             total_logits = cv2.resize(pred[i, :border_size[1], :border_size[0]].cpu().numpy(),
                                       tuple(ori_img_size), interpolation=cv2.INTER_CUBIC)
             labelmap = np.argmax(total_logits, axis=-1)
-            self.seg_running_score.update(labelmap[None], ori_target[None])
+            self.running_score.update(labelmap[None], ori_target[None])
 
     def train(self):
         # cudnn.benchmark = True
@@ -237,8 +237,8 @@ class Trainer(object):
         while self.configer.get('iters') < self.configer.get('solver', 'max_iters'):
             self.__train()
 
-        self.__val(data_loader=self.seg_data_loader.get_valloader(dataset='val'))
-        self.__val(data_loader=self.seg_data_loader.get_valloader(dataset='train'))
+        self.__val(data_loader=self.data_loader.get_valloader(dataset='val'))
+        self.__val(data_loader=self.data_loader.get_valloader(dataset='train'))
 
 
 if __name__ == "__main__":
