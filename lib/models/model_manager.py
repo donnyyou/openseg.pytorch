@@ -16,7 +16,6 @@ from lib.models.nets.fast_asp_ocnet import FastAspOCNet
 from lib.models.nets.fast_base_ocnet import FastBaseOCNet
 from lib.models.nets.pspnet import PSPNet
 from lib.models.nets.pyramid_ocnet import PyramidOCNet
-from lib.models.nets.test_fast_ocnet import RainbowFastBaseOCNet
 from lib.utils.tools.logger import Logger as Log
 
 SEG_MODEL_DICT = {
@@ -28,7 +27,6 @@ SEG_MODEL_DICT = {
     'pyramid_ocnet': PyramidOCNet,
     'fast_base_ocnet': FastBaseOCNet,
     'fast_asp_ocnet': FastAspOCNet,
-    'test_fast_ocnet': RainbowFastBaseOCNet
 }
 
 
