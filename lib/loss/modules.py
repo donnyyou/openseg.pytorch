@@ -188,17 +188,10 @@ class FSAuxOhemCELoss(nn.Module):
     def forward(self, inputs, targets, **kwargs):
         aux_out, seg_out = inputs
         seg_loss = self.ohem_ce_loss(seg_out, targets)
-        aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
-        aux_loss = self.ce_loss(aux_out, aux_targets)
+        aux_loss = self.ce_loss(aux_out, targets)
         loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
         loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
         return loss
-
-    @staticmethod
-    def _scale_target(targets_, scaled_size):
-        targets = targets_.clone().unsqueeze(1).float()
-        targets = F.interpolate(targets, size=scaled_size, mode='nearest')
-        return targets.squeeze(1).long()
 
 
 class FSAuxCELoss(nn.Module):
@@ -210,8 +203,7 @@ class FSAuxCELoss(nn.Module):
     def forward(self, inputs, targets, **kwargs):
         aux_out, seg_out = inputs
         seg_loss = self.ce_loss(seg_out, targets)
-        aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
-        aux_loss = self.ce_loss(aux_out, aux_targets)
+        aux_loss = self.ce_loss(aux_out, targets)
         loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
         loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
         return loss
@@ -233,11 +225,10 @@ class FSAuxEncCELoss(nn.Module):
     def forward(self, outputs, targets, **kwargs):
         aux_out, enc_out, seg_out = outputs
         seg_loss = self.ce_loss(seg_out, targets)
-        aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
-        aux_loss = self.ce_loss(aux_out, aux_targets)
+        aux_loss = self.ce_loss(aux_out, targets)
         loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
         loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
-        enc_loss = self.enc_loss(enc_out, aux_targets, self.configer.get('network', 'enc_size'))
+        enc_loss = self.enc_loss(enc_out, targets, self.configer.get('network', 'enc_size'))
         loss = loss + self.configer.get('network', 'loss_weights')['enc_loss'] * enc_loss
         return loss
 
@@ -282,6 +273,7 @@ class FSEncLoss(nn.Module):
         self.bce_loss = nn.BCELoss(weight, reduction=reduction)
 
     def forward(self, preds, targets, grid_size=None, **kwargs):
+        targets = self._scale_target(targets, (preds.size(2), preds.size(3)))
         if len(targets.size()) == 2:
             return self.bce_loss(F.sigmoid(preds), targets)
 
@@ -314,6 +306,12 @@ class FSEncLoss(nn.Module):
             tvect[i] = vect
 
         return tvect
+
+    @staticmethod
+    def _scale_target(targets_, scaled_size):
+        targets = targets_.clone().unsqueeze(1).float()
+        targets = F.interpolate(targets, size=scaled_size, mode='nearest')
+        return targets.squeeze(1).long()
 
 
 class FSEmbedLoss(nn.Module):
