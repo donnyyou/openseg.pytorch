@@ -138,12 +138,14 @@ if __name__ == "__main__":
                         dest='test:out_dir', help='The test out directory of images.')
 
     # ***********  Params for env.  **********
-    parser.add_argument('--seed', default=304, type=int, help='manual seed')
+    parser.add_argument('--seed', default=None, type=int, help='manual seed')
     parser.add_argument('--cudnn', type=str2bool, nargs='?', default=True, help='Use CUDNN.')
 
     args_parser = parser.parse_args()
-    random.seed(args_parser.seed)
-    torch.manual_seed(args_parser.seed)
+
+    if args_parser.seed is not None:
+        random.seed(args_parser.seed)
+        torch.manual_seed(args_parser.seed)
 
     cudnn.enabled = True
     cudnn.benchmark = args_parser.cudnn
