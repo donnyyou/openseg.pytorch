@@ -42,7 +42,7 @@ class ADE20KLoader(data.Dataset):
         label_out = [labelmap]
         for i in range(self.configer.get('train', 'batch_per_gpu')-1):
             while True:
-                cur_index = (cur_index + random.randint(0, len(self.img_list) - 1)) % len(self.img_list)
+                cur_index = (cur_index + random.randint(1, len(self.img_list) - 1)) % len(self.img_list)
                 now_img_size = self.size_list[cur_index]
                 now_mark = 0 if now_img_size[0] > now_img_size[1] else 1
                 mark = 0 if img_size[0] > img_size[1] else 1

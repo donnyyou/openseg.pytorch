@@ -140,8 +140,8 @@ class ModuleHelper(object):
 
     @staticmethod
     def kaiming_init(module,
-                     mode='fan_out',
-                     nonlinearity='relu',
+                     mode='fan_in',
+                     nonlinearity='leaky_relu',
                      bias=0,
                      distribution='normal'):
         assert distribution in ['uniform', 'normal']
