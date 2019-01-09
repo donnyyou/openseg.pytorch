@@ -43,10 +43,9 @@ elif [ "$1"x == "val"x ]; then
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --log_to_file n --out_dir val >> ${LOG_FILE} 2>&1
-  cd lib/val/scripts
-  ${PYTHON} -u cityscapes_evaluator.py --configs_file ../../../configs/cityscapes/fs_ocnet_cityscapes_seg.json \
-                                      --pred_dir ../../../results/cityscapes/test_dir/${CHECKPOINTS_NAME}/val/label \
-                                      --gt_dir ${DATA_DIR}/val/label  >> "../../../"${LOG_FILE} 2>&1
+  cd lib/metrics
+  ${PYTHON} -u cityscapes_evaluator.py --pred_dir ../../results/cityscapes/test_dir/${CHECKPOINTS_NAME}/val/label \
+                                       --gt_dir ${DATA_DIR}/val/label  >> "../../"${LOG_FILE} 2>&1
 
 elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u main.py --configs configs/cityscapes/fs_ocnet_cityscapes_seg.json \
