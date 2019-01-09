@@ -43,10 +43,10 @@ elif [ "$1"x == "val"x ]; then
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --phase test --gpu 0 --resume ./checkpoints/ade20k/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --log_to_file n --out_dir val >> ${LOG_FILE} 2>&1
-  cd lib/val/scripts
-  ${PYTHON} -u ade20k_evaluator.py --configs_file ../../../configs/ade20k/fs_deeplabv3_ade20k_torch_seg.json \
-                                   --pred_dir ../../../results/ade20k/test_dir/${CHECKPOINTS_NAME}/val/label \
-                                   --gt_dir ${DATA_DIR}/val/label  >> "../../../"${LOG_FILE} 2>&1
+  cd lib/metrics
+  ${PYTHON} -u ade20k_evaluator.py --configs ../../configs/ade20k/fs_ocnet_ade20k_seg.json \
+                                   --pred_dir ../../results/ade20k/test_dir/${CHECKPOINTS_NAME}/val/label \
+                                   --gt_dir ${DATA_DIR}/val/label  >> "../../"${LOG_FILE} 2>&1
 else
   echo "$1"x" is invalid..."
 fi

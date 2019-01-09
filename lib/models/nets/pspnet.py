@@ -82,11 +82,12 @@ class PSPNet(nn.Sequential):
 
     def forward(self, x_):
         x = self.backbone(x_)
-        aux = self.dsn(x[-2])
+        aux_x = self.dsn(x[-2])
         x = self.ppm(x[-1])
         x = self.cls(x)
+        aux_x = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
-        return aux, x
+        return aux_x, x
 
 
 if __name__ == '__main__':

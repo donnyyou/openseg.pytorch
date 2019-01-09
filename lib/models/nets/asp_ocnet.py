@@ -37,6 +37,17 @@ class AspOCNet(nn.Module):
             nn.Dropout2d(0.10),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )
+        self.context.apply(self.weights_init)
+        self.cls.apply(self.weights_init)
+        self.dsn.apply(self.weights_init)
+
+    def weights_init(self, m):
+        classname = m.__class__.__name__
+        if classname.find('Conv') != -1:
+            nn.init.kaiming_normal_(m.weight.data)
+        elif classname.find('BatchNorm') != -1:
+            m.weight.data.fill_(1.)
+            m.bias.data.fill_(1e-4)
 
     def forward(self, x_):
         x = self.backbone(x_)

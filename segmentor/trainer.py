@@ -20,7 +20,7 @@ from lib.datasets.data_loader import DataLoader
 from lib.loss.loss_manager import LossManager
 from lib.models.model_manager import ModelManager
 from lib.utils.tools.logger import Logger as Log
-from lib.val.scripts.running_score import RunningScore
+from lib.metrics.running_score import RunningScore
 from lib.vis.seg_visualizer import SegVisualizer
 from segmentor.tools.module_runner import ModuleRunner
 from segmentor.tools.optim_scheduler import OptimScheduler

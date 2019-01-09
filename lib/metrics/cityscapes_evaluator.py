@@ -18,7 +18,7 @@ except ImportError:
     izip = zip
 
 # Cityscapes imports
-from lib.val.scripts.cityscapes.evaluation.csHelpers import *
+from lib.metrics.cityscapes.evaluation.csHelpers import *
 
 # C Support
 # Enable the cython support for faster evaluation, this is necessary for speeding up your model results
@@ -27,7 +27,7 @@ CSUPPORT = True
 # Check if C-Support is available for better performance
 if CSUPPORT:
     try:
-        import lib.val.scripts.cityscapes.evaluation.addToConfusionMatrix as addToConfusionMatrix
+        import lib.metrics.cityscapes.evaluation.addToConfusionMatrix as addToConfusionMatrix
     except:
         CSUPPORT = False
 
@@ -49,7 +49,7 @@ class CArgs(object):
         else:
             self.exportFile = os.path.join(out_path, "evaluationResults", "resultPixelLevelSemanticLabeling.json")
         # Parameters that should be modified by user
-        self.groundTruthSearch  = os.path.join( self.cityscapesPath, "*", "*_gtFine_labelIds.png" )
+        self.groundTruthSearch  = os.path.join( self.cityscapesPath, "*.png" )
 
         # Remaining params
         self.evalInstLevelScore = True
