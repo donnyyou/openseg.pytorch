@@ -11,7 +11,7 @@ import numpy as np
 from lib.utils.helpers.image_helper import ImageHelper
 from lib.utils.tools.logger import Logger as Log
 from lib.utils.tools.configer import Configer
-from lib.val.scripts.running_score import RunningScore
+from lib.metrics.running_score import RunningScore
 
 
 class ADE20KEvaluator(object):

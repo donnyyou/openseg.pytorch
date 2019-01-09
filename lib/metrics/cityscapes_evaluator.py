@@ -18,7 +18,7 @@ except ImportError:
     izip = zip
 
 # Cityscapes imports
-from lib.val.scripts.cityscapes.evaluation.csHelpers import *
+from lib.metrics.cityscapes.evaluation.csHelpers import *
 
 # C Support
 # Enable the cython support for faster evaluation, this is necessary for speeding up your model results
@@ -27,7 +27,7 @@ CSUPPORT = True
 # Check if C-Support is available for better performance
 if CSUPPORT:
     try:
-        import lib.val.scripts.cityscapes.evaluation.addToConfusionMatrix as addToConfusionMatrix
+        import lib.metrics.cityscapes.evaluation.addToConfusionMatrix as addToConfusionMatrix
     except:
         CSUPPORT = False
 
