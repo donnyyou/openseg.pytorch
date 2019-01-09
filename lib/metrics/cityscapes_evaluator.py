@@ -49,7 +49,7 @@ class CArgs(object):
         else:
             self.exportFile = os.path.join(out_path, "evaluationResults", "resultPixelLevelSemanticLabeling.json")
         # Parameters that should be modified by user
-        self.groundTruthSearch  = os.path.join( self.cityscapesPath, "*", "*.png" )
+        self.groundTruthSearch  = os.path.join( self.cityscapesPath, "*.png" )
 
         # Remaining params
         self.evalInstLevelScore = True
