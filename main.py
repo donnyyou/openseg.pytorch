@@ -176,8 +176,10 @@ if __name__ == "__main__":
             from segmentor.trainer import Trainer
             model = Trainer(configer)
         else:
-            from segmentor.tester import Tester
-            model = Tester(configer)
+            # from segmentor.tester import Tester
+            # model = Tester(configer)
+            from segmentor.tester_mul_gpu import TesterMulGPU
+            model = TesterMulGPU(configer)
 
     else:
         Log.error('Method: {} is not valid.'.format(configer.get('task')))

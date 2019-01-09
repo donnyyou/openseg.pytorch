@@ -36,6 +36,8 @@ def stack(batch, data_key=None, return_dc=False):
 
 def collate(batch, trans_dict):
     data_keys = batch[0].keys()
+    # Log.info('collate data_keys: {}, trans_dict: {}\n'.format(data_keys, trans_dict))
+
     if trans_dict['size_mode'] == 'ade20k':
         return dict({key: stack(batch, data_key=key, return_dc=True) for key in data_keys})
 

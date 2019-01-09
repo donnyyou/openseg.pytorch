@@ -13,7 +13,7 @@ from torch.utils import data
 import lib.datasets.tools.transforms as trans
 import lib.datasets.tools.cv2_aug_transforms as cv2_aug_trans
 import lib.datasets.tools.pil_aug_transforms as pil_aug_trans
-from lib.datasets.fs_data_loader import FSDataLoader
+from lib.datasets.fs_data_loader import FSDataLoader, FSDataTestLoader
 from lib.datasets.rs_data_loader import RSDataLoader
 from lib.datasets.tools.collate import collate
 from lib.utils.tools.logger import Logger as Log
@@ -98,6 +98,27 @@ class SegDataLoader(object):
                 num_workers=self.configer.get('data', 'workers'), shuffle=False,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('val', 'data_transformer')
+                )
+            )
+
+            return valloader
+
+        else:
+            Log.error('Method: {} loader is invalid.'.format(self.configer.get('method')))
+            return None
+
+    def get_testloader(self, dataset=None):
+        # def __init__(self, root_dir, dataset=None, img_transform=None, configer=None):
+        dataset = 'test' if dataset is None else dataset
+        if self.configer.get('method') == 'fcn_segmentor':
+            valloader = data.DataLoader(
+                FSDataTestLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
+                             img_transform=self.img_transform,
+                             configer=self.configer),
+                batch_size=self.configer.get('test', 'batch_size'), pin_memory=True,
+                num_workers=self.configer.get('data', 'workers'), shuffle=False,
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('test', 'data_transformer')
                 )
             )
 

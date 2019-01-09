@@ -8,6 +8,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from lib.models.nets.a2net import A2Net
+from lib.models.nets.fcnet import FcnNet
 from lib.models.nets.asp_ocnet import AspOCNet
 from lib.models.nets.base_ocnet import BaseOCNet
 from lib.models.nets.deeplabv3 import DeepLabV3
@@ -24,6 +26,8 @@ from lib.utils.tools.logger import Logger as Log
 
 
 SEG_MODEL_DICT = {
+    'a2net': A2Net,
+    'fcnet': FcnNet,
     'deeplabv3': DeepLabV3,
     'pspnet': PSPNet,
     'denseaspp': DenseASPP,

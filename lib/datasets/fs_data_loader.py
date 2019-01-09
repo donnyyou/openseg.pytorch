@@ -24,7 +24,7 @@ class FSDataLoader(data.Dataset):
         self.aug_transform = aug_transform
         self.img_transform = img_transform
         self.label_transform = label_transform
-        self.img_list, self.label_list = self.__list_dirs(root_dir, dataset)
+        self.img_list, self.label_list, self.name_list = self.__list_dirs(root_dir, dataset)
 
     def __len__(self):
         return len(self.img_list)
@@ -65,6 +65,7 @@ class FSDataLoader(data.Dataset):
             img=DataContainer(img, stack=True),
             labelmap=DataContainer(labelmap, stack=True),
             meta=DataContainer(meta, stack=False, cpu_only=True),
+            name=self.name_list[index],
         )
 
     def _reduce_zero_label(self, labelmap):
@@ -95,12 +96,13 @@ class FSDataLoader(data.Dataset):
     def __list_dirs(self, root_dir, dataset):
         img_list = list()
         label_list = list()
+        name_list = list()
         image_dir = os.path.join(root_dir, dataset, 'image')
         label_dir = os.path.join(root_dir, dataset, 'label')
         img_extension = os.listdir(image_dir)[0].split('.')[-1]
 
         for file_name in os.listdir(label_dir):
-            image_name = '.'.join(file_name.split('.')[:-1])
+            image_name = file_name.split('.')[0]
             img_path = os.path.join(image_dir, '{}.{}'.format(image_name, img_extension))
             label_path = os.path.join(label_dir, file_name)
             if not os.path.exists(label_path) or not os.path.exists(img_path):
@@ -109,12 +111,13 @@ class FSDataLoader(data.Dataset):
 
             img_list.append(img_path)
             label_list.append(label_path)
+            name_list.append(image_name)
 
         if dataset == 'train' and self.configer.get('data', 'include_val'):
             image_dir = os.path.join(root_dir, 'val/image')
             label_dir = os.path.join(root_dir, 'val/label')
             for file_name in os.listdir(label_dir):
-                image_name = '.'.join(file_name.split('.')[:-1])
+                image_name = file_name.split('.')[0]
                 img_path = os.path.join(image_dir, '{}.{}'.format(image_name, img_extension))
                 label_path = os.path.join(label_dir, file_name)
                 if not os.path.exists(label_path) or not os.path.exists(img_path):
@@ -123,9 +126,54 @@ class FSDataLoader(data.Dataset):
 
                 img_list.append(img_path)
                 label_list.append(label_path)
+                name_list.append(image_name)
 
-        return img_list, label_list
+        return img_list, label_list, name_list
 
+
+class FSDataTestLoader(data.Dataset):
+    def __init__(self, root_dir, dataset=None, img_transform=None, configer=None):
+        self.configer = configer
+        self.img_transform = img_transform
+        self.img_list, self.name_list = self.__list_dirs(root_dir, dataset)
+
+    def __len__(self):
+        return len(self.img_list)
+
+    def __getitem__(self, index):
+        img = ImageHelper.read_image(self.img_list[index],
+                                     tool=self.configer.get('data', 'image_tool'),
+                                     mode=self.configer.get('data', 'input_mode'))
+        img_size = ImageHelper.get_size(img)
+        if self.img_transform is not None:
+            img = self.img_transform(img)
+        meta = dict(
+            ori_img_size=img_size,
+        )
+        return dict(
+            img=DataContainer(img, stack=True),
+            meta=DataContainer(meta, stack=False, cpu_only=True),
+            name=self.name_list[index],
+        )
+
+    def __list_dirs(self, root_dir, dataset):
+        img_list = list()
+        name_list = list()
+        image_dir = os.path.join(root_dir, dataset)
+        img_extension = os.listdir(image_dir)[0].split('.')[-1]
+
+        for item in os.listdir(image_dir):
+            sub_image_dir = os.path.join(image_dir, item)
+            for file_name in os.listdir(sub_image_dir):
+                image_name = file_name.split('.')[0]
+                img_path = os.path.join(sub_image_dir, file_name)
+                if not os.path.exists(img_path):
+                    Log.error('Image Path: {} not exists.'.format(img_path))
+                    continue
+                img_list.append(img_path)
+                name_list.append(image_name)
+
+        return img_list, name_list
 
 if __name__ == "__main__":
     # Test cityscapes loader.

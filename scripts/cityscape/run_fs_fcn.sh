@@ -10,9 +10,9 @@ cd ../../
 
 DATA_DIR="/msravcshare/v-ansheng/DataSet/CityScape"
 BACKBONE="deepbase_resnet101_dilated8"
-MODEL_NAME="factor_base_ocnet"
+MODEL_NAME="fcnet"
 LOSS_TYPE="fs_auxce_loss"
-CHECKPOINTS_NAME="fs_factorbaseocnet_cityscape_seg"$2
+CHECKPOINTS_NAME="fs_fcnet_cityscape_seg"$2
 PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
 MAX_ITERS=40000
 
@@ -25,7 +25,7 @@ if [ "$1"x == "train"x ]; then
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --gpu 0 1 2 3 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL} \
-                       > ${LOG_FILE} 2>&1
+                        # > ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "resume"x ]; then
   ${PYTHON} -u main.py --configs configs/cityscape/fs_ocnet_cityscape_seg.json --drop_last y \
