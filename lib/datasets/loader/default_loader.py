@@ -104,7 +104,7 @@ class DefaultLoader(data.Dataset):
             img_path = os.path.join(image_dir, '{}.{}'.format(image_name, img_extension))
             label_path = os.path.join(label_dir, file_name)
             if not os.path.exists(label_path) or not os.path.exists(img_path):
-                Log.error('Label Path: {} not exists.'.format(label_path))
+                Log.warn('Label Path: {} not exists.'.format(label_path))
                 continue
 
             img_list.append(img_path)
@@ -118,7 +118,7 @@ class DefaultLoader(data.Dataset):
                 img_path = os.path.join(image_dir, '{}.{}'.format(image_name, img_extension))
                 label_path = os.path.join(label_dir, file_name)
                 if not os.path.exists(label_path) or not os.path.exists(img_path):
-                    Log.error('Label Path: {} not exists.'.format(label_path))
+                    Log.warn('Label Path: {} not exists.'.format(label_path))
                     continue
 
                 img_list.append(img_path)

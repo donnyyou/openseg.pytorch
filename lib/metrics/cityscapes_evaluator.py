@@ -47,7 +47,7 @@ class CArgs(object):
                 raise ValueError("CITYSCAPES_EXPORT_DIR {} is not a directory".format(export_dir))
             self.exportFile = "{}/resultPixelLevelSemanticLabeling.json".format(export_dir)
         else:
-            self.exportFile = os.path.join(out_path, "evaluationResults", "resultPixelLevelSemanticLabeling.json")
+            self.exportFile = os.path.join(out_path, "../evaluationResults", "resultPixelLevelSemanticLabeling.json")
         # Parameters that should be modified by user
         self.groundTruthSearch  = os.path.join( self.cityscapesPath, "*.png" )
 
@@ -669,7 +669,7 @@ class CityscapesEvaluator(object):
         pred_path = pred_dir
         data_path = gt_dir
         print("evaluate the result...")
-        args = CArgs(data_path=data_path, out_path=data_path, predict_path=pred_path)
+        args = CArgs(data_path=data_path, out_path=pred_path, predict_path=pred_path)
         ob = EvalPixel(args)
         ob.run()
 
