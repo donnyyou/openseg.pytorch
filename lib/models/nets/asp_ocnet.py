@@ -45,7 +45,7 @@ class AspOCNet(nn.Module):
         classname = m.__class__.__name__
         if classname.find('Conv') != -1:
             nn.init.kaiming_normal_(m.weight.data)
-        elif classname.find('BatchNorm') != -1:
+        elif classname.find('BatchNorm') != -1 or classname.find('InPlaceABNSync'):
             m.weight.data.fill_(1.)
             m.bias.data.fill_(1e-4)
 

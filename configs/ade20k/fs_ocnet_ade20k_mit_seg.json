@@ -15,7 +15,7 @@
       "batch_per_gpu": 2,
       "data_transformer": {
         "size_mode": "ade20k",
-        "pad_mode": "random",
+        "pad_mode": "pad_right_down",
         "fit_stride": 8
       }
     },
