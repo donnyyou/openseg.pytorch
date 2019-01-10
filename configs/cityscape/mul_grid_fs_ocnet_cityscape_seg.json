@@ -27,9 +27,12 @@
       }
     },
     "test": {
-      "input_size": [2048, 1024],
-      "scale_search": [0.75, 1.0, 1.25],
-      "mode": "ms_test"
+      "batch_size": 8,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [2048, 1024],
+        "align_method": "only_pad"
+      }  
     },
     "train_trans": {
       "trans_seq": ["random_resize", "random_crop", "random_hflip", "random_brightness"],

@@ -133,6 +133,43 @@ class BaseOC_Module(nn.Module):
         return output
 
 
+class BaseOC_Module_Conv3x3(nn.Module):
+    """
+    Implementation of the BaseOC module
+    Parameters:
+        in_features / out_features: the channels of the input / output feature maps.
+        dropout: we choose 0.05 as the default value.
+        size: you can apply multiple sizes. Here we only use one size.
+    Return:
+        features fused with Object context information.
+    """
+    def __init__(self, in_channels, out_channels, key_channels, value_channels, dropout, sizes=([1]), bn_type=None):
+        super(BaseOC_Module_Conv3x3, self).__init__()
+        self.stages = []
+        self.stages = nn.ModuleList([self._make_stage(in_channels, out_channels,
+                                                      key_channels, value_channels, size, bn_type) for size in sizes])
+        self.conv_bn_dropout = nn.Sequential(
+            nn.Conv2d(2*in_channels, out_channels, kernel_size=3, padding=1, dilation=1, bias=False),
+            ModuleHelper.BNReLU(out_channels, bn_type=bn_type),
+            nn.Dropout2d(dropout)
+        )
+
+    def _make_stage(self, in_channels, output_channels, key_channels, value_channels, size, bn_type):
+        return SelfAttentionBlock2D(in_channels,
+                                    key_channels,
+                                    value_channels,
+                                    output_channels, 
+                                    size, bn_type=bn_type)
+        
+    def forward(self, feats):
+        priors = [stage(feats) for stage in self.stages]
+        context = priors[0]
+        for i in range(1, len(priors)):
+            context += priors[i]
+        output = self.conv_bn_dropout(torch.cat([context, feats], 1))
+        return output
+
+
 class BaseOC_Context_Module(nn.Module):
     """
     Output only the context features.

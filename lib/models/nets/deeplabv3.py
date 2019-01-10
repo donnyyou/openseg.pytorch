@@ -79,6 +79,7 @@ class DeepLabV3(nn.Module):
     def forward(self, x_):
         x = self.backbone(x_)
         x_dsn = self.dsn(x[-2])
+        x_dsn = F.interpolate(x_dsn, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         x = self.head(x[-1])
         x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         return x_dsn, x

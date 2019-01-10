@@ -52,7 +52,7 @@ class FastBaseOCNet(nn.Module):
         self.object_head = ObjectContext_Module(self.num_classes)
         from lib.models.modules.fast_base_oc_block import FastBaseOC_Module
         self.fast_oc_head = FastBaseOC_Module(in_channels=512, key_channels=256, scale=1,
-                                              dropout=0.05, bn_type=self.configer.get('network', 'bn_type'))
+                                              dropout=0.1, bn_type=self.configer.get('network', 'bn_type'))
         self.head = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn_head = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),

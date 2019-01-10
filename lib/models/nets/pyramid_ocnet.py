@@ -29,13 +29,13 @@ class PyramidOCNet(nn.Module):
 
         # extra added layers
         from lib.models.modules.pyramid_oc_block import Pyramid_OC_Module
-        self.context = Pyramid_OC_Module(in_channels=512, out_channels=512, dropout=0.05,
+        self.context = Pyramid_OC_Module(in_channels=512, out_channels=512, dropout=0.1,
                                          sizes=([1, 2, 3, 6]), bn_type=self.configer.get('network', 'bn_type'))
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
             ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
-            nn.Dropout2d(0.05),
+            nn.Dropout2d(0.1),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )
 

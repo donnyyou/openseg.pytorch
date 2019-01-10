@@ -8,10 +8,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from lib.models.nets.aspp_baseocnet import Aspp_BaseOCNet, Aspp_BaseOCNet_v2
 from lib.models.nets.a2net import A2Net
 from lib.models.nets.fcnet import FcnNet
-from lib.models.nets.asp_ocnet import AspOCNet
-from lib.models.nets.base_ocnet import BaseOCNet
+from lib.models.nets.asp_ocnet import AspOCNet, AspOCNet_v2, AspOCNet_v3, AspOCNet_v4
+from lib.models.nets.base_ocnet import BaseOCNet, BaseOCNet_v2, BaseOCNet_Conv3x3
 from lib.models.nets.deeplabv3 import DeepLabV3
 from lib.models.nets.denseassp import DenseASPP
 from lib.models.nets.fast_asp_ocnet import FastAspOCNet, FastAspOCNet2x
@@ -26,6 +27,8 @@ from lib.utils.tools.logger import Logger as Log
 
 
 SEG_MODEL_DICT = {
+    'aspp_baseocnet': Aspp_BaseOCNet,
+    'aspp_baseocnet_v2': Aspp_BaseOCNet_v2,
     'a2net': A2Net,
     'fcnet': FcnNet,
     'deeplabv3': DeepLabV3,
@@ -33,6 +36,11 @@ SEG_MODEL_DICT = {
     'denseaspp': DenseASPP,
     'asp_ocnet': AspOCNet,
     'base_ocnet': BaseOCNet,
+    'base_ocnet_conv3x3': BaseOCNet_Conv3x3,
+    'asp_ocnet_v2': AspOCNet_v2,
+    'asp_ocnet_v3': AspOCNet_v3,
+    'asp_ocnet_v4': AspOCNet_v4,
+    'base_ocnet_v2': BaseOCNet_v2,
     'pyramid_ocnet': PyramidOCNet,
     'fast_base_ocnet': FastBaseOCNet,
     'factor_base_ocnet': FactorBaseOCNet,

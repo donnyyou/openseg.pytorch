@@ -29,7 +29,7 @@ class A2Net(nn.Module):
             ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
         )
         from lib.models.modules.a2_block import A2_Module
-        self.a2_module = A2_Module(channels=512, factor=2, scale=1, global_cnt=32, dropout=0.05, 
+        self.a2_module = A2_Module(channels=512, factor=2, scale=1, global_cnt=128, dropout=0.05, 
                                    bn_type=self.configer.get('network', 'bn_type'))
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(

@@ -9,6 +9,7 @@ export PYTHONPATH="/msravcshare/v-ansheng/PyTorchCV-SemSeg":$PYTHONPATH
 cd ../../
 
 DATA_DIR="/msravcshare/v-ansheng/DataSet/CityScape"
+SAVE_DIR="/msravcshare/v-ansheng/SegResult/CityScapes/"
 BACKBONE="deepbase_resnet101_dilated8"
 MODEL_NAME="fast_asp_ocnet"
 LOSS_TYPE="fs_auxce_loss"
@@ -18,7 +19,7 @@ CONFIG="configs/cityscape/mul_grid_fs_ocnet_cityscape_seg.json"
 MAX_ITERS=40000
 
 LOG_FILE="./log/cityscape/${CHECKPOINTS_NAME}.log"
-
+CONFIG_DIR="/msravcshare/yuyua/code/segmentation/openseg.pytorch/configs/cityscape/fs_ocnet_cityscape_seg.json"
 
 if [ "$1"x == "train"x ]; then
   ${PYTHON} -u main.py --configs ${CONFIG} --drop_last y \
@@ -53,8 +54,9 @@ elif [ "$1"x == "val"x ]; then
 elif [ "$1"x == "test"x ]; then
   ${PYTHON} -u main.py --configs ${CONFIG} \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
-                       --phase test --gpu 0 --resume ./checkpoints/cityscape/${CHECKPOINTS_NAME}_latest.pth \
-                       --test_dir ${DATA_DIR}/test --log_to_file n --out_dir test >> ${LOG_FILE} 2>&1
+                       --phase test --gpu 0 1 2 3 --resume ./checkpoints/cityscape/${CHECKPOINTS_NAME}_latest.pth \
+                       --data_dir ${DATA_DIR} --test_dir ${DATA_DIR}/test --log_to_file n --out_dir test \
+                       --out_dir ${SAVE_DIR}${CHECKPOINTS_NAME}_test
 
 else
   echo "$1"x" is invalid..."

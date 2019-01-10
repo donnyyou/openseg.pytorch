@@ -26,9 +26,108 @@ class AspOCNet(nn.Module):
         # extra added layers
         from lib.models.modules.asp_oc_block import ASP_OC_Module
         self.context = nn.Sequential(
-            nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
+            # nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
+            # ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            ASP_OC_Module(2048, 512, bn_type=self.configer.get('network', 'bn_type')),
+        )
+        self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+        self.dsn = nn.Sequential(
+            nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
             ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
-            ASP_OC_Module(512, 512, bn_type=self.configer.get('network', 'bn_type')),
+            nn.Dropout2d(0.10),
+            nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+        )
+
+    def forward(self, x_):
+        x = self.backbone(x_)
+        aux_x = self.dsn(x[-2])
+        x = self.context(x[-1])
+        x = self.cls(x)
+        aux_x = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        return aux_x, x
+
+
+class AspOCNet_v2(nn.Module):
+    def __init__(self, configer):
+        self.inplanes = 128
+        super(AspOCNet_v2, self).__init__()
+        self.configer = configer
+        self.num_classes = self.configer.get('data', 'num_classes')
+        self.backbone = BackboneSelector(configer).get_backbone()
+
+        # extra added layers
+        from lib.models.modules.asp_oc_block import ASP_OC_Module_v2
+        self.context = nn.Sequential(
+            # nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
+            # ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            ASP_OC_Module_v2(2048, 512, bn_type=self.configer.get('network', 'bn_type')),
+        )
+        self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+        self.dsn = nn.Sequential(
+            nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            nn.Dropout2d(0.10),
+            nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+        )
+
+    def forward(self, x_):
+        x = self.backbone(x_)
+        aux_x = self.dsn(x[-2])
+        x = self.context(x[-1])
+        x = self.cls(x)
+        aux_x = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        return aux_x, x
+
+
+class AspOCNet_v3(nn.Module):
+    def __init__(self, configer):
+        self.inplanes = 128
+        super(AspOCNet_v3, self).__init__()
+        self.configer = configer
+        self.num_classes = self.configer.get('data', 'num_classes')
+        self.backbone = BackboneSelector(configer).get_backbone()
+
+        # extra added layers
+        from lib.models.modules.asp_oc_block import ASP_OC_Module_v3
+        self.context = nn.Sequential(
+            # nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
+            # ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            ASP_OC_Module_v3(2048, 512, bn_type=self.configer.get('network', 'bn_type')),
+        )
+        self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+        self.dsn = nn.Sequential(
+            nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
+            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            nn.Dropout2d(0.10),
+            nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
+        )
+
+    def forward(self, x_):
+        x = self.backbone(x_)
+        aux_x = self.dsn(x[-2])
+        x = self.context(x[-1])
+        x = self.cls(x)
+        aux_x = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        return aux_x, x
+
+
+class AspOCNet_v4(nn.Module):
+    def __init__(self, configer):
+        self.inplanes = 128
+        super(AspOCNet_v4, self).__init__()
+        self.configer = configer
+        self.num_classes = self.configer.get('data', 'num_classes')
+        self.backbone = BackboneSelector(configer).get_backbone()
+
+        # extra added layers
+        from lib.models.modules.asp_oc_block import ASP_OC_Module_v4
+        self.context = nn.Sequential(
+            # nn.Conv2d(2048, 512, kernel_size=3, stride=1, padding=1),
+            # ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            ASP_OC_Module_v4(2048, 512, bn_type=self.configer.get('network', 'bn_type')),
         )
         self.cls = nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.dsn = nn.Sequential(

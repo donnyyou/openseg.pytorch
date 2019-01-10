@@ -42,10 +42,20 @@ class _PyramidSelfAttentionBlock(nn.Module):
             self.out_channels = in_channels
         self.f_key = nn.Sequential(
             nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
-                      kernel_size=1, stride=1, padding=0),
-            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type)
+                kernel_size=1, stride=1, padding=0),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            nn.Conv2d(in_channels=self.key_channels, out_channels=self.key_channels,
+                kernel_size=1, stride=1, padding=0),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
         )
-        self.f_query = self.f_key
+        self.f_query = nn.Sequential(
+            nn.Conv2d(in_channels=self.in_channels, out_channels=self.key_channels,
+                kernel_size=1, stride=1, padding=0),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+            nn.Conv2d(in_channels=self.key_channels, out_channels=self.key_channels,
+                kernel_size=1, stride=1, padding=0),
+            ModuleHelper.BNReLU(self.key_channels, bn_type=bn_type),
+        )
         self.f_value = nn.Conv2d(in_channels=self.in_channels, out_channels=self.value_channels,
                                  kernel_size=1, stride=1, padding=0)
         self.W = nn.Conv2d(in_channels=self.value_channels, out_channels=self.out_channels,
@@ -140,7 +150,7 @@ class Pyramid_OC_Module(nn.Module):
             [self._make_stage(in_channels, out_channels, in_channels // 2, in_channels,
                               size, bn_type) for size in sizes])
         self.conv_bn_dropout = nn.Sequential(
-            nn.Conv2d(2 * in_channels * self.group, out_channels, kernel_size=1, padding=0),
+            nn.Conv2d(2 * in_channels * self.group, out_channels, kernel_size=3, padding=1, bias=False),
             ModuleHelper.BNReLU(out_channels, bn_type=bn_type),
             nn.Dropout2d(dropout)
         )
