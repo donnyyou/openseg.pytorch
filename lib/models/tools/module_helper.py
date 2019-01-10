@@ -37,8 +37,13 @@ class ModuleHelper(object):
                 nn.ReLU()
             )
         elif bn_type == 'inplace_abn':
-            from lib.extensions.inplace_abn.bn import InPlaceABNSync
-            return InPlaceABNSync(num_features, **kwargs)
+            torch_ver = torch.__version__[:3]
+            if torch_ver == '0.4':
+                from lib.extensions.inplace_abn.bn import InPlaceABNSync
+                return InPlaceABNSync(num_features, **kwargs)
+            elif torch_ver == '1.0':
+                from lib.extensions.inplace_abn_1.bn import InPlaceABNSync
+                return InPlaceABNSync(num_features, **kwargs)
         else:
             Log.error('Not support BN type: {}.'.format(bn_type))
             exit(1)
@@ -56,6 +61,13 @@ class ModuleHelper(object):
             torch_ver = torch.__version__[:3]
             if torch_ver == '0.4':
                 from lib.extensions.inplace_abn.bn import InPlaceABNSync
+                if ret_cls:
+                    return InPlaceABNSync
+
+                return functools.partial(InPlaceABNSync, activation='none')
+
+            elif torch_ver == '1.0':
+                from lib.extensions.inplace_abn_1.bn import InPlaceABNSync
                 if ret_cls:
                     return InPlaceABNSync
 
